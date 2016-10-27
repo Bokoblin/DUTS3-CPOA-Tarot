@@ -1,0 +1,17 @@
+Project Name : Distribution Tarot
+Developers   : Alexandre JACQUOT et Arthur JOLIVET
+
+Current version : v0.1.0
+
+===================================================================
+v0.1.0 (27/10/16) :
+
+Project created with ressources and JavaFX sample.
+Additions after :
+- Added documented Model classes and enums:
+	- Card : Contains card information
+	- Chien, Hand inherited of CardGroup : groups of card
+	- Rank and Suit enums : some card information
+- Added Exceptions and unit tests for these classes
+- Added 3D card sample
+
