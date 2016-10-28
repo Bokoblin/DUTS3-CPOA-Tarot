@@ -1,17 +1,19 @@
 package samples.card3DAlexandreSample;
 
-import javafx.animation.ParallelTransition;
-import javafx.animation.RotateTransition;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
+import javafx.scene.*;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -19,21 +21,24 @@ import javafx.util.Duration;
 public class Main extends Application {
 
     private Scene scene;
+    private SubScene subScene;
     private RotateTransition rotateTransition;
     private ParallelTransition parallelTransition;
+    private Rotate rotation;
+    private Rotate rotation2;
 
     static MeshView create3DRectangle(float width, float height, float deep)
     {
         TriangleMesh mesh = new TriangleMesh();
         mesh.getPoints().addAll(
-                0, 0, deep,      //P0
-                width, 0, deep,    //P1
-                0, height, deep,    //P2
-                width, height, deep,  //P3
-                0, 0, 0,        //P4
-                width, 0, 0,      //P5
-                0, height, 0,      //P6
-                width, height, 0     //P7
+                0, 0, 0,        //P0
+                width, 0, 0,      //P1
+                0, height, 0,      //P2
+                width, height, 0,     //P3
+                0, 0, deep,      //P4
+                width, 0, deep,    //P5
+                0, height, deep,    //P6
+                width, height, deep //P7
         );
 
         mesh.getTexCoords().addAll(
@@ -77,16 +82,55 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("La super carte!");
         Group root = new Group();
-        Scene scene = new Scene(root, 600, 600, true, SceneAntialiasing.BALANCED);
+        Group root3d = new Group();
+        scene = new Scene(root);
+        subScene = new SubScene(root3d, 600, 600, true, SceneAntialiasing.BALANCED);
         primaryStage.setScene(scene);
+
         PhongMaterial mat = new PhongMaterial();
         mat.setDiffuseMap(new Image("file:./res/testCarte.jpg"));
-        MeshView rectangle = create3DRectangle(200,284,5);
+        MeshView rectangle = create3DRectangle(200,284,1);
         rectangle.setMaterial(mat);
-        root.getChildren().add(rectangle);
+        root3d.getChildren().add(rectangle);
+
+        Camera camera = new PerspectiveCamera(true);
+        subScene.setCamera(camera);
+        camera.setTranslateX(100);
+        camera.setTranslateY(150);
+        camera.setTranslateZ(-400);
+        camera.setRotationAxis(Rotate.X_AXIS);
+        camera.setFarClip(100000);
+
+        root.getChildren().add(subScene);
+        root.getChildren().add(new Label("coucou tu veux voir ma b ... anane !"));
+
         primaryStage.show();
 
-        rotateTransition = new RotateTransition(Duration.seconds(12), root);
+
+        rotation = new Rotate(0, 100, 150, 0.5, Rotate.Y_AXIS);
+        rectangle.getTransforms().add(rotation);
+
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(Duration.ZERO, new KeyValue(rotation.angleProperty(), 360)),
+                new KeyFrame(new Duration(6000), new KeyValue(rotation.angleProperty(), 0))
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+
+        rotation2 = new Rotate(0, 100, 150, 2, Rotate.X_AXIS);
+        rectangle.getTransforms().add(rotation2);
+
+        Timeline timeline2 = new Timeline();
+        timeline2.getKeyFrames().addAll(
+                new KeyFrame(Duration.ZERO, new KeyValue(rotation2.angleProperty(), 360)),
+                new KeyFrame(new Duration(9000), new KeyValue(rotation2.angleProperty(), 0))
+        );
+        timeline2.setCycleCount(Timeline.INDEFINITE);
+        timeline2.play();
+
+        //Another way to make transition effect ...
+        /*rotateTransition = new RotateTransition(Duration.seconds(12), root);
         rotateTransition.setAxis(Rotate.Y_AXIS);
         rotateTransition.setFromAngle(0);
         rotateTransition.setToAngle(360);
@@ -96,7 +140,23 @@ public class Main extends Application {
         parallelTransition = new ParallelTransition();
         parallelTransition.getChildren().addAll(rotateTransition);
         parallelTransition.setCycleCount(Timeline.INDEFINITE);
-        parallelTransition.play();
+        parallelTransition.play();*/
+
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                switch (event.getCode()) {
+                    case UP:    camera.setTranslateY(camera.getTranslateY()+1); break;
+                    case DOWN:  camera.setTranslateY(camera.getTranslateY()-1); break;
+                    case RIGHT:    camera.setTranslateX(camera.getTranslateX()-1); break;
+                    case LEFT:  camera.setTranslateX(camera.getTranslateX()+1); break;
+                    case PAGE_UP:    camera.setTranslateZ(camera.getTranslateZ()+10); break;
+                    case PAGE_DOWN:  camera.setTranslateZ(camera.getTranslateZ()-10); break;
+                    case Z:    camera.setRotate(camera.getRotate()+1); break;
+                    case S:  camera.setRotate(camera.getRotate()-1); break;
+                }
+            }
+        });
     }
 
 
