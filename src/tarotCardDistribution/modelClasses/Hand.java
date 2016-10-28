@@ -11,66 +11,49 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution.modelClasses;
 
 import exceptions.*;
 
 import java.util.ArrayList;
 
 /**
- * Hand class extending CardGroup :
- * Group of cards representing the player
+ * The {@code Hand} class extends {@code CardGroup},
+ * it consists in a group of cards representing the player
  *
  * @author Arthur
- * @version v0.1
+ * @version v0.2
  * @since v0.1
  *
  * @see CardGroup
  * @see Card
  */
 public class Hand extends CardGroup{
-    private static int nb;
-    private static final int nbMax = 4;
-    private final int cardNumberMax = 18;
+    private static int handNumber;
+    private final int HAND_NUMBER_MAX = 4;
 
     /**
-     * Default Ctor :
-     * Create a new hand
+     * Constructs a hand
      * @since v0.1
      *
      * @throws CardGroupInstancesNumberException if user tries to create too much hands
      */
     public Hand() throws CardGroupInstancesNumberException {
-        if ( nb >= nbMax)
+        super(18);
+        if ( handNumber >= HAND_NUMBER_MAX)
             throw new CardGroupInstancesNumberException(
-                    "Hand instances limit has been reached.", nbMax);
+                    "Hand instances limit has been reached.", HAND_NUMBER_MAX);
         else {
             cardList = new ArrayList<>();
-            nb++;
+            handNumber++;
         }
     }
 
-    /**
-     * Method : add a card to the hand
-     * @since v0.1
-     */
-    @Override
-    public void addCard(Card card) throws CardNumberException {
-        if ( cardList.size() >= cardNumberMax)
-            throw new CardNumberException(
-                    "Hand card number limit has been reached.", cardNumberMax);
-        else {
-            cardList.add(card);
-        }
+    public static int getHandNumber() {
+        return handNumber;
     }
 
-    /**
-     * Getter on instance number
-     * @since v0.1
-     *
-     * @return number of instances
-     */
-    public static int getNumber() {
-        return nb;
+    public int getHandMaxNumber() {
+        return HAND_NUMBER_MAX;
     }
 }

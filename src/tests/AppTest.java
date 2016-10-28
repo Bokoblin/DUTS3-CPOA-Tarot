@@ -13,11 +13,10 @@ limitations under the License.
 
 package tests;
 
-import app.*;
-import exceptions.*;
-
 import org.junit.Test;
 import static org.junit.Assert.*;
+import exceptions.*;
+import tarotCardDistribution.modelClasses.*;
 
 /**
  * App Unit tests
@@ -41,7 +40,7 @@ public class AppTest {
         try {
             Card c = new Card(Suit.Heart, Rank.Ace);
         } catch (CardNumberException | CardUniquenessException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
 
         assertTrue(Card.getCardNumber() == 1);
@@ -61,13 +60,13 @@ public class AppTest {
         try {
             c1 = new Card(Suit.Diamond, Rank.King);
         } catch (CardNumberException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
         Card c2 = null;
         try {
             c2 = new Card(Suit.Diamond, Rank.King);
         } catch (CardUniquenessException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
 
         assertTrue(c2 == null);
@@ -86,7 +85,7 @@ public class AppTest {
                 hand.addCard(new Card() );
             }
         } catch (CardNumberException | CardGroupInstancesNumberException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
 
         assert hand != null;
@@ -106,18 +105,17 @@ public class AppTest {
                 Hand hand = new Hand();
             }
         } catch (CardGroupInstancesNumberException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
 
         try {
             Chien chien1 = new Chien();
             Chien chien2 = new Chien();
         } catch (CardGroupInstancesNumberException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
 
-        assertTrue( Hand.getNumber() == 4);
-        assertTrue( Chien.getNumber() == 1);
+        assertTrue( Hand.getHandNumber() == 4);
     }
 
     /**
@@ -135,7 +133,7 @@ public class AppTest {
                 Card c = new Card();
             }
         } catch (CardNumberException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
         assertTrue(Card.getCardNumber() <= Card.getTotalCardNumber());
     }

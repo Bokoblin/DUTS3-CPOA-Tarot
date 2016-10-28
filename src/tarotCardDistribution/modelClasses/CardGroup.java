@@ -11,17 +11,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution.modelClasses;
 
 import exceptions.*;
 import java.util.List;
 
 /**
- * Hand class extending CardGroup :
- * Group of cards representing the player
- *
+ * The {@code CardGroup} class consists in a group of cards.
+ * It is abstract so it only defines common attributes and methods
+ * for {@code Hand} ans {@code Chien} classes
  * @author Arthur
- * @version v0.1
+ * @version v0.2
  * @since v0.1
  *
  * @see CardGroup
@@ -29,41 +29,38 @@ import java.util.List;
  */
 public abstract class CardGroup {
     protected List<Card> cardList;
+    protected final int CARD_NUMBER_MAX;
 
     /**
-     * Default Ctor :
-     * Create a new hand
+     * Constructs a CardGroup
      * @since v0.1
      *
+     * @param CARD_NUMBER_MAX the max number of card a subclass of CardGroup can have
      * @throws CardGroupInstancesNumberException
      */
-    public CardGroup() throws CardGroupInstancesNumberException {
-
+    public CardGroup(int CARD_NUMBER_MAX) throws CardGroupInstancesNumberException {
+        this.CARD_NUMBER_MAX = CARD_NUMBER_MAX;
     }
 
     /**
-     * Method : add a card to the CardGroup
-     * @since v0.1
-     */
-    public abstract void addCard(Card card) throws CardNumberException;
-
-
-    /**
-     * Getter on card number
+     * Add a card
      * @since v0.1
      *
-     * @return number of cards in the group
+     * @param card the card which is added to card list
      */
+    public void addCard(Card card) throws CardNumberException {
+        if ( cardList.size() >= CARD_NUMBER_MAX)
+            throw new CardNumberException(
+                    "Card number limit has been reached.", CARD_NUMBER_MAX);
+        else {
+            cardList.add(card);
+        }
+    }
+
+
     public int getCardNumber() {
         return cardList.size();
     }
-
-    /**
-     * Getter on card list
-     * @since v0.1
-     *
-     * @return a list of cards
-     */
     public List<Card> getCardList() {
         return cardList;
     }

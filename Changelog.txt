@@ -1,9 +1,18 @@
-Project Name : Distribution Tarot
+Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.1.0
+Current version : v0.2.0
 
 ===================================================================
+v0.2.0 (28/10/16) :
+
+- Added Model-View-Controller Architecture
+- updated Model Classes
+    - updated CardGroup inheritance
+    - updated documentation
+- updated 3D card sample
+- removed JavaFX sample (not needed anymore)
+
 v0.1.0 (27/10/16) :
 
 Project created with ressources and JavaFX sample.
@@ -14,4 +23,3 @@ Additions after :
 	- Rank and Suit enums : some card information
 - Added Exceptions and unit tests for these classes
 - Added 3D card sample
-

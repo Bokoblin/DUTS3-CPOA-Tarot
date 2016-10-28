@@ -11,65 +11,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution.modelClasses;
 
 import exceptions.*;
 
 import java.util.ArrayList;
 
 /**
- * Chien class :
- * Group of cards put at the center of the table
+ * The {@code Chien} class extends {@code CardGroup},
+ * it consists in a group of cards representing the chien/talon
  *
  * @author Arthur
- * @version v0.1
+ * @version v0.2
  * @since v0.1
  *
  * @see CardGroup
  * @see Card
  */
 public class Chien extends CardGroup{
-    private static int nb;
-    private static final int nbMax = 1;
-    private final int cardNumberMax = 6;
+    private static boolean exist = false;
 
     /**
-     * Default Ctor :
-     * Create a new chien
+     * Constructs a chien
      * @since v0.1
      *
-     * @throws CardGroupInstancesNumberException user can only create 1 Chien
+     * @throws CardGroupInstancesNumberException if user tries to create more than one chien
      */
     public Chien() throws CardGroupInstancesNumberException {
-        if ( nb >= nbMax)
+        super(6);
+        if (exist)
             throw new CardGroupInstancesNumberException("Only one Chien is possible.");
         else {
             cardList = new ArrayList<>();
-            nb++;
+            exist = true;
         }
     }
 
-    /**
-     * Method : add a card to the chien
-     * @since v0.1
-     */
-    @Override
-    public void addCard(Card card) throws CardNumberException {
-        if ( cardList.size() >= cardNumberMax)
-            throw new CardNumberException(
-                    "Hand card number limit has been reached.\n", nbMax);
-        else {
-            cardList.add(card);
-        }
-    }
-
-    /**
-     * Getter on instance number
-     * @since v0.1
-     *
-     * @return number of instances
-     */
-    public static int getNumber() {
-        return nb;
-    }
 }
