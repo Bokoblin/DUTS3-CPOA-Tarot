@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution.modelClasses;
 
 import exceptions.*;
 
@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Card class :
- * contains all the information a card can contain,
- * checks number of cards
- *
+ * The {@code Card} class contains all the information a card can contain,
+ * statitistics on cards type, number and max number and a list of already
+ * instantiated cards to check card uniqueness
+ * because there can't be multiple card with same suit and rank
  * @author Arthur
  * @version v0.1
  * @since v0.1
@@ -41,8 +41,7 @@ public class Card{
     private final Rank rank;
 
     /**
-     * Default Ctor :
-     * Create a new void card
+     * Constructs a void card
      * @since v0.1
      *
      * @throws CardNumberException if user tries to create too much cards
@@ -50,16 +49,14 @@ public class Card{
     public Card() throws CardNumberException {
         suit = null;
         rank = null;
-
         if ( nb >= nbMax)
-            throw new CardNumberException("Card instances limit has been reached.", nbMax);
+            throw new CardNumberException("Card number limit has been reached.", nbMax);
         else
             nb++;
     }
 
     /**
-     * Parameterized Ctor :
-     * Create a new card with a suit and a rank
+     * Constructs a card with a suit and a rank
      * @since v0.1
      *
      * @param suit defines card suit
@@ -77,27 +74,14 @@ public class Card{
         cardList.add(String.valueOf(suit)+String.valueOf(rank));
 
         if ( nb >= nbMax)
-            throw new CardNumberException("Card instances limits has been reached.", nbMax);
+            throw new CardNumberException("Card number limits has been reached.", nbMax);
         else
             nb++;
     }
 
-    /**
-     * Getter on card instances number
-     * @since v0.1
-     *
-     * @return number of cards created
-     */
     public static int getCardNumber() {
         return nb;
     }
-
-    /**
-     * Getter on card total instances number
-     * @since v0.1
-     *
-     * @return total number of cards that can be created
-     */
     public static int getTotalCardNumber() {
         return nbMax;
     }

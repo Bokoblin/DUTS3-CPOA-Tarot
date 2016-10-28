@@ -11,20 +11,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution.modelClasses;
 
 /**
- * Suit enumeration :
- * Defines all suits that can be assigned to a card
+ * The {@code Rank} enumeration defines all ranks
+ * that can be assigned to a card
  *
  * @author Arthur
  * @version v0.1
  * @since v0.1
  */
-public enum Suit {
-    Heart,
-    Diamond,
-    Club,
-    Spade,
-    Atout
+public enum Rank {
+    Ace,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Knight,
+    Queen,
+    King
 }

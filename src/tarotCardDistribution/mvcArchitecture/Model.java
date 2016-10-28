@@ -11,29 +11,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution.mvcArchitecture;
+
+import java.util.Observable;
 
 /**
- * Rank enumeration :
- * Defines all ranks that can be assigned to a card
- *
+ * The {@code Model} class consists in the MVC architecture model
  * @author Arthur
- * @version v0.1
- * @since v0.1
+ * @version v0.2
+ * @since v0.2
+ *
+ * @see Observable
  */
-public enum Rank {
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Knight,
-    Queen,
-    King
+public class Model extends Observable {
+
 }
