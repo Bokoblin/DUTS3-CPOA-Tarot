@@ -21,7 +21,7 @@ import java.util.Observer;
 /**
  * The {@code View} class consists in the MVC architecture view
  * @author Arthur
- * @version v0.2
+ * @version v0.3
  * @since v0.2
  *
  * @see Observer
@@ -30,17 +30,18 @@ import java.util.Observer;
 public class View extends Scene implements Observer{
     private Model model;
     private Controller controller;
+    private Group root;
 
     /**
      * Constructs a view for a specific root node and with a model and a controller
      * @since v0.1
-     *
-     * @param root the root node of the scene
+     * @version v0.3
      * @param model the model it reads
      * @param controller the controller it sends event information
      */
     public View(Group root, Model model, Controller controller) {
         super(root);
+        this.root = root;
         this.model = model;
         this.controller = controller;
         model.addObserver(this);
