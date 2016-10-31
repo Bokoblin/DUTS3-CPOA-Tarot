@@ -19,11 +19,12 @@ import javafx.stage.Stage;
 import tarotCardDistribution.mvcArchitecture.Controller;
 import tarotCardDistribution.mvcArchitecture.Model;
 import tarotCardDistribution.mvcArchitecture.View;
+import tarotCardDistribution.viewClasses.ViewCard;
 
 /**
  * The {@code Main} class inits MVC architecture and launch the tarotCardDistribution
  * @author Arthur
- * @version v0.2
+ * @version v0.3
  * @since v0.2
  *
  * @see Application

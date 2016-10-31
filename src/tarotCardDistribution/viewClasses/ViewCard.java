@@ -1,0 +1,100 @@
+package tarotCardDistribution.viewClasses;
+
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.transform.Rotate;
+
+/**
+ * The {@code ViewCard} class is a JavaFX extended node with some useful methods to help animating the cards on the table.
+ * @author Alexandre
+ * @version v0.3
+ * @since v0.3
+ */
+public class ViewCard extends MeshView {
+    private Rotate rotateX;
+    private Rotate rotateY;
+    private Rotate rotateZ;
+
+    public ViewCard(float width, float height, float deep, String texturePath)
+    {
+        super();
+        float textureWidth = 0;
+        float textureHeight = 0;
+        javafx.scene.image.Image image;
+        image = new javafx.scene.image.Image(texturePath);
+        textureHeight = (float)image.getHeight();
+        textureWidth = (float)image.getWidth();
+        
+        TriangleMesh mesh = new TriangleMesh();
+        
+        mesh.getPoints().addAll(
+                0, 0, 0,        //P0
+                width, 0, 0,      //P1
+                0, height, 0,      //P2
+                width, height, 0,     //P3
+                0, 0, deep,      //P4
+                width, 0, deep,    //P5
+                0, height, deep,    //P6
+                width, height, deep //P7
+        );
+
+        mesh.getTexCoords().addAll(
+                (20f/textureWidth), 0,       //T0
+                (1556f/textureWidth), 0,        //T1
+                0, (20f/textureWidth),       //T2
+                (20f/textureWidth), (20f/textureHeight),   //T3
+                (1556f/textureWidth), (20f/textureHeight),    //T4
+                (1576f/textureWidth), (20f/textureHeight),   //T5
+                1, (20f/textureHeight),       //T6
+                0, (2683f/textureHeight),        //T7
+                (20f/textureWidth), (2683f/textureHeight),    //T8
+                (1556f/textureWidth), (2683f/textureHeight),     //T9
+                (1576f/textureWidth), (2683f/textureHeight),    //T10
+                1, (2683f/textureHeight),        //T11
+                (20f/textureWidth), 1,   //T12
+                (1556f/textureWidth), 1     //T13
+        );
+
+        mesh.getFaces().addAll(
+                5,1,4,0,0,3     //P5,T1 ,P4,T0  ,P0,T3
+                ,5,1,0,3,1,4    //P5,T1 ,P0,T3  ,P1,T4
+                ,0,3,4,2,6,7    //P0,T3 ,P4,T2  ,P6,T7
+                ,0,3,6,7,2,8    //P0,T3 ,P6,T7  ,P2,T8
+                ,1,4,0,3,2,8    //P1,T4 ,P0,T3  ,P2,T8
+                ,1,4,2,8,3,9    //P1,T4 ,P2,T8  ,P3,T9
+                ,5,5,1,4,3,9    //P5,T5 ,P1,T4  ,P3,T9
+                ,5,5,3,9,7,10   //P5,T5 ,P3,T9  ,P7,T10
+                ,4,6,5,5,7,10   //P4,T6 ,P5,T5  ,P7,T10
+                ,4,6,7,10,6,11  //P4,T6 ,P7,T10 ,P6,T11
+                ,3,9,2,8,6,12   //P3,T9 ,P2,T8  ,P6,T12
+                ,3,9,6,12,7,13  //P3,T9 ,P6,T12 ,P7,T13
+        );
+        this.setMesh(mesh);
+
+        PhongMaterial material = null;
+        material = new PhongMaterial();
+        material.setDiffuseMap(image);
+        this.setMaterial(material);
+
+        rotateX = new Rotate(0, Rotate.X_AXIS);
+        rotateY = new Rotate(0, Rotate.Y_AXIS);
+        rotateZ = new Rotate(0, Rotate.Z_AXIS);
+        this.getTransforms().addAll(rotateX, rotateY, rotateZ);
+    }
+
+    public Rotate getRotateX()
+    {
+        return rotateX;
+    }
+
+    public Rotate getRotateY()
+    {
+        return rotateY;
+    }
+
+    public Rotate getRotateZ()
+    {
+        return rotateZ;
+    }
+}
