@@ -1,9 +1,17 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.2.0
+Current version : v0.4.0
 
 ===================================================================
+v0.4.0 (01/11/16) :
+- Added Transformation Class
+- Added ViewCamera Class
+- Updated the Main class to show a demo card
+
+v0.3.0 (31/10/16) :
+- Added the ViewCard class
+
 v0.2.0 (28/10/16) :
 
 - Added Model-View-Controller Architecture
