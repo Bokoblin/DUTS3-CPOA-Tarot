@@ -15,6 +15,9 @@ package tarotCardDistribution.mvcArchitecture;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import tarotCardDistribution.viewClasses.ViewCamera;
+import tarotCardDistribution.viewClasses.ViewCard;
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -30,7 +33,8 @@ import java.util.Observer;
 public class View extends Scene implements Observer{
     private Model model;
     private Controller controller;
-    private Group root;
+    private Group root3d;
+    private Group rootGUI;
 
     /**
      * Constructs a view for a specific root node and with a model and a controller
@@ -40,8 +44,15 @@ public class View extends Scene implements Observer{
      * @param controller the controller it sends event information
      */
     public View(Group root, Model model, Controller controller) {
-        super(root);
-        this.root = root;
+        super(root, 800, 600);
+        root3d = new Group();
+        rootGUI = new Group();
+        root.getChildren().addAll(root3d, rootGUI);
+        root3d.getChildren().add(new ViewCard(100, 200, 2, "file:./res/testCarte.jpg"));
+        this.setCamera(new ViewCamera(true));
+        this.getViewCamera().setTranslateX(50);
+        this.getViewCamera().setTranslateY(100);
+        this.getViewCamera().setTranslateZ(-200);
         this.model = model;
         this.controller = controller;
         model.addObserver(this);
@@ -59,5 +70,20 @@ public class View extends Scene implements Observer{
     @Override
     public void update(Observable o, Object arg) {
 
+    }
+
+    public Group getRoot3d()
+    {
+        return root3d;
+    }
+
+    public Group getRootGUI()
+    {
+        return rootGUI;
+    }
+
+    public ViewCamera getViewCamera()
+    {
+        return (ViewCamera)getCamera();
     }
 }

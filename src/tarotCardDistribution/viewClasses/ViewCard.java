@@ -3,7 +3,6 @@ package tarotCardDistribution.viewClasses;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
-import javafx.scene.transform.Rotate;
 
 /**
  * The {@code ViewCard} class is a JavaFX extended node with some useful methods to help animating the cards on the table.
@@ -12,11 +11,9 @@ import javafx.scene.transform.Rotate;
  * @since v0.3
  */
 public class ViewCard extends MeshView {
-    private Rotate rotateX;
-    private Rotate rotateY;
-    private Rotate rotateZ;
+    private Transformations transformations;
 
-    public ViewCard(float width, float height, float deep, String texturePath)
+    public ViewCard(float width, float height, float depth, String texturePath)
     {
         super();
         float textureWidth = 0;
@@ -33,10 +30,10 @@ public class ViewCard extends MeshView {
                 width, 0, 0,      //P1
                 0, height, 0,      //P2
                 width, height, 0,     //P3
-                0, 0, deep,      //P4
-                width, 0, deep,    //P5
-                0, height, deep,    //P6
-                width, height, deep //P7
+                0, 0, depth,      //P4
+                width, 0, depth,    //P5
+                0, height, depth,    //P6
+                width, height, depth //P7
         );
 
         mesh.getTexCoords().addAll(
@@ -77,24 +74,11 @@ public class ViewCard extends MeshView {
         material.setDiffuseMap(image);
         this.setMaterial(material);
 
-        rotateX = new Rotate(0, Rotate.X_AXIS);
-        rotateY = new Rotate(0, Rotate.Y_AXIS);
-        rotateZ = new Rotate(0, Rotate.Z_AXIS);
-        this.getTransforms().addAll(rotateX, rotateY, rotateZ);
+        transformations = new Transformations(this);
     }
 
-    public Rotate getRotateX()
+    public Transformations getTransformations()
     {
-        return rotateX;
-    }
-
-    public Rotate getRotateY()
-    {
-        return rotateY;
-    }
-
-    public Rotate getRotateZ()
-    {
-        return rotateZ;
+        return transformations;
     }
 }
