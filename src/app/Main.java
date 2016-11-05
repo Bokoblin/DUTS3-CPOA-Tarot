@@ -16,15 +16,14 @@ package app;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.stage.Stage;
-import tarotCardDistribution.mvcArchitecture.Controller;
-import tarotCardDistribution.mvcArchitecture.Model;
-import tarotCardDistribution.mvcArchitecture.View;
-import tarotCardDistribution.viewClasses.ViewCard;
+import tarotCardDistribution.controller.AppController;
+import tarotCardDistribution.model.GameModel;
+import tarotCardDistribution.view.AppView;
 
 /**
  * The {@code Main} class inits MVC architecture and launch the tarotCardDistribution
  * @author Arthur
- * @version v0.3
+ * @version v0.5
  * @since v0.2
  *
  * @see Application
@@ -33,17 +32,23 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Group root = new Group();
-        Model model = new Model();
-        Controller controller = new Controller();
-        View scene = new View(root, model, controller);
-        controller.setModel(model);
-        controller.setView(scene);
+        GameModel gameModel = new GameModel();
+        AppController appController = new AppController();
+        AppView scene = new AppView(root, gameModel, appController);
+        appController.setGameModel(gameModel);
+        appController.setAppView(scene);
 
         primaryStage.setTitle("JACQUOT JOLIVET S3A");
-        primaryStage.setScene(scene);
+        //primaryStage.setScene(scene);
+
+        //shuffling, cut, dealing
+        gameModel.handleDealing();
+        gameModel.handleBids();
+        System.out.println(gameModel.toString());
+
+        //Game playing is not to be done
         primaryStage.show();
     }
-
 
     public static void main(String[] args) {
         launch(args);

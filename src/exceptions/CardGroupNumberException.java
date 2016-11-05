@@ -19,7 +19,7 @@ package exceptions;
  * @version v0.1
  * @since v0.1
  */
-public class CardGroupInstancesNumberException extends Exception {
+public class CardGroupNumberException extends Exception {
 
     /**
      * Exception fired when user tries to instantiate
@@ -28,7 +28,7 @@ public class CardGroupInstancesNumberException extends Exception {
      *
      * @param message personalized message
      */
-    public CardGroupInstancesNumberException(String message) {
+    public CardGroupNumberException(String message) {
         super("Exception : " + message);
     }
 
@@ -40,7 +40,7 @@ public class CardGroupInstancesNumberException extends Exception {
      * @param message personalized message
      * @param nbMax max number of cards possible
      */
-    public CardGroupInstancesNumberException(String message, int nbMax) {
+    public CardGroupNumberException(String message, int nbMax) {
         super("Exception : " + message + " Max is " + String.valueOf(nbMax));
     }
 }

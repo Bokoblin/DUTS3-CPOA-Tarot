@@ -11,19 +11,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.modelClasses;
+package tarotCardDistribution.model;
+
+import java.util.Random;
 
 /**
  * The {@code Suit} enumeration defines all suits that can be assigned to a card
  *
  * @author Arthur
- * @version v0.1
+ * @version v0.5
  * @since v0.1
  */
 public enum Suit {
-    Heart,
-    Diamond,
     Club,
+    Diamond,
+    Heart,
     Spade,
-    Atout
+    Trump;
+
+    public static Suit randomSuit() {
+        int pick = new Random().nextInt(Suit.values().length);
+        return Suit.values()[pick];
+    }
 }

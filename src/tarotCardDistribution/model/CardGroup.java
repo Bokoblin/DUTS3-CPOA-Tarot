@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.modelClasses;
+package tarotCardDistribution.model;
 
 import exceptions.*;
 import java.util.List;
@@ -29,17 +29,17 @@ import java.util.List;
  */
 public abstract class CardGroup {
     protected List<Card> cardList;
-    protected final int CARD_NUMBER_MAX;
+    protected final int NB_MAX_CARDS;
 
     /**
      * Constructs a CardGroup
      * @since v0.1
      *
-     * @param CARD_NUMBER_MAX the max number of card a subclass of CardGroup can have
-     * @throws CardGroupInstancesNumberException
+     * @param NB_MAX_CARDS the max number of card a subclass of CardGroup can have
+     * @throws CardGroupNumberException
      */
-    public CardGroup(int CARD_NUMBER_MAX) throws CardGroupInstancesNumberException {
-        this.CARD_NUMBER_MAX = CARD_NUMBER_MAX;
+    public CardGroup(int NB_MAX_CARDS) throws CardGroupNumberException {
+        this.NB_MAX_CARDS = NB_MAX_CARDS;
     }
 
     /**
@@ -49,16 +49,18 @@ public abstract class CardGroup {
      * @param card the card which is added to card list
      */
     public void addCard(Card card) throws CardNumberException {
-        if ( cardList.size() >= CARD_NUMBER_MAX)
+        if ( cardList.size() >= NB_MAX_CARDS)
             throw new CardNumberException(
-                    "Card number limit has been reached.", CARD_NUMBER_MAX);
+                    "Card number limit has been reached.", NB_MAX_CARDS);
         else {
             cardList.add(card);
         }
     }
 
 
-    public int getCardNumber() {
+    //GETTERS - no documentation needed
+
+    public int getNbCards() {
         return cardList.size();
     }
     public List<Card> getCardList() {

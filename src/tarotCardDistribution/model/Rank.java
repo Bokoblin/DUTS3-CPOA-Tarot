@@ -11,18 +11,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.mvcArchitecture;
+package tarotCardDistribution.model;
 
-import java.util.Observable;
+import java.util.Random;
 
 /**
- * The {@code Model} class consists in the MVC architecture model
- * @author Arthur
- * @version v0.2
- * @since v0.2
+ * The {@code Rank} enumeration defines all ranks
+ * that can be assigned to a card
  *
- * @see Observable
+ * @author Arthur
+ * @version v0.5
+ * @since v0.1
  */
-public class Model extends Observable {
+public enum Rank {
+    Ace,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Knight,
+    Queen,
+    King;
 
+    public static Rank randomRank() {
+        int pick = new Random().nextInt(Rank.values().length);
+        return Rank.values()[pick];
+    }
 }
