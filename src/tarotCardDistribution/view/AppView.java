@@ -11,39 +11,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.mvcArchitecture;
+package tarotCardDistribution.view;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import tarotCardDistribution.viewClasses.ViewCamera;
-import tarotCardDistribution.viewClasses.ViewCard;
+import tarotCardDistribution.controller.AppController;
+import tarotCardDistribution.model.GameModel;
 
 import java.util.Observable;
 import java.util.Observer;
 
 /**
- * The {@code View} class consists in the MVC architecture view
- * @author Arthur
+ * The {@code AppView} class consists in the MVC architecture view
+ * @author Alexandre, Arthur
  * @version v0.3
  * @since v0.2
  *
  * @see Observer
  * @see Scene
  */
-public class View extends Scene implements Observer{
-    private Model model;
-    private Controller controller;
+public class AppView extends Scene implements Observer{
+    private GameModel gameModel;
+    private AppController appController;
     private Group root3d;
     private Group rootGUI;
 
     /**
-     * Constructs a view for a specific root node and with a model and a controller
+     * Constructs a view for a specific root node and with a gameModel and a appController
      * @since v0.1
-     * @version v0.3
-     * @param model the model it reads
-     * @param controller the controller it sends event information
+     * @param gameModel the gameModel it reads
+     * @param appController the appController it sends event information
      */
-    public View(Group root, Model model, Controller controller) {
+    public AppView(Group root, GameModel gameModel, AppController appController) {
         super(root, 800, 600);
         root3d = new Group();
         rootGUI = new Group();
@@ -53,14 +52,14 @@ public class View extends Scene implements Observer{
         this.getViewCamera().setTranslateX(50);
         this.getViewCamera().setTranslateY(100);
         this.getViewCamera().setTranslateZ(-200);
-        this.model = model;
-        this.controller = controller;
-        model.addObserver(this);
+        this.gameModel = gameModel;
+        this.appController = appController;
+        gameModel.addObserver(this);
     }
 
     /**
      * This method is called whenever the observed object is changed.
-     * It determines which object of the model has been changed with arg
+     * It determines which object of the gameModel has been changed with arg
      * parameter and updates view in consequence
      * @since v0.2
      *
@@ -72,16 +71,17 @@ public class View extends Scene implements Observer{
 
     }
 
+
+    //GETTERS - no documentation needed
+
     public Group getRoot3d()
     {
         return root3d;
     }
-
     public Group getRootGUI()
     {
         return rootGUI;
     }
-
     public ViewCamera getViewCamera()
     {
         return (ViewCamera)getCamera();

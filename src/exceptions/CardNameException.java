@@ -11,22 +11,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.mvcArchitecture;
+package exceptions;
 
 /**
- * The {@code Controller} class consists in the MVC architecture controller
+ * Exception class on card uniqueness
+ *
  * @author Arthur
- * @version v0.2
- * @since v0.2
+ * @version v0.5
+ * @since v0.5
  */
-public class Controller {
-    private Model model;
-    private View view;
-
-    public void setModel(Model model) {
-        this.model = model;
-    }
-    public void setView(View view) {
-        this.view = view;
+public class CardNameException extends Exception {
+    /**
+     * Exception fired when user tries to instantiate a card with a bad name
+     * @since v0.5
+     */
+    public CardNameException() {
+        super("Exception : Incorrect Card Name");
     }
 }

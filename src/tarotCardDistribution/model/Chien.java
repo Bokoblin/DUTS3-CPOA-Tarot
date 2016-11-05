@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.modelClasses;
+package tarotCardDistribution.model;
 
 import exceptions.*;
 
@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * it consists in a group of cards representing the chien/talon
  *
  * @author Arthur
- * @version v0.2
+ * @version v0.5
  * @since v0.1
  *
  * @see CardGroup
@@ -35,16 +35,31 @@ public class Chien extends CardGroup{
      * Constructs a chien
      * @since v0.1
      *
-     * @throws CardGroupInstancesNumberException if user tries to create more than one chien
+     * @throws CardGroupNumberException if user tries to create more than one chien
      */
-    public Chien() throws CardGroupInstancesNumberException {
-        super(6);
+    public Chien() throws CardGroupNumberException {
+        super(6); //Max number of cards for this group
         if (exist)
-            throw new CardGroupInstancesNumberException("Only one Chien is possible.");
+            throw new CardGroupNumberException("Only one Chien is possible.");
         else {
             cardList = new ArrayList<>();
             exist = true;
         }
     }
 
+    /**
+     * Reset static field for unit tests
+     * @since v0.5
+     */
+    public static void resetClassForTesting() {
+        exist = false;
+    }
+
+    /**
+     * Return if chien exists
+     * @since v0.5
+     */
+    public static boolean exists() {
+        return exist;
+    }
 }

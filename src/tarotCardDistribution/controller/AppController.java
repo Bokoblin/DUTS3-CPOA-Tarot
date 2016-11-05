@@ -11,29 +11,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.modelClasses;
+package tarotCardDistribution.controller;
+
+import tarotCardDistribution.model.GameModel;
+import tarotCardDistribution.view.AppView;
 
 /**
- * The {@code Rank} enumeration defines all ranks
- * that can be assigned to a card
- *
+ * The {@code AppController} class consists in the MVC architecture controller
  * @author Arthur
- * @version v0.1
- * @since v0.1
+ * @version v0.2
+ * @since v0.2
  */
-public enum Rank {
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Knight,
-    Queen,
-    King
+public class AppController {
+    private GameModel gameModel;
+    private AppView appView;
+
+
+    //SETTERS - no documentation needed
+
+    public void setGameModel(GameModel gameModel) {
+        this.gameModel = gameModel;
+    }
+    public void setAppView(AppView appView) {
+        this.appView = appView;
+    }
 }
