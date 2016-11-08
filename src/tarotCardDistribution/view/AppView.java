@@ -13,8 +13,15 @@ limitations under the License.
 
 package tarotCardDistribution.view;
 
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.transform.Rotate;
 import tarotCardDistribution.controller.AppController;
 import tarotCardDistribution.model.GameModel;
 
@@ -35,6 +42,7 @@ public class AppView extends Scene implements Observer{
     private AppController appController;
     private Group root3d;
     private Group rootGUI;
+    private Group background;
 
     /**
      * Constructs a view for a specific root node and with a gameModel and a appController
@@ -43,18 +51,44 @@ public class AppView extends Scene implements Observer{
      * @param appController the appController it sends event information
      */
     public AppView(Group root, GameModel gameModel, AppController appController) {
-        super(root, 800, 600);
+        super(root, 800, 600, true, SceneAntialiasing.BALANCED);
         root3d = new Group();
         rootGUI = new Group();
+        background = new Group();
         root.getChildren().addAll(root3d, rootGUI);
-        root3d.getChildren().add(new ViewCard(100, 200, 2, "file:./res/testCarte.jpg"));
+        root3d.getChildren().add(background);
+        this.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent keyEvent)
+            {
+                root3d.setRotationAxis(Rotate.Z_AXIS);
+                switch (keyEvent.getCode())
+                {
+                    case D:
+                        root3d.setRotate(root3d.getRotate()-1);
+                        break;
+                    case Q:
+                        root3d.setRotate(root3d.getRotate()+1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
+        //Create the scene objects
+        //root3d.getChildren().add(new ViewCard(100, 200, 2, "file:./res/testCarte.jpg", 1536, 2663, null));
+        RectangleMesh table = new RectangleMesh(2000, 2000, 182, "file:./res/table.jpg", 1100, 1100);
+        background.getChildren().add(table);
         this.setCamera(new ViewCamera(true));
-        this.getViewCamera().setTranslateX(50);
-        this.getViewCamera().setTranslateY(100);
-        this.getViewCamera().setTranslateZ(-200);
-        this.gameModel = gameModel;
-        this.appController = appController;
-        gameModel.addObserver(this);
+        this.getViewCamera().setTranslateX(1000);
+        this.getViewCamera().setTranslateY(2400);
+        this.getViewCamera().setTranslateZ(-3600);
+
+        //Lets define the camera
+        getViewCamera().getTransformations().getRotateX().setAngle(20);
+        root3d.getChildren().add(new AmbientLight(Color.WHITE));
     }
 
     /**

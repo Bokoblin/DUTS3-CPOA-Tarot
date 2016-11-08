@@ -15,6 +15,7 @@ package app;
 
 import javafx.application.Application;
 import javafx.scene.Group;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import tarotCardDistribution.controller.AppController;
 import tarotCardDistribution.model.GameModel;
@@ -31,6 +32,7 @@ import tarotCardDistribution.view.AppView;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
+        primaryStage.setMaximized(true);
         Group root = new Group();
         GameModel gameModel = new GameModel();
         AppController appController = new AppController();
@@ -39,7 +41,8 @@ public class Main extends Application {
         appController.setAppView(scene);
 
         primaryStage.setTitle("JACQUOT JOLIVET S3A");
-        //primaryStage.setScene(scene);
+        primaryStage.setScene(scene);
+        scene.setFill(Color.BLACK);
 
         //shuffling, cut, dealing
         gameModel.handleDealing();
