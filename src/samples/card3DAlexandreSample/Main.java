@@ -9,6 +9,7 @@ import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Path;
@@ -92,6 +93,13 @@ public class Main extends Application {
         MeshView rectangle = create3DRectangle(200,284,1);
         rectangle.setMaterial(mat);
         root3d.getChildren().add(rectangle);
+        final PointLight light = new PointLight(Color.WHITE);
+        root3d.getChildren().add(light);
+        light.setTranslateX(100);
+        light.setTranslateY(150);
+        light.setTranslateZ(-50);
+        light.setRotationAxis(Rotate.X_AXIS);
+        light.setRotate(-90);
 
         Camera camera = new PerspectiveCamera(true);
         subScene.setCamera(camera);
