@@ -16,6 +16,9 @@ package tarotCardDistribution.model;
 import java.util.*;
 
 import exceptions.*;
+import javafx.scene.Group;
+import tarotCardDistribution.view.UpdateViewCard;
+import tarotCardDistribution.view.UpdateViewCardType;
 
 /**
  * The {@code GameModel} class consists in the MVC architecture model
@@ -294,6 +297,23 @@ public class GameModel extends Observable {
         return result;
     }
 
+    public void testAddCard(CardGroup group)
+    {
+        Card card = getCardList().get(0);
+        setChanged();
+        if (group == null)
+        {
+            notifyObservers(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, card));
+        } else {
+            notifyObservers(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, card, group));
+        }
+    }
+
+    public void testMoveCard(Card card, CardGroup group)
+    {
+        setChanged();
+        notifyObservers(new UpdateViewCard(UpdateViewCardType.CHANGECARDGROUP, card, group));
+    }
 
     //GETTERS - no documentation needed
 

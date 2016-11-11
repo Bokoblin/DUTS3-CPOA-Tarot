@@ -30,13 +30,15 @@ import tarotCardDistribution.view.AppView;
  * @see Application
  */
 public class Main extends Application {
+    AppView scene;
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setMaximized(true);
         Group root = new Group();
         GameModel gameModel = new GameModel();
         AppController appController = new AppController();
-        AppView scene = new AppView(root, gameModel, appController);
+        scene = new AppView(root, gameModel, appController);
         appController.setGameModel(gameModel);
         appController.setAppView(scene);
 
@@ -51,6 +53,11 @@ public class Main extends Application {
 
         //Game playing is not to be done
         primaryStage.show();
+    }
+
+    public AppView getScene()
+    {
+        return scene;
     }
 
     public static void main(String[] args) {

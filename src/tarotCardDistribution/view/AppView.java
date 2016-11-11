@@ -13,6 +13,9 @@ limitations under the License.
 
 package tarotCardDistribution.view;
 
+import com.sun.glass.ui.View;
+import com.sun.istack.internal.NotNull;
+import exceptions.ViewCardUpdateExistException;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.AmbientLight;
@@ -23,8 +26,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import tarotCardDistribution.controller.AppController;
-import tarotCardDistribution.model.GameModel;
+import tarotCardDistribution.model.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -41,8 +46,11 @@ public class AppView extends Scene implements Observer{
     private GameModel gameModel;
     private AppController appController;
     private Group root3d;
+    private Group chien;
+    private Group[] hands = new Group[4];
     private Group rootGUI;
     private Group background;
+    private HashMap<ViewCard, Group> cardToGroup;
 
     /**
      * Constructs a view for a specific root node and with a gameModel and a appController
@@ -52,11 +60,24 @@ public class AppView extends Scene implements Observer{
      */
     public AppView(Group root, GameModel gameModel, AppController appController) {
         super(root, 800, 600, true, SceneAntialiasing.BALANCED);
+
         root3d = new Group();
         rootGUI = new Group();
         background = new Group();
+        chien = new Group();
+        cardToGroup = new HashMap<ViewCard, Group>();
+        this.gameModel = gameModel;
+        this.appController = appController;
         root.getChildren().addAll(root3d, rootGUI);
         root3d.getChildren().add(background);
+        root3d.getChildren().add(chien);
+        for (int i =0; i<4; i++)
+        {
+            hands[i] = new Group();
+            root3d.getChildren().add(hands[i]);
+        }
+        gameModel.addObserver(this);
+
         this.setOnKeyPressed(new EventHandler<KeyEvent>()
         {
             @Override
@@ -101,10 +122,126 @@ public class AppView extends Scene implements Observer{
      * @param   arg   an argument passed to the <code>notifyObservers</code> method.
      */
     @Override
-    public void update(Observable o, Object arg) {
-
+    public void update(Observable o, Object arg)
+    {
+        if (arg instanceof UpdateViewCard)
+        {
+            UpdateViewCard updateViewCard = (UpdateViewCard)arg;
+            try {
+                switch (updateViewCard.getType())
+                {
+                    case ADDNEWCARD:
+                        addNewCard(updateViewCard);
+                        break;
+                    case TURNBACKTCARD:
+                        turnBackCard(updateViewCard);
+                        break;
+                    case CHANGECARDGROUP:
+                        changeCardGroup(updateViewCard);
+                        break;
+                    case REMOVETHECARDFROMCURRENTGROUP:
+                        removeCardFromGroup(updateViewCard);
+                        break;
+                    case DELETECARD:
+                        removeCard(updateViewCard);
+                        break;
+                    default:
+                        break;
+                }
+            } catch (ViewCardUpdateExistException exception)
+            {
+                System.err.println(exception.getStackTrace());
+            }
+        }
     }
 
+    private void addNewCard(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
+    {
+        if (modelCardExist(updateViewCard.getCard()) != null)
+        {
+            throw new ViewCardUpdateExistException(updateViewCard, false);
+        }
+        ViewCard viewCard = new ViewCard(ViewCard.CARDWIDTH, ViewCard.CARDHEIGHT, ViewCard.CARDDEPTH, 1536, 2663, updateViewCard.getCard());
+        Group group = cardGroupToViewGroup(updateViewCard.getCardGroup());
+        cardToGroup.put(viewCard, group);
+        group.getChildren().add(viewCard);
+    }
+
+    private void turnBackCard(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
+    {
+        ViewCard viewCard = modelCardExist(updateViewCard.getCard());
+        if (viewCard == null)
+        {
+            throw new ViewCardUpdateExistException(updateViewCard, true);
+        }
+        // Add a transition
+    }
+
+    private void changeCardGroup(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
+    {
+        ViewCard viewCard = modelCardExist(updateViewCard.getCard());
+        if (viewCard == null)
+        {
+            throw new ViewCardUpdateExistException(updateViewCard, true);
+        }
+        Group group = cardGroupToViewGroup(updateViewCard.getCardGroup());
+        cardToGroup.get(viewCard).getChildren().remove(viewCard);
+        cardToGroup.replace(viewCard, group);
+        group.getChildren().add(viewCard);
+    }
+
+    private void removeCardFromGroup(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
+    {
+        ViewCard viewCard = modelCardExist(updateViewCard.getCard());
+        if (viewCard == null)
+        {
+            throw new ViewCardUpdateExistException(updateViewCard, true);
+        }
+        cardToGroup.replace(viewCard, cardGroupToViewGroup(null));
+    }
+
+    private void removeCard(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
+    {
+        ViewCard viewCard = modelCardExist(updateViewCard.getCard());
+        if (viewCard == null)
+        {
+            throw new ViewCardUpdateExistException(updateViewCard, true);
+        }
+        cardToGroup.get(viewCard).getChildren().remove(viewCard);
+        cardToGroup.remove(viewCard);
+    }
+
+    private ViewCard modelCardExist(Card card)
+    {
+        for (Map.Entry<ViewCard, Group> entry : cardToGroup.entrySet())
+        {
+            if (entry.getKey().getModelCard() == card)
+            {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    private Group cardGroupToViewGroup(CardGroup cardGroup)
+    {
+        if (cardGroup instanceof Chien)
+        {
+            return chien;
+        } else if (cardGroup instanceof Hand)
+        {
+            for (Map.Entry<Integer, Hand> entity : gameModel.getPlayerMap().entrySet())
+            {
+                if (entity.getValue() == (Hand)cardGroup)
+                {
+                    return hands[entity.getKey()];
+                }
+            }
+        } else {
+            return root3d;
+        }
+        return root3d;
+    }
 
     //GETTERS - no documentation needed
 
@@ -115,6 +252,14 @@ public class AppView extends Scene implements Observer{
     public Group getRootGUI()
     {
         return rootGUI;
+    }
+    public Group[] getHands()
+    {
+        return hands;
+    }
+    public Group getChien()
+    {
+        return chien;
     }
     public ViewCamera getViewCamera()
     {
