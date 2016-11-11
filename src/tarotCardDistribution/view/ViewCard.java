@@ -1,5 +1,6 @@
 package tarotCardDistribution.view;
 
+import com.sun.istack.internal.NotNull;
 import tarotCardDistribution.model.Card;
 
 /**
@@ -10,10 +11,13 @@ import tarotCardDistribution.model.Card;
  */
 public class ViewCard extends RectangleMesh {
     private Card modelCard;
+    public static final float CARDHEIGHT = 200;
+    public static final float CARDWIDTH = CARDHEIGHT * (55/88);
+    public static final float CARDDEPTH = 2;
 
-    public ViewCard(float width, float height, float depth, String texturePath, float textureFaceWidth, float textureFaceHeight, Card modelCard)
+    public ViewCard(float width, float height, float depth, float textureFaceWidth, float textureFaceHeight, @NotNull Card modelCard)
     {
-        super(width, height, depth, texturePath, textureFaceWidth, textureFaceHeight);
+        super(width, height, depth, "file:./res/" + modelCard.getName().toLowerCase() + ".jpg", textureFaceWidth, textureFaceHeight);
         this.modelCard = modelCard;
     }
 
