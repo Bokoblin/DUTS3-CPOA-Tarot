@@ -297,22 +297,10 @@ public class GameModel extends Observable {
         return result;
     }
 
-    public void testAddCard(CardGroup group)
-    {
-        Card card = getCardList().get(0);
-        setChanged();
-        if (group == null)
-        {
-            notifyObservers(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, card));
-        } else {
-            notifyObservers(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, card, group));
-        }
-    }
-
-    public void testMoveCard(Card card, CardGroup group)
+    public void updateCard(UpdateViewCard updateViewCard)
     {
         setChanged();
-        notifyObservers(new UpdateViewCard(UpdateViewCardType.CHANGECARDGROUP, card, group));
+        notifyObservers(updateViewCard);
     }
 
     //GETTERS - no documentation needed

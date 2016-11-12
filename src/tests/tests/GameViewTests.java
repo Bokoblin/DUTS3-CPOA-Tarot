@@ -7,6 +7,8 @@ import org.junit.*;
 import tarotCardDistribution.controller.AppController;
 import tarotCardDistribution.model.*;
 import tarotCardDistribution.view.AppView;
+import tarotCardDistribution.view.UpdateViewCard;
+import tarotCardDistribution.view.UpdateViewCardType;
 import tarotCardDistribution.view.ViewCard;
 
 import static org.junit.Assert.*;
@@ -53,7 +55,7 @@ public class GameViewTests extends Application
     public void addCardToView()
     {
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
-        gameModel.testAddCard(null);
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, gameModel.getCardList().get(0)));
         assertTrue(scene.getRoot3d().getChildren().size() == nbNodeBeforeAddingCard+1);
     }
 
@@ -64,11 +66,33 @@ public class GameViewTests extends Application
         Chien chien = gameModel.getChien();
         assertTrue(scene.getHands()[1].getChildren().size() == 0);
         assertTrue(scene.getChien().getChildren().size() == 0);
-        gameModel.testAddCard(hand);
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, gameModel.getCardList().get(0), hand));
         assertTrue(scene.getHands()[1].getChildren().size() == 1);
-        gameModel.testMoveCard(((ViewCard)scene.getHands()[1].getChildren().get(0)).getModelCard(), chien);
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.CHANGECARDGROUP, ((ViewCard)scene.getHands()[1].getChildren().get(0)).getModelCard(), chien));
         assertTrue(scene.getHands()[1].getChildren().size() == 0);
         assertTrue(scene.getChien().getChildren().size() == 1);
+    }
+
+    @Test
+    public void removeCardFromGroup()
+    {
+        Chien chien = gameModel.getChien();
+        assertTrue(scene.getChien().getChildren().size() == 0);
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, gameModel.getCardList().get(0), chien));
+        assertTrue(scene.getChien().getChildren().size() == 1);
+        int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.REMOVETHECARDFROMCURRENTGROUP, ((ViewCard)scene.getChien().getChildren().get(0)).getModelCard()));
+        assertTrue(scene.getRoot3d().getChildren().size() == nbNodeBeforeAddingCard+1);
+    }
+
+    @Test
+    public void removeCard()
+    {
+        Chien chien = gameModel.getChien();
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.ADDNEWCARD, gameModel.getCardList().get(0), chien));
+        assertTrue(scene.getChien().getChildren().size() == 1);
+        gameModel.updateCard(new UpdateViewCard(UpdateViewCardType.DELETECARD, ((ViewCard)scene.getChien().getChildren().get(0)).getModelCard()));
+        assertTrue(scene.getChien().getChildren().size() == 0);
     }
 
     @Override
