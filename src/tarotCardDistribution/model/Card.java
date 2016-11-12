@@ -25,7 +25,7 @@ import java.util.Objects;
  * instantiated cards to check card uniqueness
  * because there can't be multiple card with same suit and rank
  * @author Arthur
- * @version v0.5
+ * @version v0.6.2
  * @since v0.1
  *
  * @see Suit
@@ -39,6 +39,7 @@ public class Card{
 
     private static int nb = 0;
     private static List<String> cardList = new ArrayList<>();
+    private boolean shown;
 
     private final String name;
     private final Suit suit;
@@ -61,6 +62,7 @@ public class Card{
         rank = null;
         name = "";
         trumpRank = -1;
+        shown = false;
     }
 
     /**
@@ -211,5 +213,15 @@ public class Card{
     }
     public Rank getRank() {
         return rank;
+    }
+    public boolean isShown() {
+        return shown;
+    }
+
+
+    //SETTERS - no documentation needed
+
+    public void setShown(boolean shown) {
+        this.shown = shown;
     }
 }

@@ -12,7 +12,14 @@ import tarotCardDistribution.model.*;
 import tarotCardDistribution.view.*;
 
 import static org.junit.Assert.*;
-//TODO : Documentation
+
+/**
+ * GameView Unit tests
+ *
+ * @author Alexandre
+ * @version v0.6
+ * @since v0.6
+ */
 public class GameViewTests extends Application
 {
     private static AppController appController;
@@ -52,17 +59,15 @@ public class GameViewTests extends Application
         root = new Group();
         try {
             gameModel = new GameModel();
-        } catch (CardNumberException e) {
-            e.printStackTrace();
-        } catch (CardUniquenessException e) {
-            e.printStackTrace();
-        } catch (CardGroupNumberException e) {
-            e.printStackTrace();
+        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+            e.getMessage();
         }
         scene = new AppView(root, gameModel, appController);
     }
+
     /**
-     * Add a card to the view and verify the number of cards of the default group (root3d) have been increase
+     * Add a card to the view and verify the number of cards
+     * of the default group (root3d) have been increase
      * @since v0.6
      */
     @Test
@@ -74,7 +79,8 @@ public class GameViewTests extends Application
     }
 
     /**
-     * Add a card to the view then move it to another group and verify the number of cards of the group have been increase
+     * Add a card to the view then move it to another group
+     * and verify the number of cards of the group have been increase
      * @since v0.6
      */
     @Test
@@ -122,8 +128,9 @@ public class GameViewTests extends Application
     }
 
     /**
-     * Create the scne of the application before the tests.
+     * Create the scene of the application before the tests.
      * @since v0.6
+     * @param primaryStage the app main stage
      */
     @Override
     public void start(Stage primaryStage) throws Exception {

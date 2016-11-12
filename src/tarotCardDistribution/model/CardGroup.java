@@ -63,8 +63,12 @@ public abstract class CardGroup {
      */
     public String cardListToString() {
         String result = "";
-        for (Card c : cardList )
-            result += c.getName() + "; ";
+        for (Card c : cardList ) {
+            if ( c.isShown())
+                result += c.getName() + "; ";
+            else
+                result += "?? ; ";
+        }
         return result;
     }
 

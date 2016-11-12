@@ -153,9 +153,9 @@ public class PlayerHandler {
     public String getPlayerName(Hand player) {
         if ( player == north)
             return "North";
-        else if ( currentPlayer == west)
+        else if ( player == west)
             return "West";
-        else if ( currentPlayer == south)
+        else if ( player == south)
             return "South";
         else
             return "East";

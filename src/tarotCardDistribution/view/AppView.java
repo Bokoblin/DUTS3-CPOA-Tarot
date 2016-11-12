@@ -150,13 +150,14 @@ public class AppView extends Scene implements Observer{
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void addNewCard(CardUpdate cardUpdate) throws ViewCardUpdateExistException
+    private void addNewCard(CardUpdate cardUpdate)
+            throws ViewCardUpdateExistException
     {
         if (getViewCard(cardUpdate.getCard()) != null)
         {
             throw new ViewCardUpdateExistException(cardUpdate, false);
         }
-        ViewCard viewCard = new ViewCard(ViewCard.CARDWIDTH, ViewCard.CARDHEIGHT, ViewCard.CARDDEPTH, ViewCard.TEXTURECARDFACEHEIGHT, ViewCard.TEXTURECARDFACEHEIGHT, cardUpdate.getCard());
+        ViewCard viewCard = new ViewCard(cardUpdate.getCard());
         Group group = cardGroupToViewGroup(cardUpdate.getCardGroup());
         cardToGroup.put(viewCard, group);
         group.getChildren().add(viewCard);
@@ -169,7 +170,8 @@ public class AppView extends Scene implements Observer{
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void turnBackCard(CardUpdate cardUpdate) throws ViewCardUpdateExistException
+    private void turnBackCard(CardUpdate cardUpdate)
+            throws ViewCardUpdateExistException
     {
         ViewCard viewCard = getViewCard(cardUpdate.getCard());
         if (viewCard == null)
@@ -186,7 +188,8 @@ public class AppView extends Scene implements Observer{
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void changeCardGroup(CardUpdate cardUpdate) throws ViewCardUpdateExistException
+    private void changeCardGroup(CardUpdate cardUpdate)
+            throws ViewCardUpdateExistException
     {
         ViewCard viewCard = getViewCard(cardUpdate.getCard());
         if (viewCard == null)
@@ -201,12 +204,14 @@ public class AppView extends Scene implements Observer{
 
     /**
      * This method is called by @update if the update type is @REMOVE_CARD_FROM_GROUP
-     * It remove a ViewCard from its actual JavaFX group and place it to the default group that is @root3d
+     * It remove a ViewCard from its actual JavaFX group
+     * and place it to the default group that is @root3d
      * @since v0.6
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void removeCardFromGroup(CardUpdate cardUpdate) throws ViewCardUpdateExistException
+    private void removeCardFromGroup(CardUpdate cardUpdate)
+            throws ViewCardUpdateExistException
     {
         changeCardGroup(cardUpdate);
     }
