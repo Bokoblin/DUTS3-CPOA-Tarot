@@ -22,7 +22,7 @@ import static tarotCardDistribution.model.PlayerHandler.PlayersCardinalPoint.Sou
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.6
+ * @version v0.6.2
  * @since v0.2
  *
  * @see Observable
@@ -98,13 +98,9 @@ public class GameModel extends Observable {
     public void chooseInitialDealer() {
         System.out.println("=== DEALER CHOOSING ===");
         //list of picked cards
-        Map<Card, Hand> CardPickedByPlayerMap = new HashMap<>();
+        Map<Card, Hand> pickedCardsMap = new HashMap<>();
 
-        //Copies initialDeck and shuffles the copy
-        List<Card> randomPickedCardsList = new ArrayList<>();
-        randomPickedCardsList.addAll(initialDeck);
-        long seed = System.nanoTime();
-        Collections.shuffle(randomPickedCardsList, new Random(seed));
+        shuffleCards();
 
         //Randomly chooses a card
         playerHandler.getPlayersMap().forEach((cardinal,player)-> {
@@ -116,7 +112,11 @@ public class GameModel extends Observable {
                 int numCard;
                 do {
                     numCard = sc.nextInt();
-                    if ( numCard >= 0 && numCard < 78 && Objects.nonNull(randomPickedCardsList.get(numCard)) ) {
+                    if (Objects.equals(initialDeck.get(numCard).getName(), "Excuse")) {
+                        initialDeck.remove(initialDeck.get(numCard));
+                        pickedCardsMap.put( initialDeck.get(numCard), player);
+                    }
+                    else if ( numCard >= 0 && numCard < 78 && Objects.nonNull(initialDeck.get(numCard)) ) {
                         choiceValid = true;
                         System.out.println("Your choice have been saved.");
                     }
@@ -127,30 +127,31 @@ public class GameModel extends Observable {
                 c = initialDeck.get(numCard);
             }
             else {
-                c = randomCard(randomPickedCardsList);
-                randomPickedCardsList.remove(c);
+                do {
+                    c = randomCard(initialDeck);
+                }
+                while (Objects.equals(c.getName(), "Excuse"));
             }
 
-            randomPickedCardsList.remove(c);
-            if (!Objects.equals(c.getName(), "Excuse"))
-                CardPickedByPlayerMap.put(c, player);
-                //If the player picked Excuse, it must pick another card
-            else {
-                c = randomCard(randomPickedCardsList);
-                randomPickedCardsList.remove(c);
-                CardPickedByPlayerMap.put(c, player);
-            }
+            initialDeck.remove(c);
+            pickedCardsMap.put(c, player);
         });
+
+        pickedCardsMap.forEach( (card, player) -> card.setShown(true));
 
         //set dealer from picking
         Card minCard = null;
-        for (Map.Entry<Card, Hand> mapEntry : CardPickedByPlayerMap.entrySet())
+        for (Map.Entry<Card, Hand> mapEntry : pickedCardsMap.entrySet())
             if (Objects.isNull(minCard))
                 minCard = mapEntry.getKey();
             else if ( Card.compareSmallerTo(mapEntry.getKey(), minCard) )
                 minCard = mapEntry.getKey();
 
-        playerHandler.setFirstDealer(CardPickedByPlayerMap.get(minCard));
+        playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
+
+        pickedCardsMap.forEach( (card, player) -> card.setShown(false));
+        pickedCardsMap.forEach( (card, player) -> initialDeck.add(card));
+        pickedCardsMap.clear();
     }
 
     /**
@@ -172,6 +173,7 @@ public class GameModel extends Observable {
             dealAllCards();
 
             //"Petit Sec" checking
+            ourPlayer.getCardList().forEach(c -> c.setShown(true));
             System.out.println("Petit Sec checking...");
             for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
                     : playerHandler.getPlayersMap().entrySet()) {
@@ -274,7 +276,7 @@ public class GameModel extends Observable {
         while ( !talon.getCardList().isEmpty() ) {
             moveCardBetweenDecks(talon.getCardList(), initialDeck, talon.getCardList().get(0));
         }
-
+        initialDeck.forEach(c -> c.setShown(false));
     }
 
     /**
@@ -306,6 +308,7 @@ public class GameModel extends Observable {
         playerHandler.getPlayersMap().forEach((cardinal,player)-> {
             if ( player == ourPlayer) {
                 System.out.println("Here are your cards :");
+                player.getCardList().forEach(c -> c.setShown(true));
                 System.out.println(ourPlayer.cardListToString());
                 System.out.println("Choose your Bids among those one :");
                 System.out.println("1. Small");
@@ -359,7 +362,8 @@ public class GameModel extends Observable {
      */
     private void constituteEcart() {
         System.out.println("Showing the talon to all...");
-        //TODO : Add hidden/shown system at model level
+        talon.getCardList().forEach(c -> c.setShown(true));
+        System.out.println(talon.cardListToString());
         System.out.println("Placing talon's cards into taker's deck...");
 
         while ( !talon.getCardList().isEmpty() ) {
@@ -395,10 +399,13 @@ public class GameModel extends Observable {
                     System.out.println("Your choice isn't valid, try again");
             }
             while (!choiceValid);
+            if ( ourPlayer.getInCards(choice).getSuit() != Suit.Trump)
+                ourPlayer.getInCards(choice).setShown(false);
             moveCardBetweenDecks(ourPlayer.getCardList(), talon.getCardList(), ourPlayer.getInCards(choice));
             System.out.println("Taker : " + ourPlayer.cardListToString());
             System.out.println("Talon : " + talon.cardListToString());
         }
+        System.out.println("Ecart done...");
     }
 
     /**
@@ -446,6 +453,16 @@ public class GameModel extends Observable {
     }
 
     /**
+     * Notify observers with the type of card update
+     * @since v0.6
+     */
+    public void updateCard(CardUpdate cardUpdate)
+    {
+        setChanged();
+        notifyObservers(cardUpdate);
+    }
+
+    /**
      * Displays card repartition after distribution
      * @since v0.5
      */
@@ -457,18 +474,17 @@ public class GameModel extends Observable {
         for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
                 : playerHandler.getPlayersMap().entrySet()) {
             result += "Player " + playerHandler.getPlayerName(player.getValue()) + " : ";
-            result +=  player.getValue().cardListToString() + "\n";
+            for ( Card c : player.getValue().getCardList()) {
+                result += c.getName() + "; ";
+            }
+            result +=  "\n";
         }
-        result += "talon : " + talon.cardListToString() + "\n";
+        result += "Talon : ";
+        for ( Card c : talon.getCardList()) {
+            result += c.getName() + "; ";
+        }
 
         return result;
-    }
-
-    //TODO : Documentation
-    public void updateCard(CardUpdate cardUpdate)
-    {
-        setChanged();
-        notifyObservers(cardUpdate);
     }
 
     //GETTERS - no documentation needed
