@@ -22,7 +22,7 @@ import java.util.Objects;
  * it consists in a group of cards representing a player
  *
  * @author Arthur
- * @version v0.5
+ * @version v0.6
  * @since v0.1
  *
  * @see CardGroup
@@ -31,6 +31,7 @@ import java.util.Objects;
 public class Hand extends CardGroup{
     private static int nbHands;
     private static final int NB_MAX_HANDS = 4;
+    private Bids bidChosen;
 
     /**
      * Constructs a hand
@@ -47,8 +48,14 @@ public class Hand extends CardGroup{
             cardList = new ArrayList<>();
             nbHands++;
         }
+        bidChosen = null;
     }
 
+    /**
+     * Check if a hand has Petit Sec
+     * (First of Trump as only Trump and no excuse)
+     * @since v0.5
+     */
     boolean checkHasPetitSec() {
         int nbTrumps = 0;
         boolean hasLePetit = false;
@@ -81,5 +88,14 @@ public class Hand extends CardGroup{
     }
     public static int getNbMaxHands() {
         return NB_MAX_HANDS;
+    }
+    public Bids getBidChosen() {
+        return bidChosen;
+    }
+
+    //SETTERS - no documentation needed
+
+    public void setBidChosen(Bids bidChosen) {
+        this.bidChosen = bidChosen;
     }
 }

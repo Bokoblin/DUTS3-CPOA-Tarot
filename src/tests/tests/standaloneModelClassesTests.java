@@ -13,10 +13,10 @@ limitations under the License.
 
 package tests;
 
+import tarotCardDistribution.model.*;
 import org.junit.*;
 import static org.junit.Assert.*;
 import exceptions.*;
-import tarotCardDistribution.model.*;
 
 /**
  * Standalone Unit tests for model classes
@@ -35,7 +35,7 @@ public class StandaloneModelClassesTests {
     public void cleanClasses() {
         Card.resetClassForTesting();
         Hand.resetClassForTesting();
-        Chien.resetClassForTesting();
+        Talon.resetClassForTesting();
     }
 
     /**
@@ -89,7 +89,7 @@ public class StandaloneModelClassesTests {
 
     /**
      * Tests adding cards to the hand
-     * Note : test is similar for the Chien
+     * Note : test is similar for the Talon
      * No exception should be fired
      * @since v0.1
      *
@@ -113,7 +113,7 @@ public class StandaloneModelClassesTests {
     }
 
     /**
-     * Tests creating the hand and the Chien
+     * Tests creating the hand and the Talon
      * Two exceptions should be fired
      * @since v0.1
      *
@@ -136,10 +136,10 @@ public class StandaloneModelClassesTests {
         }
 
         try {
-            assertTrue( !Chien.exists() );
-            Chien chien = new Chien();
+            assertTrue( !Talon.exists() );
+            Talon chien = new Talon();
             assertTrue(chien.getNbCards() == 0);
-            assertTrue( Chien.exists() );
+            assertTrue( Talon.exists() );
         }
         catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
@@ -229,7 +229,7 @@ public class StandaloneModelClassesTests {
     }
 
     /**
-     * Tests creating the hand and the Chien
+     * Tests creating the hand and the Talon
      * Two exceptions should be fired
      * @since v0.5
      *
@@ -250,12 +250,12 @@ public class StandaloneModelClassesTests {
         }
 
         try {
-            Chien chien1 = new Chien();
-            Chien chien2 = new Chien();
+            Talon chien1 = new Talon();
+            Talon chien2 = new Talon();
             fail("Exception should be fired");
         } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
-            assertTrue( Chien.exists() );
+            assertTrue( Talon.exists() );
         }
     }
 }

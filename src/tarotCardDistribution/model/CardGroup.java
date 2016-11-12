@@ -15,13 +15,14 @@ package tarotCardDistribution.model;
 
 import exceptions.*;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The {@code CardGroup} class consists in a group of cards.
  * It is abstract so it only defines common attributes and methods
- * for {@code Hand} ans {@code Chien} classes
+ * for {@code Hand} ans {@code Talon} classes
  * @author Arthur
- * @version v0.2
+ * @version v0.6
  * @since v0.1
  *
  * @see CardGroup
@@ -34,7 +35,6 @@ public abstract class CardGroup {
     /**
      * Constructs a CardGroup
      * @since v0.1
-     *
      * @param NB_MAX_CARDS the max number of card a subclass of CardGroup can have
      * @throws CardGroupNumberException
      */
@@ -45,7 +45,6 @@ public abstract class CardGroup {
     /**
      * Add a card
      * @since v0.1
-     *
      * @param card the card which is added to card list
      */
     public void addCard(Card card) throws CardNumberException {
@@ -55,6 +54,42 @@ public abstract class CardGroup {
         else {
             cardList.add(card);
         }
+    }
+
+    /**
+     * Display all the cards of a card group
+     * @since v0.6
+     * @return a string containing all CardGroup's cards name
+     */
+    public String cardListToString() {
+        String result = "";
+        for (Card c : cardList )
+            result += c.getName() + "; ";
+        return result;
+    }
+
+    /**
+     * Find a card by its name
+     * @since v0.6
+     * @return a boolean indicating if card has been found
+     */
+    public boolean findInCards(String nameToFind) {
+        for (Card c : cardList)
+            if (Objects.equals(c.getName(), nameToFind))
+                return true;
+        return false;
+    }
+
+    /**
+     * Find a card by its name
+     * @since v0.6
+     * @return the card if found
+     */
+    public Card getInCards(String nameToFind) {
+        for (Card c : cardList)
+            if (Objects.equals(c.getName(), nameToFind))
+                return c;
+        return null;
     }
 
 

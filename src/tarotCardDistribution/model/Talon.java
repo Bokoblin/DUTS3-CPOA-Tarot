@@ -18,29 +18,28 @@ import exceptions.*;
 import java.util.ArrayList;
 
 /**
- * The {@code Chien} class extends {@code CardGroup},
- * it consists in a group of cards representing the chien/talon
- *
+ * The {@code Talon} class extends {@code CardGroup},
+ * it consists in a group of cards representing the chien
+ * and afterward the taker's ecart
  * @author Arthur
- * @version v0.5
+ * @version v0.6
  * @since v0.1
  *
  * @see CardGroup
  * @see Card
  */
-public class Chien extends CardGroup{
+public class Talon extends CardGroup{
     private static boolean exist = false;
 
     /**
-     * Constructs a chien
+     * Constructs a talon
      * @since v0.1
-     *
-     * @throws CardGroupNumberException if user tries to create more than one chien
+     * @throws CardGroupNumberException if user tries to create more than one talon
      */
-    public Chien() throws CardGroupNumberException {
+    public Talon() throws CardGroupNumberException {
         super(6); //Max number of cards for this group
         if (exist)
-            throw new CardGroupNumberException("Only one Chien is possible.");
+            throw new CardGroupNumberException("Only one Talon is possible.");
         else {
             cardList = new ArrayList<>();
             exist = true;
@@ -56,7 +55,7 @@ public class Chien extends CardGroup{
     }
 
     /**
-     * Return if chien exists
+     * Return if talon exists
      * @since v0.5
      */
     public static boolean exists() {
