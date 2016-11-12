@@ -159,20 +159,17 @@ public class GameModelTests {
             //Card repartition before dealing
             assertTrue( !gameModel.getInitialDeck().isEmpty());
             assertTrue( gameModel.getTalon().getCardList().isEmpty());
-            for (int i=0; i < 4; i++) {
-                assertTrue( gameModel.getPlayerHandler().getCurrentPlayer().getCardList().isEmpty() );
-                gameModel.getPlayerHandler().changeCurrentPlayer();
-            }
+            gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
+                    assertTrue(player.getCardList().isEmpty()) );
 
             gameModel.dealAllCards();
 
             assertTrue( gameModel.getInitialDeck().isEmpty());
 
             //each player has its 18 cards
-            for (int i=0; i < 4; i++) {
-                assertTrue( gameModel.getPlayerHandler().getCurrentPlayer().getCardList().size() == 18 );
-                gameModel.getPlayerHandler().changeCurrentPlayer();
-            }
+            gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
+                assertTrue(player.getCardList().size() == 18) );
+
             //so do the chien
             assertTrue(gameModel.getTalon().getCardList().size() == 6);
 
@@ -206,10 +203,8 @@ public class GameModelTests {
             //Card repartition after gathering
             assertTrue( gameModel.getInitialDeck().size() == 78);
             assertTrue( gameModel.getTalon().getCardList().isEmpty());
-            for (int i=0; i < 4; i++) {
-                assertTrue( gameModel.getPlayerHandler().getCurrentPlayer().getCardList().isEmpty() );
-                gameModel.getPlayerHandler().changeCurrentPlayer();
-            }
+            gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
+                    assertTrue(player.getCardList().isEmpty()) );
 
         } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
             System.err.println(e.getMessage());

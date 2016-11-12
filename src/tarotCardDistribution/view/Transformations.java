@@ -14,6 +14,7 @@ public class Transformations {
     private Rotate rotateY;
     private Rotate rotateZ;
 
+    //TODO : Documentation
     public Transformations(Node object)
     {
         rotateX = new Rotate(0, Rotate.X_AXIS);

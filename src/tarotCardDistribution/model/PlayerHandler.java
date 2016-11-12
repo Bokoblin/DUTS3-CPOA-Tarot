@@ -2,6 +2,9 @@ package tarotCardDistribution.model;
 
 import exceptions.CardGroupNumberException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The {@code PlayerHandler} class handles players creation
  * and their temporary status (dealer, shuffler, cutter, currentPlayer)
@@ -22,6 +25,15 @@ public class PlayerHandler {
     private Hand cutter; //dealer's left player
     private Hand currentPlayer; //dealer's right player
 
+    private Map<PlayersCardinalPoint,Hand> playersMap;
+
+    public enum PlayersCardinalPoint {
+        North,
+        West,
+        South,
+        East
+    }
+
     /**
      * Constructs a player handler and the 4 players
      * @since v0.6
@@ -36,6 +48,12 @@ public class PlayerHandler {
         } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
         }
+
+        playersMap = new HashMap<>();
+        playersMap.put(PlayersCardinalPoint.North, north);
+        playersMap.put(PlayersCardinalPoint.West, west);
+        playersMap.put(PlayersCardinalPoint.South, south);
+        playersMap.put(PlayersCardinalPoint.East, east);
 
         dealer = null;
         shuffler = null;
@@ -149,9 +167,6 @@ public class PlayerHandler {
     public Hand getCurrentPlayer() {
         return currentPlayer;
     }
-    public Hand getSouth() {
-        return south;
-    }
     public Hand getDealer() {
         return dealer;
     }
@@ -161,5 +176,27 @@ public class PlayerHandler {
     public Hand getCutter() {
         return cutter;
     }
-
+    public Hand getPlayer(PlayersCardinalPoint p) {
+        if ( p == PlayersCardinalPoint.North)
+            return north;
+        else if ( p == PlayersCardinalPoint.West)
+            return west;
+        else if ( p == PlayersCardinalPoint.South)
+            return north;
+        else
+            return east;
+    }
+    public PlayersCardinalPoint getPlayerCardinalPoint(Hand p) {
+        if ( p == north)
+            return PlayersCardinalPoint.North;
+        else if ( p == west)
+            return PlayersCardinalPoint.West;
+        else if ( p == south)
+            return PlayersCardinalPoint.South;
+        else
+            return PlayersCardinalPoint.East;
+    }
+    public Map<PlayersCardinalPoint, Hand> getPlayersMap() {
+        return playersMap;
+    }
 }
