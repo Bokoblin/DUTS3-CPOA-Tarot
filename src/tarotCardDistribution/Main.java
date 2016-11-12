@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app;
+package tarotCardDistribution;
 
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -21,9 +21,10 @@ import tarotCardDistribution.model.GameModel;
 import tarotCardDistribution.view.AppView;
 
 /**
- * The {@code Main} class inits MVC architecture and launch the tarotCardDistribution
+ * The {@code Main} class inits MVC architecture and launch the architecture
+ * @author Alexandre
  * @author Arthur
- * @version v0.5
+ * @version v0.6
  * @since v0.2
  *
  * @see Application
@@ -37,17 +38,16 @@ public class Main extends Application {
         AppView scene = new AppView(root, gameModel, appController);
         appController.setGameModel(gameModel);
         appController.setAppView(scene);
-
         primaryStage.setTitle("JACQUOT JOLIVET S3A");
-        //primaryStage.setScene(scene);
 
         //shuffling, cut, dealing
+        gameModel.chooseInitialDealer();
         gameModel.handleDealing();
         gameModel.handleBids();
         System.out.println(gameModel.toString());
 
         //Game playing is not to be done
-        primaryStage.show();
+        System.exit(0);
     }
 
     public static void main(String[] args) {

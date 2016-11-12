@@ -18,7 +18,6 @@ import java.util.Random;
 /**
  * The {@code Rank} enumeration defines all ranks
  * that can be assigned to a card
- *
  * @author Arthur
  * @version v0.5
  * @since v0.1
@@ -39,6 +38,13 @@ public enum Rank {
     Queen,
     King;
 
+    /**
+     * Method returning a random rank among enum ones
+     * @since v0.5
+     *
+     * @return a random rank
+     * @see Random
+     */
     public static Rank randomRank() {
         int pick = new Random().nextInt(Rank.values().length);
         return Rank.values()[pick];

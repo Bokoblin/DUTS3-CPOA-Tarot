@@ -160,6 +160,11 @@ public class Card{
         cardList.clear();
     }
 
+    /**
+     * Compare two cards following their Suit and Rank
+     * @since v0.5
+     * @return a boolean indicating if a card is smaller or not
+     */
     public static boolean compareSmallerTo(Card c1, Card c2) {
         //Both are not trumps
         if ( c1.suit != Suit.Trump && c2.suit != Suit.Trump) {
@@ -203,5 +208,8 @@ public class Card{
     }
     public Suit getSuit() {
         return suit;
+    }
+    public Rank getRank() {
+        return rank;
     }
 }
