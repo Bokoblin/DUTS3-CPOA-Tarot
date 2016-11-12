@@ -192,12 +192,7 @@ public class AppView extends Scene implements Observer{
 
     private void removeCardFromGroup(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
     {
-        ViewCard viewCard = modelCardExist(updateViewCard.getCard());
-        if (viewCard == null)
-        {
-            throw new ViewCardUpdateExistException(updateViewCard, true);
-        }
-        cardToGroup.replace(viewCard, cardGroupToViewGroup(null));
+        changeCardGroup(updateViewCard);
     }
 
     private void removeCard(UpdateViewCard updateViewCard) throws ViewCardUpdateExistException
