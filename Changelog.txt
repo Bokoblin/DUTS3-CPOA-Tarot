@@ -5,6 +5,13 @@ Current version : v0.6.0
 
 =========================================================================
 
+v0.6.1 (12/11/16) :
+- Corrected the tests
+- Completed the documentation of the view
+
+
+--------------------------------------------------------------------
+
 v0.6.0 (12/11/16) :
 - Added Card Bids (Model part) to GameModel class :
     - handle choosing bids

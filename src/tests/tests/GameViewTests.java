@@ -1,5 +1,8 @@
 package tests;
 
+import exceptions.CardGroupNumberException;
+import exceptions.CardNumberException;
+import exceptions.CardUniquenessException;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.stage.Stage;
@@ -16,7 +19,11 @@ public class GameViewTests extends Application
     private static GameModel gameModel;
     private static AppView scene;
     private static Group root;
-    //TODO : Documentation
+
+    /**
+     * Constructs a view and run it in another thread for the tests.
+     * @since v0.6
+     */
     @BeforeClass
     public static void initApplication()
     {
@@ -43,9 +50,21 @@ public class GameViewTests extends Application
         Hand.resetClassForTesting();
         Talon.resetClassForTesting();
         root = new Group();
+        try {
+            gameModel = new GameModel();
+        } catch (CardNumberException e) {
+            e.printStackTrace();
+        } catch (CardUniquenessException e) {
+            e.printStackTrace();
+        } catch (CardGroupNumberException e) {
+            e.printStackTrace();
+        }
         scene = new AppView(root, gameModel, appController);
     }
-    //TODO : Documentation
+    /**
+     * Add a card to the view and verify the number of cards of the default group (root3d) have been increase
+     * @since v0.6
+     */
     @Test
     public void addCardToView()
     {
@@ -53,43 +72,59 @@ public class GameViewTests extends Application
         gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0)));
         assertTrue(scene.getRoot3d().getChildren().size() == nbNodeBeforeAddingCard+1);
     }
-    //TODO : Documentation
+
+    /**
+     * Add a card to the view then move it to another group and verify the number of cards of the group have been increase
+     * @since v0.6
+     */
     @Test
     public void moveCard()
     {
         Hand hand = gameModel.getPlayerHandler().getPlayer(PlayerHandler.PlayersCardinalPoint.South);
-        Talon chien = gameModel.getTalon();
-        assertTrue(scene.getHands()[1].getChildren().size() == 0);
-        assertTrue(scene.getChien().getChildren().size() == 0);
+        Talon talon = gameModel.getTalon();
+        int nbNodeHandBefore = scene.cardGroupToViewGroup(hand).getChildren().size();
+        int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), hand));
-        assertTrue(scene.getHands()[1].getChildren().size() == 1);
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getHands()[1].getChildren().get(0)).getModelCard(), chien));
-        assertTrue(scene.getHands()[1].getChildren().size() == 0);
-        assertTrue(scene.getChien().getChildren().size() == 1);
+        assertTrue(scene.cardGroupToViewGroup(hand).getChildren().size() == nbNodeHandBefore+1);
+        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.cardGroupToViewGroup(hand).getChildren().get(0)).getModelCard(), talon));
+        assertTrue(scene.cardGroupToViewGroup(hand).getChildren().size() == nbNodeHandBefore);
+        assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
     }
-    //TODO : Documentation
+
+    /**
+     * Add a card to the view then delete and verify the number of cards of the group have been decrease
+     * @since v0.6
+     */
     @Test
     public void removeCardFromGroup()
     {
-        Talon chien = gameModel.getTalon();
-        assertTrue(scene.getChien().getChildren().size() == 0);
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), chien));
-        assertTrue(scene.getChien().getChildren().size() == 1);
+        Talon talon = gameModel.getTalon();
+        int nbNodeTalonBefore = scene.getTalon().getChildren().size();
+        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
+        assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP, ((ViewCard)scene.getChien().getChildren().get(0)).getModelCard()));
+        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
         assertTrue(scene.getRoot3d().getChildren().size() == nbNodeBeforeAddingCard+1);
     }
-    //TODO : Documentation
+
+    /**
+     * Add a card to the view then delete it and verify the number of cards of the group have been increase
+     * @since v0.6
+     */
     @Test
     public void removeCard()
     {
-        Talon chien = gameModel.getTalon();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), chien));
-        assertTrue(scene.getChien().getChildren().size() == 1);
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.DELETE_CARD, ((ViewCard)scene.getChien().getChildren().get(0)).getModelCard()));
-        assertTrue(scene.getChien().getChildren().size() == 0);
+        Talon talon = gameModel.getTalon();
+        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
+        int nbNodeTalonBefore = scene.getTalon().getChildren().size();
+        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.DELETE_CARD, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+        assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore - 1);
     }
-    //TODO : Documentation
+
+    /**
+     * Create the scne of the application before the tests.
+     * @since v0.6
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         root = new Group();

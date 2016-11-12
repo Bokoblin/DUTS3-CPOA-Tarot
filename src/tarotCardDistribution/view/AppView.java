@@ -39,7 +39,7 @@ public class AppView extends Scene implements Observer{
     private GameModel gameModel;
     private AppController appController;
     private Group root3d;
-    private Group chien;
+    private Group talon;
     private Group[] hands = new Group[4];
     private Group rootGUI;
     private Group background;
@@ -57,13 +57,13 @@ public class AppView extends Scene implements Observer{
         root3d = new Group();
         rootGUI = new Group();
         background = new Group();
-        chien = new Group();
+        talon = new Group();
         cardToGroup = new HashMap<>();
         this.gameModel = gameModel;
         this.appController = appController;
         root.getChildren().addAll(root3d, rootGUI);
         root3d.getChildren().add(background);
-        root3d.getChildren().add(chien);
+        root3d.getChildren().add(talon);
         for (int i =0; i<4; i++)
         {
             hands[i] = new Group();
@@ -143,23 +143,35 @@ public class AppView extends Scene implements Observer{
         }
     }
 
-    //TODO : Documentation
+    /**
+     * This method is called by @update if the update type is @ADD_CARD
+     * It create a new ViewCard and add it to the corresponding javaFX group
+     * @since v0.6
+     *
+     * @param   cardUpdate     the cardUpdate object.
+     */
     private void addNewCard(CardUpdate cardUpdate) throws ViewCardUpdateExistException
     {
-        if (modelCardExist(cardUpdate.getCard()) != null)
+        if (getViewCard(cardUpdate.getCard()) != null)
         {
             throw new ViewCardUpdateExistException(cardUpdate, false);
         }
-        ViewCard viewCard = new ViewCard(ViewCard.CARDWIDTH, ViewCard.CARDHEIGHT, ViewCard.CARDDEPTH, 1536, 2663, cardUpdate.getCard());
+        ViewCard viewCard = new ViewCard(ViewCard.CARDWIDTH, ViewCard.CARDHEIGHT, ViewCard.CARDDEPTH, ViewCard.TEXTURECARDFACEHEIGHT, ViewCard.TEXTURECARDFACEHEIGHT, cardUpdate.getCard());
         Group group = cardGroupToViewGroup(cardUpdate.getCardGroup());
         cardToGroup.put(viewCard, group);
         group.getChildren().add(viewCard);
     }
 
-    //TODO : Documentation
+    /**
+     * This method is called by @update if the update type is @TURN_CARD
+     * It apply a 180° on the 3D Card with a transition to show its other face
+     * @since v0.6
+     *
+     * @param   cardUpdate     the cardUpdate object.
+     */
     private void turnBackCard(CardUpdate cardUpdate) throws ViewCardUpdateExistException
     {
-        ViewCard viewCard = modelCardExist(cardUpdate.getCard());
+        ViewCard viewCard = getViewCard(cardUpdate.getCard());
         if (viewCard == null)
         {
             throw new ViewCardUpdateExistException(cardUpdate, true);
@@ -167,10 +179,16 @@ public class AppView extends Scene implements Observer{
         // Add a transition
     }
 
-    //TODO : Documentation
+    /**
+     * This method is called by @update if the update type is @MOVE_CARD_BETWEEN_GROUPS
+     * It move a ViewCard associated with a model Card to another JavaFX Group
+     * @since v0.6
+     *
+     * @param   cardUpdate     the cardUpdate object.
+     */
     private void changeCardGroup(CardUpdate cardUpdate) throws ViewCardUpdateExistException
     {
-        ViewCard viewCard = modelCardExist(cardUpdate.getCard());
+        ViewCard viewCard = getViewCard(cardUpdate.getCard());
         if (viewCard == null)
         {
             throw new ViewCardUpdateExistException(cardUpdate, true);
@@ -181,16 +199,28 @@ public class AppView extends Scene implements Observer{
         group.getChildren().add(viewCard);
     }
 
-    //TODO : Documentation
+    /**
+     * This method is called by @update if the update type is @REMOVE_CARD_FROM_GROUP
+     * It remove a ViewCard from its actual JavaFX group and place it to the default group that is @root3d
+     * @since v0.6
+     *
+     * @param   cardUpdate     the cardUpdate object.
+     */
     private void removeCardFromGroup(CardUpdate cardUpdate) throws ViewCardUpdateExistException
     {
         changeCardGroup(cardUpdate);
     }
 
-    //TODO : Documentation
+    /**
+     * This method is called by @update if the update type is @DELETE_CARD
+     * It delete the ViewCard associated to a model Card from the View
+     * @since v0.6
+     *
+     * @param   cardUpdate     the cardUpdate object.
+     */
     private void removeCard(CardUpdate cardUpdate) throws ViewCardUpdateExistException
     {
-        ViewCard viewCard = modelCardExist(cardUpdate.getCard());
+        ViewCard viewCard = getViewCard(cardUpdate.getCard());
         if (viewCard == null)
         {
             throw new ViewCardUpdateExistException(cardUpdate, true);
@@ -199,8 +229,14 @@ public class AppView extends Scene implements Observer{
         cardToGroup.remove(viewCard);
     }
 
-    //TODO : Documentation
-    private ViewCard modelCardExist(Card card)
+    /**
+     * This method return the associated ViewCard of the actual scene of a Card model object
+     * If the ViewCard doesn't exist it return null
+     * @since v0.6
+     *
+     * @param   card     the model card object.
+     */
+    private ViewCard getViewCard(Card card)
     {
         for (Map.Entry<ViewCard, Group> entry : cardToGroup.entrySet())
         {
@@ -212,25 +248,24 @@ public class AppView extends Scene implements Observer{
         return null;
     }
 
-    //TODO : Documentation
-    private Group cardGroupToViewGroup(CardGroup cardGroup)
+    /**
+     * This method return the associated JavaFX Group of a CardGroup
+     * Return the @root3d group if no specific group exist
+     * @since v0.6
+     *
+     * @param   cardGroup     the cardUpdate object.
+     */
+    public Group cardGroupToViewGroup(CardGroup cardGroup)
     {
         if (cardGroup instanceof Talon)
         {
-            return chien;
+            return talon;
         }
         else if (cardGroup instanceof Hand) {
-            for (int i=1; i <= 4; i++)
-            {
-                if (gameModel.getPlayerHandler().getCurrentPlayer() == (Hand)cardGroup)
-                {
-                    return hands[i];
-                }
-            }
+            return hands[gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardGroup).ordinal()];
         } else {
             return root3d;
         }
-        return root3d;
     }
 
     //GETTERS - no documentation needed
@@ -247,9 +282,13 @@ public class AppView extends Scene implements Observer{
     {
         return hands;
     }
-    public Group getChien()
+    public Group getHand(PlayerHandler.PlayersCardinalPoint cardinalPoint)
     {
-        return chien;
+        return hands[cardinalPoint.ordinal()];
+    }
+    public Group getTalon()
+    {
+        return talon;
     }
     public ViewCamera getViewCamera()
     {

@@ -16,7 +16,11 @@ public class CardUpdate {
     {
         if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS)
         {
-            //TODO : Throw an exception
+            try {
+                throw new Exception("Cannot move a card without specifying the destination group.");
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
         }
         this.card = card;
         this.cardGroup = null;
@@ -25,10 +29,6 @@ public class CardUpdate {
 
     public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, @NotNull CardGroup cardGroup)
     {
-        if (!cardGroup.getCardList().contains(card))
-        {
-            //TODO : Throw an exception
-        }
         this.cardGroup = cardGroup;
         this.card = card;
         this.type = type;

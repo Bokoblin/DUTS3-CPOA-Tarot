@@ -2,6 +2,13 @@ package exceptions;
 
 import tarotCardDistribution.model.CardUpdate;
 
+/**
+ * Exception class on card update
+ *
+ * @author Alexandre
+ * @version v0.6
+ * @since v0.5
+ */
 public class ViewCardUpdateExistException extends Exception
 {
     public ViewCardUpdateExistException(CardUpdate cardUpdate, boolean existExcepted)
