@@ -72,11 +72,11 @@ public class PlayerHandler {
             shuffler = south;
             cutter = east;
         }
-        else if ( currentPlayer == west) {
+        else if ( dealer == west) {
             shuffler = east;
             cutter = north;
         }
-        else if ( currentPlayer == south) {
+        else if ( dealer == south) {
             shuffler = north;
             cutter = west;
         }
@@ -182,7 +182,7 @@ public class PlayerHandler {
         else if ( p == PlayersCardinalPoint.West)
             return west;
         else if ( p == PlayersCardinalPoint.South)
-            return north;
+            return south;
         else
             return east;
     }

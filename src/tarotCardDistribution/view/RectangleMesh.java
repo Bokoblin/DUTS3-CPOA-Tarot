@@ -1,6 +1,15 @@
 package tarotCardDistribution.view;
 
-//TODO : Documentation
+/**
+ * The RectangleMesh class is a pre-defined rectangle mesh extended from MeshView
+ * It create the mesh points from the specified coordinates, apply the specified texture and have a list of Transformations
+ * @author Alexandre
+ * @version v0.6
+ * @since v0.2
+ *
+ * @see java.util.Observer
+ * @see javafx.scene.Scene
+ */
 
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;

@@ -14,6 +14,8 @@ public class ViewCard extends RectangleMesh {
     public static final float CARDHEIGHT = 200;
     public static final float CARDWIDTH = CARDHEIGHT * (55/88);
     public static final float CARDDEPTH = 2;
+    public static final int TEXTURECARDFACEWIDTH = 1536;
+    public static final int TEXTURECARDFACEHEIGHT = 2663;
 
     //TODO : Documentation
     public ViewCard(float width, float height, float depth, float textureFaceWidth, float textureFaceHeight, @NotNull Card modelCard)
