@@ -45,7 +45,6 @@ public class Hand extends CardGroup{
             throw new CardGroupNumberException(
                     "Hand instances limit has been reached.", NB_MAX_HANDS);
         else {
-            cardList = new ArrayList<>();
             nbHands++;
         }
         bidChosen = null;

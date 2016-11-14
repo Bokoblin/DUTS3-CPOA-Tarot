@@ -74,7 +74,11 @@ public class GameViewTests extends Application
     public void addCardToView()
     {
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0)));
+        try {
+            gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0)));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
         assertTrue(scene.getRoot3d().getChildren().size() == nbNodeBeforeAddingCard+1);
     }
 
@@ -109,7 +113,11 @@ public class GameViewTests extends Application
         gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+        try {
+            gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
         assertTrue(scene.getRoot3d().getChildren().size() == nbNodeBeforeAddingCard+1);
     }
 
@@ -123,7 +131,11 @@ public class GameViewTests extends Application
         Talon talon = gameModel.getTalon();
         gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.DELETE_CARD, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+        try {
+            gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.DELETE_CARD, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore - 1);
     }
 

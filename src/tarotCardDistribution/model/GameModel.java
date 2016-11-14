@@ -22,7 +22,7 @@ import static tarotCardDistribution.model.PlayerHandler.PlayersCardinalPoint.Sou
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.6.2
+ * @version v0.6.3
  * @since v0.2
  *
  * @see Observable
@@ -32,7 +32,8 @@ import static tarotCardDistribution.model.PlayerHandler.PlayersCardinalPoint.Sou
  * @see Talon
  */
 public class GameModel extends Observable {
-    private List<Card> initialDeck;
+
+    private CardGroup initialDeck;
     private PlayerHandler playerHandler;
     private Talon talon;
     private Hand ourPlayer;
@@ -47,7 +48,7 @@ public class GameModel extends Observable {
      */
     public GameModel()
             throws CardNumberException, CardUniquenessException, CardGroupNumberException {
-        initialDeck = new ArrayList<>();
+        initialDeck = new CardGroup(78);
 
         //Players creation
         playerHandler = new PlayerHandler();
@@ -112,11 +113,11 @@ public class GameModel extends Observable {
                 int numCard;
                 do {
                     numCard = sc.nextInt();
-                    if (Objects.equals(initialDeck.get(numCard).getName(), "Excuse")) {
-                        initialDeck.remove(initialDeck.get(numCard));
-                        pickedCardsMap.put( initialDeck.get(numCard), player);
+                    if (Objects.equals(initialDeck.getCardList().get(numCard).getName(), "Excuse")) {
+                        initialDeck.getCardList().remove(initialDeck.getCardList().get(numCard));
+                        pickedCardsMap.put( initialDeck.getCardList().get(numCard), player);
                     }
-                    else if ( numCard >= 0 && numCard < 78 && Objects.nonNull(initialDeck.get(numCard)) ) {
+                    else if ( numCard >= 0 && numCard < 78 && Objects.nonNull(initialDeck.getCardList().get(numCard)) ) {
                         choiceValid = true;
                         System.out.println("Your choice have been saved.");
                     }
@@ -124,16 +125,16 @@ public class GameModel extends Observable {
                         System.out.println("Your choice isn't valid, try again");
                 }
                 while (!choiceValid);
-                c = initialDeck.get(numCard);
+                c = initialDeck.getCardList().get(numCard);
             }
             else {
                 do {
-                    c = randomCard(initialDeck);
+                    c = randomCard(initialDeck.getCardList());
                 }
                 while (Objects.equals(c.getName(), "Excuse"));
             }
 
-            initialDeck.remove(c);
+            initialDeck.getCardList().remove(c);
             pickedCardsMap.put(c, player);
         });
 
@@ -150,7 +151,13 @@ public class GameModel extends Observable {
         playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
 
         pickedCardsMap.forEach( (card, player) -> card.setShown(false));
-        pickedCardsMap.forEach( (card, player) -> initialDeck.add(card));
+        pickedCardsMap.forEach((card, player) -> {
+            try {
+                initialDeck.add(card);
+            } catch (CardNumberException e) {
+                System.err.println(e.getMessage());
+            }
+        });
         pickedCardsMap.clear();
     }
 
@@ -197,7 +204,7 @@ public class GameModel extends Observable {
      */
     public void shuffleCards() {
         long seed = System.nanoTime();
-        Collections.shuffle(initialDeck, new Random(seed));
+        Collections.shuffle(initialDeck.getCardList(), new Random(seed));
     }
 
     /**
@@ -210,7 +217,7 @@ public class GameModel extends Observable {
         boolean isValidIterator = false;
 
         do {
-            splitIt = initialDeck.indexOf(randomCard(initialDeck));
+            splitIt = initialDeck.getCardList().indexOf(randomCard(initialDeck.getCardList()));
             if ( splitIt < 74 && splitIt > 3)
                 isValidIterator = true;
         }
@@ -220,13 +227,17 @@ public class GameModel extends Observable {
         List<Card> cut2 = new ArrayList<>();
 
         for (int i=0; i <= splitIt; i++)
-            cut1.add(initialDeck.get(i));
+            cut1.add(initialDeck.getCardList().get(i));
         for (int i = splitIt+1; i < initialDeck.size(); i++)
-            cut2.add(initialDeck.get(i));
+            cut2.add(initialDeck.getCardList().get(i));
 
-        initialDeck.clear();
-        initialDeck.addAll(cut2);
-        initialDeck.addAll(cut1);
+        initialDeck.getCardList().clear();
+        try {
+            initialDeck.addAll(cut2);
+            initialDeck.addAll(cut1);
+        } catch (CardNumberException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     /**
@@ -235,24 +246,24 @@ public class GameModel extends Observable {
      */
     public void dealAllCards() {
         int cptNbCardGivenToSameHand = 0;
-        while( !initialDeck.isEmpty()) {
+        while( !initialDeck.getCardList().isEmpty()) {
             boolean chienReceiveCard = false;
             if( talon.getCardList().size() < 6
                     && initialDeck.size() < 78) { //Don't give first card to chien
                 if ( initialDeck.size() == 2 ) { //Don't give last card to chien
-                    moveCardBetweenDecks(initialDeck, talon.getCardList(), initialDeck.get(0));
+                    moveCardBetweenDecks(initialDeck.getCardList(), talon.getCardList(), initialDeck.getCardList().get(0));
                     chienReceiveCard = true;
                 }
                 else {
                     chienReceiveCard = ( (new Random().nextInt(2) != 0)); //simulate a "heads or tails"
                     if (chienReceiveCard) {
-                        moveCardBetweenDecks(initialDeck, talon.getCardList(), initialDeck.get(0));
+                        moveCardBetweenDecks(initialDeck.getCardList(), talon.getCardList(), initialDeck.getCardList().get(0));
                     }
                 }
             }
             if (!chienReceiveCard) {
-                moveCardBetweenDecks(initialDeck, playerHandler.getCurrentPlayer().getCardList(),
-                        initialDeck.get(0));
+                moveCardBetweenDecks(initialDeck.getCardList(), playerHandler.getCurrentPlayer().getCardList(),
+                        initialDeck.getCardList().get(0));
                 cptNbCardGivenToSameHand++;
             }
             if (cptNbCardGivenToSameHand == 3) {
@@ -270,13 +281,13 @@ public class GameModel extends Observable {
     public void gatherAllCards() {
         playerHandler.getPlayersMap().forEach((cardinal,player)-> {
             while ( !player.getCardList().isEmpty() ) {
-                moveCardBetweenDecks(player.getCardList(), initialDeck, player.getCardList().get(0));
+                moveCardBetweenDecks(player.getCardList(), initialDeck.getCardList(), player.getCardList().get(0));
             }
         });
         while ( !talon.getCardList().isEmpty() ) {
-            moveCardBetweenDecks(talon.getCardList(), initialDeck, talon.getCardList().get(0));
+            moveCardBetweenDecks(talon.getCardList(), initialDeck.getCardList(), talon.getCardList().get(0));
         }
-        initialDeck.forEach(c -> c.setShown(false));
+        initialDeck.getCardList().forEach(c -> c.setShown(false));
     }
 
     /**
@@ -379,9 +390,9 @@ public class GameModel extends Observable {
             String choice;
             do {
                 choice = sc.nextLine();
-                Card c = ourPlayer.getInCards(choice);
+                Card c = ourPlayer.getInCardsList(choice);
 
-                if ( ourPlayer.findInCards(choice) ) {
+                if ( ourPlayer.findInCardsList(choice) ) {
                     if ( c.getSuit() != Suit.Trump && !Objects.equals(c.getName(), "Excuse")
                             && c.getRank() != Rank.King) {
                         choiceValid = true;
@@ -399,9 +410,9 @@ public class GameModel extends Observable {
                     System.out.println("Your choice isn't valid, try again");
             }
             while (!choiceValid);
-            if ( ourPlayer.getInCards(choice).getSuit() != Suit.Trump)
-                ourPlayer.getInCards(choice).setShown(false);
-            moveCardBetweenDecks(ourPlayer.getCardList(), talon.getCardList(), ourPlayer.getInCards(choice));
+            if ( ourPlayer.getInCardsList(choice).getSuit() != Suit.Trump)
+                ourPlayer.getInCardsList(choice).setShown(false);
+            moveCardBetweenDecks(ourPlayer.getCardList(), talon.getCardList(), ourPlayer.getInCardsList(choice));
             System.out.println("Taker : " + ourPlayer.cardListToString());
             System.out.println("Talon : " + talon.cardListToString());
         }
@@ -490,7 +501,7 @@ public class GameModel extends Observable {
     //GETTERS - no documentation needed
 
     public List<Card> getInitialDeck() {
-        return initialDeck;
+        return initialDeck.getCardList();
     }
     public PlayerHandler getPlayerHandler() {
         return playerHandler;

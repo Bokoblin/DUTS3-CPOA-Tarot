@@ -13,12 +13,16 @@ limitations under the License.
 
 package tarotCardDistribution.view;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
+import javafx.util.Duration;
 import tarotCardDistribution.controller.*;
 import tarotCardDistribution.model.*;
 import exceptions.ViewCardUpdateExistException;
@@ -39,11 +43,13 @@ public class AppView extends Scene implements Observer{
     private GameModel gameModel;
     private AppController appController;
     private Group root3d;
+    private Group rootGUI;
     private Group talon;
     private Group[] hands = new Group[4];
-    private Group rootGUI;
+    private Group initialDeck;
     private Group background;
-    private HashMap<ViewCard, Group> cardToGroup;
+    private HashMap<CardGroup, Group> cardGroupToGroup;
+    private HashMap<ViewCard, Group> viewCardToGroup;
 
     /**
      * Constructs a view for a specific root node and with a gameModel and a appController
@@ -54,22 +60,30 @@ public class AppView extends Scene implements Observer{
     public AppView(Group root, GameModel gameModel, AppController appController) {
         super(root, 800, 600, true, SceneAntialiasing.BALANCED);
 
+        this.gameModel = gameModel;
+        this.appController = appController;
+        gameModel.addObserver(this);
+
         root3d = new Group();
         rootGUI = new Group();
         background = new Group();
         talon = new Group();
-        cardToGroup = new HashMap<>();
-        this.gameModel = gameModel;
-        this.appController = appController;
+        initialDeck = new Group();
+        viewCardToGroup = new HashMap<>();
+        cardGroupToGroup = new HashMap<>();
         root.getChildren().addAll(root3d, rootGUI);
-        root3d.getChildren().add(background);
-        root3d.getChildren().add(talon);
+        root3d.getChildren().addAll(background, talon, initialDeck);
         for (int i =0; i<4; i++)
         {
             hands[i] = new Group();
             root3d.getChildren().add(hands[i]);
         }
-        gameModel.addObserver(this);
+        for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint : PlayerHandler.PlayersCardinalPoint.values())
+        {
+            cardGroupToGroup.put(gameModel.getPlayerHandler().getPlayer(playersCardinalPoint), hands[playersCardinalPoint.ordinal()]);
+        }
+        cardGroupToGroup.put(gameModel.getTalon(), talon);
+        //cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
 
         this.setOnKeyPressed(keyEvent -> {
             root3d.setRotationAxis(Rotate.Z_AXIS);
@@ -159,7 +173,7 @@ public class AppView extends Scene implements Observer{
         }
         ViewCard viewCard = new ViewCard(cardUpdate.getCard());
         Group group = cardGroupToViewGroup(cardUpdate.getCardGroup());
-        cardToGroup.put(viewCard, group);
+        viewCardToGroup.put(viewCard, group);
         group.getChildren().add(viewCard);
     }
 
@@ -167,7 +181,7 @@ public class AppView extends Scene implements Observer{
      * This method is called by @update if the update type is @TURN_CARD
      * It apply a 180° on the 3D Card with a transition to show its other face
      * @since v0.6
-     *
+     * @version 0.6.3
      * @param   cardUpdate     the cardUpdate object.
      */
     private void turnBackCard(CardUpdate cardUpdate)
@@ -178,7 +192,49 @@ public class AppView extends Scene implements Observer{
         {
             throw new ViewCardUpdateExistException(cardUpdate, true);
         }
-        // Add a transition
+        Timeline timeline = new Timeline();
+        KeyValue initialTranslate = null;
+        KeyValue finalTranslate = null;
+        //If the card belong to a player deck the card will translate to the center of the table before rotating
+        if (cardUpdate.getCardGroup() instanceof Hand)
+        {
+            switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardUpdate.getCardGroup()))
+            {
+                case North:
+                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 220);
+                    break;
+                case West:
+                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 220);
+                    break;
+                case South:
+                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), -220);
+                    break;
+                case East:
+                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), -220);
+                    break;
+            }
+        } else {
+            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
+            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
+        }
+        double initialRotateY = viewCard.getTransformations().getRotateY().getAngle();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(Duration.ZERO, initialTranslate),
+                new KeyFrame(new Duration(500), finalTranslate),
+                new KeyFrame(new Duration(500), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), 0)),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), -100)),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), initialRotateY)),
+                new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), (initialRotateY+180)%360)),
+                new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), -100)),
+                new KeyFrame(new Duration(2000), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), 0)),
+                new KeyFrame(new Duration(2000), finalTranslate),
+                new KeyFrame(new Duration(2500), initialTranslate)
+        );
+        timeline.play();
     }
 
     /**
@@ -197,8 +253,8 @@ public class AppView extends Scene implements Observer{
             throw new ViewCardUpdateExistException(cardUpdate, true);
         }
         Group group = cardGroupToViewGroup(cardUpdate.getCardGroup());
-        cardToGroup.get(viewCard).getChildren().remove(viewCard);
-        cardToGroup.replace(viewCard, group);
+        viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
+        viewCardToGroup.replace(viewCard, group);
         group.getChildren().add(viewCard);
     }
 
@@ -230,8 +286,8 @@ public class AppView extends Scene implements Observer{
         {
             throw new ViewCardUpdateExistException(cardUpdate, true);
         }
-        cardToGroup.get(viewCard).getChildren().remove(viewCard);
-        cardToGroup.remove(viewCard);
+        viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
+        viewCardToGroup.remove(viewCard);
     }
 
     /**
@@ -243,7 +299,7 @@ public class AppView extends Scene implements Observer{
      */
     private ViewCard getViewCard(Card card)
     {
-        for (Map.Entry<ViewCard, Group> entry : cardToGroup.entrySet())
+        for (Map.Entry<ViewCard, Group> entry : viewCardToGroup.entrySet())
         {
             if (entry.getKey().getModelCard() == card)
             {
@@ -262,12 +318,9 @@ public class AppView extends Scene implements Observer{
      */
     public Group cardGroupToViewGroup(CardGroup cardGroup)
     {
-        if (cardGroup instanceof Talon)
+        if (cardGroupToGroup.containsKey(cardGroup))
         {
-            return talon;
-        }
-        else if (cardGroup instanceof Hand) {
-            return hands[gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardGroup).ordinal()];
+            return cardGroupToGroup.get(cardGroup);
         } else {
             return root3d;
         }
@@ -294,6 +347,10 @@ public class AppView extends Scene implements Observer{
     public Group getTalon()
     {
         return talon;
+    }
+    public Group getInitialDeck()
+    {
+        return initialDeck;
     }
     public ViewCamera getViewCamera()
     {

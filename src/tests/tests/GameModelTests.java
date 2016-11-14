@@ -168,7 +168,7 @@ public class GameModelTests {
 
             //each player has its 18 cards
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
-                assertTrue(player.getCardList().size() == 18) );
+                    assertTrue(player.getCardList().size() == 18) );
 
             //so do the chien
             assertTrue(gameModel.getTalon().getCardList().size() == 6);
