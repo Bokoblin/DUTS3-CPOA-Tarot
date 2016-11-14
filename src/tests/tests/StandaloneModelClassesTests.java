@@ -102,9 +102,9 @@ public class StandaloneModelClassesTests {
         try {
             Hand hand = new Hand();
             for (int i = 1; i <= 18; i++) {
-                hand.addCard(new Card() );
+                hand.add(new Card() );
             }
-            assertTrue(hand.getNbCards() == 18);
+            assertTrue(hand.size() == 18);
         }
         catch (CardNumberException | CardGroupNumberException e) {
             System.err.println(e.getMessage());
@@ -127,7 +127,7 @@ public class StandaloneModelClassesTests {
             assertTrue(Hand.getNbHands() == 0);
             for (int i = 1; i < 4; i++) {
                 Hand hand = new Hand();
-                assertTrue(hand.getNbCards() == 0);
+                assertTrue(hand.size() == 0);
             }
             assertTrue(Hand.getNbHands() == 3);
         } catch (CardGroupNumberException e) {
@@ -138,7 +138,7 @@ public class StandaloneModelClassesTests {
         try {
             assertTrue( !Talon.exists() );
             Talon chien = new Talon();
-            assertTrue(chien.getNbCards() == 0);
+            assertTrue(chien.size() == 0);
             assertTrue( Talon.exists() );
         }
         catch (CardGroupNumberException e) {
@@ -218,7 +218,7 @@ public class StandaloneModelClassesTests {
         try {
             Hand hand = new Hand();
             for (int i = 1; i < 20; i++) {
-                hand.addCard(new Card() );
+                hand.add(new Card() );
             }
             fail("Exception should be fired");
         }

@@ -41,7 +41,6 @@ public class Talon extends CardGroup{
         if (exist)
             throw new CardGroupNumberException("Only one Talon is possible.");
         else {
-            cardList = new ArrayList<>();
             exist = true;
         }
     }

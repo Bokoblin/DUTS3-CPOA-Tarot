@@ -14,6 +14,9 @@ limitations under the License.
 package tarotCardDistribution.model;
 
 import exceptions.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,14 +25,65 @@ import java.util.Objects;
  * It is abstract so it only defines common attributes and methods
  * for {@code Hand} ans {@code Talon} classes
  * @author Arthur
- * @version v0.6
+ * @author Alexandre
+ * @version v0.6.3
  * @since v0.1
  *
  * @see CardGroup
  * @see Card
  */
-public abstract class CardGroup {
-    protected List<Card> cardList;
+public class CardGroup {
+    public class CardsArray extends ArrayList<Card>
+    {
+        /**
+         To ensure that we can't call the defaults add methods with a risk of overflow the cards limit,
+         we override it. These overrated methods will be call if we cast CardsArray into an ArrayList;
+         **/
+        @Override
+        public boolean add(Card card)
+        {
+            boolean success = true;
+            try {
+                CardGroup.this.add(card);
+            } catch (CardNumberException e) {
+                e.printStackTrace();
+                success = false;
+            }
+            return success;
+        }
+
+        @Override
+        public boolean addAll(Collection cards)
+        {
+            boolean success = true;
+            try {
+                CardGroup.this.addAll(new ArrayList<Card>(cards));
+            } catch (CardNumberException e) {
+                System.err.println(e.getMessage());
+                success = false;
+            }
+            return success;
+        }
+
+        @Override
+        public boolean addAll(int index, Collection cards)
+        {
+            boolean success = true;
+            try {
+                CardGroup.this.addAll(new ArrayList<Card>(cards));
+            } catch (CardNumberException e) {
+                System.err.println(e.getMessage());
+                success = false;
+            }
+            return success;
+        }
+
+        private void realAdd(Card card)
+        {
+            super.add(card);
+        }
+    }
+    protected CardsArray cardList;
     protected final int NB_MAX_CARDS;
 
     /**
@@ -39,6 +93,7 @@ public abstract class CardGroup {
      * @throws CardGroupNumberException
      */
     public CardGroup(int NB_MAX_CARDS) throws CardGroupNumberException {
+        cardList = new CardsArray();
         this.NB_MAX_CARDS = NB_MAX_CARDS;
     }
 
@@ -47,12 +102,23 @@ public abstract class CardGroup {
      * @since v0.1
      * @param card the card which is added to card list
      */
-    public void addCard(Card card) throws CardNumberException {
-        if ( cardList.size() >= NB_MAX_CARDS)
-            throw new CardNumberException(
-                    "Card number limit has been reached.", NB_MAX_CARDS);
-        else {
-            cardList.add(card);
+    public void add(Card card) throws CardNumberException {
+        if ( cardList.size() >= NB_MAX_CARDS) {
+            throw new CardNumberException("Card number limit has been reached.", NB_MAX_CARDS);
+        } else {
+            cardList.realAdd(card);
+        }
+    }
+
+    /**
+     * Add cards
+     * @since v0.7
+     * @param cards the cards which are added to card list
+     */
+    public void addAll(List<Card> cards) throws CardNumberException {
+        for (Card card : cards)
+        {
+            add(card);
         }
     }
 
@@ -77,7 +143,7 @@ public abstract class CardGroup {
      * @since v0.6
      * @return a boolean indicating if card has been found
      */
-    public boolean findInCards(String nameToFind) {
+    public boolean findInCardsList(String nameToFind) {
         for (Card c : cardList)
             if (Objects.equals(c.getName(), nameToFind))
                 return true;
@@ -89,7 +155,7 @@ public abstract class CardGroup {
      * @since v0.6
      * @return the card if found
      */
-    public Card getInCards(String nameToFind) {
+    public Card getInCardsList(String nameToFind) {
         for (Card c : cardList)
             if (Objects.equals(c.getName(), nameToFind))
                 return c;
@@ -99,10 +165,10 @@ public abstract class CardGroup {
 
     //GETTERS - no documentation needed
 
-    public int getNbCards() {
+    public int size() {
         return cardList.size();
     }
-    public List<Card> getCardList() {
+    public CardsArray getCardList() {
         return cardList;
     }
 }

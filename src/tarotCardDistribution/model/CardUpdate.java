@@ -7,20 +7,22 @@ import tarotCardDistribution.model.ActionPerformedOnCard;
 import tarotCardDistribution.model.Card;
 import tarotCardDistribution.model.CardGroup;
 
+/**
+ * This class is a container which is passed when calling notifyObservers() method.
+ * It indicate to view what action to perform on a specific card with sometimes a specific cardGroup.
+ * @author Alexandre
+ * @version v0.6.3
+ * @since v0.6
+ */
 public class CardUpdate {
     private CardGroup cardGroup;
     private Card card;
     private ActionPerformedOnCard type;
 
-    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card)
-    {
+    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card) throws Exception {
         if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS)
         {
-            try {
-                throw new Exception("Cannot move a card without specifying the destination group.");
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
+            throw new Exception("Cannot move a card without specifying the destination group.");
         }
         this.card = card;
         this.cardGroup = null;

@@ -1,9 +1,17 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.6.0
+Current version : v0.6.3
 
 =========================================================================
+
+v0.6.3 (14/11/16) :
+- Turned CardGroup into non abstract class and change the defaults add methods
+- Changed type of initialDeck into CardGroup
+- Completed the transition when flipping a card
+
+
+--------------------------------------------------------------------
 
 v0.6.2 (13/11/16) :
 - added card turning system
