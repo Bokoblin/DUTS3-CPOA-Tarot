@@ -46,7 +46,7 @@ public class ViewCard extends RectangleMesh {
     public ViewCard(float width, float height, float depth,
                     float textureFaceWidth, float textureFaceHeight, @NotNull Card modelCard)
     {
-        super(width, height, depth, "file:./res/" + modelCard.getName().toLowerCase()
+        super(width, height, depth, "file:./res/testCarte"
                 + ".jpg", textureFaceWidth, textureFaceHeight);
         this.modelCard = modelCard;
     }
