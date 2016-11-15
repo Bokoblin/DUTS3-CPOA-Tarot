@@ -18,11 +18,14 @@ public class Transformations {
 
     public Transformations(Node object)
     {
-        rotateX = new Rotate(0, Rotate.X_AXIS);
-        rotateY = new Rotate(0, Rotate.Y_AXIS);
-        rotateZ = new Rotate(0, Rotate.Z_AXIS);
+        double pivotX = object.getBoundsInLocal().getWidth()/2;
+        double pivotY = object.getBoundsInLocal().getHeight()/2;
+        double pivotZ = object.getBoundsInLocal().getDepth()/2;
+        rotateX = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.X_AXIS);
+        rotateY = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.Y_AXIS);
+        rotateZ = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.Z_AXIS);
         translate = new Translate(0,0,0);
-        object.getTransforms().addAll(rotateX, rotateY, rotateZ);
+        object.getTransforms().addAll(rotateX, rotateY, rotateZ, translate);
     }
 
 

@@ -4,6 +4,11 @@ Developers   : Alexandre JACQUOT et Arthur JOLIVET
 Current version : v0.6.3
 
 =========================================================================
+v0.6.3 (14/11/16) :
+- Some corrections for the transitions
+
+
+--------------------------------------------------------------------
 
 v0.6.3 (14/11/16) :
 - Turned CardGroup into non abstract class and change the defaults add methods

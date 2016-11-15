@@ -60,7 +60,7 @@ public class GameModelTests {
             throws CardNumberException, CardUniquenessException, CardGroupNumberException {
         try {
             GameModel gameModel = new GameModel();
-            assertTrue(gameModel.getInitialDeck().size() == 78);
+            assertTrue(gameModel.getInitialDeck().getCardList().size() == 78);
             assertTrue(gameModel.getTalon() != null);
             assertTrue(gameModel.getTalon().getCardList().size() == 0);
 
@@ -88,14 +88,14 @@ public class GameModelTests {
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
             cardListToNotBeShuffled.addAll(cardListToBeShuffled);
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
             gameModel.shuffleCards();
             cardListToBeShuffled.clear();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
 
             assertNotEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
@@ -123,14 +123,14 @@ public class GameModelTests {
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
             cardListToNotBeShuffled.addAll(cardListToBeShuffled);
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
             gameModel.cutCards();
             cardListToBeShuffled.clear();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
 
             assertNotEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
@@ -157,14 +157,14 @@ public class GameModelTests {
             gameModel = new GameModel();
 
             //Card repartition before dealing
-            assertTrue( !gameModel.getInitialDeck().isEmpty());
+            assertTrue( !gameModel.getInitialDeck().getCardList().isEmpty());
             assertTrue( gameModel.getTalon().getCardList().isEmpty());
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
                     assertTrue(player.getCardList().isEmpty()) );
 
             gameModel.dealAllCards();
 
-            assertTrue( gameModel.getInitialDeck().isEmpty());
+            assertTrue( gameModel.getInitialDeck().getCardList().isEmpty());
 
             //each player has its 18 cards
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
@@ -196,12 +196,12 @@ public class GameModelTests {
             gameModel = new GameModel();
             gameModel.dealAllCards();
 
-            assertTrue( gameModel.getInitialDeck().isEmpty());
+            assertTrue( gameModel.getInitialDeck().getCardList().isEmpty());
 
             gameModel.gatherAllCards();
 
             //Card repartition after gathering
-            assertTrue( gameModel.getInitialDeck().size() == 78);
+            assertTrue( gameModel.getInitialDeck().getCardList().size() == 78);
             assertTrue( gameModel.getTalon().getCardList().isEmpty());
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
                     assertTrue(player.getCardList().isEmpty()) );
@@ -234,7 +234,7 @@ public class GameModelTests {
             assertTrue( list2.isEmpty());
 
 
-            Card c = gameModel.randomCard(gameModel.getInitialDeck());
+            Card c = gameModel.randomCard(gameModel.getInitialDeck().getCardList());
             list1.add(c);
 
             assertTrue( list1.size() == 1);
@@ -272,17 +272,17 @@ public class GameModelTests {
 
             //Initialize with each card and occurence 0
             for( int i=0; i < 78; i++) {
-                occurenceCard.put( gameModel.getInitialDeck().get(i), 0);
+                occurenceCard.put( gameModel.getInitialDeck().getCardList().get(i), 0);
             }
 
             //Calling randomCard() method a high number of time to check if it is random
             for( int i=0; i < 1_000_000; i++) {
-                Card c = gameModel.randomCard(gameModel.getInitialDeck());
+                Card c = gameModel.randomCard(gameModel.getInitialDeck().getCardList());
                 occurenceCard.replace(c, occurenceCard.get(c), occurenceCard.get(c)+1);
             }
 
             //Checking percent rate
-            double mean = 1_000_000/gameModel.getInitialDeck().size();
+            double mean = 1_000_000/gameModel.getInitialDeck().getCardList().size();
             double delta = mean*0.05; //standard deviation of 5%
 
             for (Map.Entry<Card, Integer> mapEntry : occurenceCard.entrySet()) {

@@ -45,10 +45,10 @@ public class Main extends Application {
         scene.setFill(Color.BLACK);
 
         //shuffling, cut, dealing
-        gameModel.chooseInitialDealer();
+        /*gameModel.chooseInitialDealer();
         gameModel.handleDealing();
         gameModel.handleBids();
-        System.out.println(gameModel.toString());
+        System.out.println(gameModel.toString());*/
 
         //Game playing is not to be done
         primaryStage.show();

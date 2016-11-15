@@ -31,7 +31,6 @@ public class RectangleMesh extends MeshView{
 
 
         TriangleMesh mesh = new TriangleMesh();
-
         mesh.getPoints().addAll(
                 0, 0, 0,        //P0
                 width, 0, 0,      //P1

@@ -100,10 +100,20 @@ public class AppView extends Scene implements Observer{
             }
         });
 
+        this.setOnMouseClicked(event -> {
+            try {
+                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD,gameModel.getInitialDeck().getCardList().get(0)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
         //Create the scene objects
-        //root3d.getChildren().add(new ViewCard(100, 200, 2, "file:./res/testCarte.jpg", 1536, 2663, null));
-        RectangleMesh table = new RectangleMesh(2000, 2000, 182, "file:./res/table.jpg", 1100, 1100);
-        background.getChildren().add(table);
+        /*RectangleMesh table = new RectangleMesh(2000, 2000, 182, "file:./res/table.jpg", 1100, 1100);
+        background.getChildren().add(table);*/
+        ViewCard viewCard =  new ViewCard(100, 200, 2, 1536, 2663, gameModel.getInitialDeck().getCardList().get(0));
+        root3d.getChildren().add(viewCard);
+        viewCardToGroup.put(viewCard, root3d);
         this.setCamera(new ViewCamera(true));
         this.getViewCamera().setTranslateX(1000);
         this.getViewCamera().setTranslateY(2400);
@@ -201,36 +211,44 @@ public class AppView extends Scene implements Observer{
             switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardUpdate.getCardGroup()))
             {
                 case North:
-                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 220);
+                    initialTranslate = new KeyValue(viewCard.translateYProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.translateYProperty(), 220);
                     break;
                 case West:
-                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 220);
+                    initialTranslate = new KeyValue(viewCard.translateXProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.translateXProperty(), 220);
                     break;
                 case South:
-                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), -220);
+                    initialTranslate = new KeyValue(viewCard.translateYProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.translateYProperty(), -220);
                     break;
                 case East:
-                    initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), -220);
+                    initialTranslate = new KeyValue(viewCard.translateXProperty(), 0);
+                    finalTranslate = new KeyValue(viewCard.translateXProperty(), -220);
                     break;
             }
         } else {
             initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
             finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
         }
-        double initialRotateY = viewCard.getTransformations().getRotateY().getAngle();
+        double initialRotateY, finalRotateY;
+        if (viewCard.getTransformations().getRotateY().getAngle() >= 180)
+        {
+            initialRotateY = 180;
+            finalRotateY = 0;
+        } else {
+            initialRotateY = 0;
+            finalRotateY = 180;
+        }
         timeline.getKeyFrames().addAll(
                 new KeyFrame(Duration.ZERO, initialTranslate),
                 new KeyFrame(new Duration(500), finalTranslate),
-                new KeyFrame(new Duration(500), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), 0)),
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), -100)),
+                new KeyFrame(new Duration(500), new KeyValue(viewCard.translateZProperty(), 0)),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), -100)),
                 new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), initialRotateY)),
-                new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), (initialRotateY+180)%360)),
-                new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), -100)),
-                new KeyFrame(new Duration(2000), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), 0)),
+                new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), finalRotateY)),
+                new KeyFrame(new Duration(1500), new KeyValue(viewCard.translateZProperty(), -100)),
+                new KeyFrame(new Duration(2000), new KeyValue(viewCard.translateZProperty(), 0)),
                 new KeyFrame(new Duration(2000), finalTranslate),
                 new KeyFrame(new Duration(2500), initialTranslate)
         );
