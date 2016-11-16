@@ -13,14 +13,14 @@ limitations under the License.
 
 package tarotCardDistribution.view;
 
+import com.sun.glass.ui.View;
+import com.sun.istack.internal.NotNull;
+import com.sun.javafx.geom.Vec3d;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.Point3D;
-import javafx.scene.AmbientLight;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
+import javafx.scene.*;
 import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
@@ -44,11 +44,12 @@ import java.util.*;
  */
 public class AppView extends Scene implements Observer{
     //const
-    private static final double TABLE_SIZE = 2000;
-    private static final double TABLE_DEPTH = 182;
+    private static final float TABLE_SIZE = 2000;
+    private static final float TABLE_DEPTH = 182;
     private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), TABLE_DEPTH);
-    private static final double HAND_MARGIN = 200;
-    private static final double MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN))/18;
+    private static final float HAND_MARGIN_UP = 100;
+    private static final float HAND_MARGIN_LEFT =200;
+    private static final float MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN_LEFT))/18;
 
     private GameModel gameModel;
     private AppController appController;
@@ -74,6 +75,7 @@ public class AppView extends Scene implements Observer{
         this.appController = appController;
         gameModel.addObserver(this);
 
+        //Create the groups
         root3d = new Group();
         rootGUI = new Group();
         background = new Group();
@@ -95,6 +97,7 @@ public class AppView extends Scene implements Observer{
         cardGroupToGroup.put(gameModel.getTalon(), talon);
         cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
 
+        //Define the scene events
         this.setOnKeyPressed(keyEvent -> {
             root3d.setRotationAxis(Rotate.Z_AXIS);
             switch (keyEvent.getCode())
@@ -112,18 +115,19 @@ public class AppView extends Scene implements Observer{
 
         this.setOnMouseClicked(event -> {
             try {
-                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD,gameModel.getInitialDeck().getCardList().get(1)));
+                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, gameModel.getInitialDeck().getCardList().get(1)));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
         //Create the scene objects
-        /*RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH, "file:./res/table.jpg", 1100, 1100);
-        background.getChildren().add(table);*/
-        ViewCard viewCard =  new ViewCard(100, 200, 2, 1536, 2663, gameModel.getInitialDeck().getCardList().get(1));
+        RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH, "file:./res/table.jpg", 1100, 1100);
+        background.getChildren().add(table);
+        ViewCard viewCard =  new ViewCard(gameModel.getInitialDeck().getCardList().get(1));
         hands[0].getChildren().add(viewCard);
         viewCardToGroup.put(viewCard, hands[0]);
+        viewCard.setPosition(getCardDefaultPosition(viewCard));
         this.setCamera(new ViewCamera(true));
         this.getViewCamera().setTranslateX(1000);
         this.getViewCamera().setTranslateY(2400);
@@ -131,7 +135,13 @@ public class AppView extends Scene implements Observer{
 
         //Lets define the camera
         getViewCamera().getTransformations().getRotateX().setAngle(20);
-        root3d.getChildren().add(new AmbientLight(Color.WHITE));
+
+        //And finally the light
+        PointLight pointLight = new PointLight(Color.WHITE);
+        pointLight.setTranslateX(TABLE_SIZE/2);
+        pointLight.setTranslateY(TABLE_SIZE/2);
+        pointLight.setTranslateZ(-20000);
+        root3d.getChildren().add(pointLight);
     }
 
     /**
@@ -192,6 +202,7 @@ public class AppView extends Scene implements Observer{
             throw new ViewCardUpdateExistException(cardUpdate, false);
         }
         ViewCard viewCard = new ViewCard(cardUpdate.getCard());
+        viewCard.setPosition(getCardDefaultPosition(viewCard));
         Group group = cardGroupToViewGroup(cardUpdate.getCardGroup());
         viewCardToGroup.put(viewCard, group);
         group.getChildren().add(viewCard);
@@ -215,6 +226,7 @@ public class AppView extends Scene implements Observer{
         Timeline timeline = new Timeline();
         KeyValue initialTranslate = null;
         KeyValue finalTranslate = null;
+        Point3D initialPosition = getCardDefaultPosition(viewCard);
         //If the card belong to a player deck the card will translate to the center of the table before rotating
         CardGroup cardGroup = viewGroupToCardGroup(viewCardToGroup.get(viewCard));
         if (cardGroup instanceof Hand)
@@ -222,25 +234,25 @@ public class AppView extends Scene implements Observer{
             switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardGroup))
             {
                 case North:
-                    initialTranslate = new KeyValue(viewCard.translateYProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.translateYProperty(), 220);
+                    initialTranslate = new KeyValue(viewCard.translateYProperty(), initialPosition.getY());
+                    finalTranslate = new KeyValue(viewCard.translateYProperty(), initialPosition.getY() + 220);
                     break;
                 case West:
-                    initialTranslate = new KeyValue(viewCard.translateXProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.translateXProperty(), 220);
+                    initialTranslate = new KeyValue(viewCard.translateXProperty(), initialPosition.getX());
+                    finalTranslate = new KeyValue(viewCard.translateXProperty(), initialPosition.getX() + 220);
                     break;
                 case South:
-                    initialTranslate = new KeyValue(viewCard.translateYProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.translateYProperty(), -220);
+                    initialTranslate = new KeyValue(viewCard.translateYProperty(), initialPosition.getY());
+                    finalTranslate = new KeyValue(viewCard.translateYProperty(), initialPosition.getY() -220);
                     break;
                 case East:
-                    initialTranslate = new KeyValue(viewCard.translateXProperty(), 0);
-                    finalTranslate = new KeyValue(viewCard.translateXProperty(), -220);
+                    initialTranslate = new KeyValue(viewCard.translateXProperty(), initialPosition.getX());
+                    finalTranslate = new KeyValue(viewCard.translateXProperty(), initialPosition.getX() -220);
                     break;
             }
         } else {
-            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
-            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0);
+            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), initialPosition.getX());
+            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), initialPosition.getX());
         }
         double initialRotateY, finalRotateY;
         if (viewCard.getTransformations().getRotateY().getAngle() >= 180)
@@ -320,16 +332,103 @@ public class AppView extends Scene implements Observer{
     }
 
     /**
-     * This method return the correct posiion of a card depending on the group
-     * @since v0.4
-     * @version 0.6.4
+     * This method return the correct default position of a card depending on the group
+     * @since v0.6.5
+     * @version 0.6.5
      * @param   viewCard    the viewCard object.
      */
-    public Point3D getCardPosition(ViewCard viewCard)
+    public Point3D getCardDefaultPosition(@NotNull ViewCard viewCard)
     {
+        Point3D point3D = null;
+        Group group = viewCardToGroup.get(viewCard);
+        if (viewCardToGroup.get(viewCard) == hands[0] || viewCardToGroup.get(viewCard) == hands[1] || viewCardToGroup.get(viewCard) == hands[2] || viewCardToGroup.get(viewCard) == hands[3])
+        {
+            switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)viewGroupToCardGroup(group)))
+            {
+                case North:
+                    point3D = new Point3D(HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, HAND_MARGIN_UP, 0);
+                    break;
+                case West:
+                    point3D = new Point3D(HAND_MARGIN_UP, HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, 0);
+                    break;
+                case South:
+                    point3D = new Point3D(HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, TABLE_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(), 0);
+                    break;
+                case East:
+                    point3D = new Point3D(TABLE_SIZE - HAND_MARGIN_UP - ViewCard.getCardHeight(), HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, 0);
+                    break;
+            }
+        } else if (viewCardToGroup.get(viewCard) == talon)
+        {
 
+        } else if (viewCardToGroup.get(viewCard) == initialDeck)
+        {
+
+        } else if (viewCardToGroup.get(viewCard) == root3d)
+        {
+
+        } else {
+
+        }
+        return point3D;
     }
 
+    /**
+     * This method return the correct default rotation of a card depending on the group
+     * @since v0.6.5
+     * @version 0.6.5
+     * @param   viewCard    the viewCard object.
+     */
+    public Vec3d getCardDefaultRotation(@NotNull ViewCard viewCard)
+    {
+        Vec3d vec3d = new Vec3d(0, 0, 0);
+        if (viewCardToGroup.get(viewCard) == hands[0] || viewCardToGroup.get(viewCard) == hands[1] || viewCardToGroup.get(viewCard) == hands[2] || viewCardToGroup.get(viewCard) == hands[3])
+        {
+            switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)viewGroupToCardGroup(viewCardToGroup.get(viewCard))))
+            {
+                case North:
+
+                    break;
+                case West:
+                    break;
+                case South:
+                    break;
+                case East:
+                    break;
+            }
+        } else if (viewCardToGroup.get(viewCard) == talon)
+        {
+
+        } else if (viewCardToGroup.get(viewCard) == initialDeck)
+        {
+
+        } else if (viewCardToGroup.get(viewCard) == root3d)
+        {
+
+        } else {
+
+        }
+        return vec3d;
+    }
+
+    /**
+     * This return the number of viewCard node in a Group
+     * @since v0.6.5
+     * @version 0.6.5
+     * @param   group    the Group object.
+     */
+    public int getNbViewCard(Group group)
+    {
+        int nb = 0;
+        for (Node node : group.getChildren())
+        {
+            if (node instanceof ViewCard)
+            {
+                nb++;
+            }
+        }
+        return nb;
+    }
 
     /**
      * This method return the associated ViewCard of the actual scene of a Card model object
@@ -355,7 +454,7 @@ public class AppView extends Scene implements Observer{
      * Return the @root3d group if no specific group exist
      * @since v0.6
      *
-     * @param   cardGroup     the cardUpdate object.
+     * @param   cardGroup     the cardGroup object.
      */
     public Group cardGroupToViewGroup(CardGroup cardGroup)
     {
@@ -367,6 +466,13 @@ public class AppView extends Scene implements Observer{
         }
     }
 
+    /**
+     * This method return the associated CardGroup of a JavaFx Group
+     * Return the null if no specific group exist
+     * @since v0.6.5
+     *
+     * @param   viewgroup     the viewGroup object.
+     */
     public CardGroup viewGroupToCardGroup(Group viewgroup)
     {
         for (Map.Entry<CardGroup, Group> entry : cardGroupToGroup.entrySet())
