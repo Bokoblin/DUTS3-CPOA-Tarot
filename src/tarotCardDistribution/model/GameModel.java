@@ -500,13 +500,10 @@ public class GameModel extends Observable {
 
     //GETTERS - no documentation needed
 
-    public CardGroup getInitialDeck() {
-        return initialDeck;
-    }
-    /*public CardGroup getInitialDeck()
+    public CardGroup getInitialDeck()
     {
         return initialDeck;
-    }*/
+    }
     public PlayerHandler getPlayerHandler() {
         return playerHandler;
     }

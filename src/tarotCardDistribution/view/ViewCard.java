@@ -58,4 +58,12 @@ public class ViewCard extends RectangleMesh {
     {
         return modelCard;
     }
+
+    public static float getCardWidth() {
+        return CARD_WIDTH;
+    }
+
+    public static float getCardHeight() {
+        return CARD_HEIGHT;
+    }
 }
