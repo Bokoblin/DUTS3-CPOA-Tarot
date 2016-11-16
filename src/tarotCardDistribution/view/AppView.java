@@ -16,10 +16,12 @@ package tarotCardDistribution.view;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
+import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
@@ -27,6 +29,7 @@ import tarotCardDistribution.controller.*;
 import tarotCardDistribution.model.*;
 import exceptions.ViewCardUpdateExistException;
 
+import java.awt.*;
 import java.util.*;
 
 /**
@@ -40,6 +43,13 @@ import java.util.*;
  * @see Scene
  */
 public class AppView extends Scene implements Observer{
+    //const
+    private static final double TABLE_SIZE = 2000;
+    private static final double TABLE_DEPTH = 182;
+    private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), TABLE_DEPTH);
+    private static final double HAND_MARGIN = 200;
+    private static final double MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN))/18;
+
     private GameModel gameModel;
     private AppController appController;
     private Group root3d;
@@ -83,7 +93,7 @@ public class AppView extends Scene implements Observer{
             cardGroupToGroup.put(gameModel.getPlayerHandler().getPlayer(playersCardinalPoint), hands[playersCardinalPoint.ordinal()]);
         }
         cardGroupToGroup.put(gameModel.getTalon(), talon);
-        //cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
+        cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
 
         this.setOnKeyPressed(keyEvent -> {
             root3d.setRotationAxis(Rotate.Z_AXIS);
@@ -102,18 +112,18 @@ public class AppView extends Scene implements Observer{
 
         this.setOnMouseClicked(event -> {
             try {
-                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD,gameModel.getInitialDeck().getCardList().get(0)));
+                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD,gameModel.getInitialDeck().getCardList().get(1)));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
 
         //Create the scene objects
-        /*RectangleMesh table = new RectangleMesh(2000, 2000, 182, "file:./res/table.jpg", 1100, 1100);
+        /*RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH, "file:./res/table.jpg", 1100, 1100);
         background.getChildren().add(table);*/
-        ViewCard viewCard =  new ViewCard(100, 200, 2, 1536, 2663, gameModel.getInitialDeck().getCardList().get(0));
-        root3d.getChildren().add(viewCard);
-        viewCardToGroup.put(viewCard, root3d);
+        ViewCard viewCard =  new ViewCard(100, 200, 2, 1536, 2663, gameModel.getInitialDeck().getCardList().get(1));
+        hands[0].getChildren().add(viewCard);
+        viewCardToGroup.put(viewCard, hands[0]);
         this.setCamera(new ViewCamera(true));
         this.getViewCamera().setTranslateX(1000);
         this.getViewCamera().setTranslateY(2400);
@@ -206,9 +216,10 @@ public class AppView extends Scene implements Observer{
         KeyValue initialTranslate = null;
         KeyValue finalTranslate = null;
         //If the card belong to a player deck the card will translate to the center of the table before rotating
-        if (cardUpdate.getCardGroup() instanceof Hand)
+        CardGroup cardGroup = viewGroupToCardGroup(viewCardToGroup.get(viewCard));
+        if (cardGroup instanceof Hand)
         {
-            switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardUpdate.getCardGroup()))
+            switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardGroup))
             {
                 case North:
                     initialTranslate = new KeyValue(viewCard.translateYProperty(), 0);
@@ -309,6 +320,18 @@ public class AppView extends Scene implements Observer{
     }
 
     /**
+     * This method return the correct posiion of a card depending on the group
+     * @since v0.4
+     * @version 0.6.4
+     * @param   viewCard    the viewCard object.
+     */
+    public Point3D getCardPosition(ViewCard viewCard)
+    {
+
+    }
+
+
+    /**
      * This method return the associated ViewCard of the actual scene of a Card model object
      * If the ViewCard doesn't exist it return null
      * @since v0.6
@@ -342,6 +365,18 @@ public class AppView extends Scene implements Observer{
         } else {
             return root3d;
         }
+    }
+
+    public CardGroup viewGroupToCardGroup(Group viewgroup)
+    {
+        for (Map.Entry<CardGroup, Group> entry : cardGroupToGroup.entrySet())
+        {
+            if (entry.getValue() == viewgroup)
+            {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     //GETTERS - no documentation needed
