@@ -14,6 +14,7 @@ public class ViewCamera extends PerspectiveCamera {
     public ViewCamera(boolean fixedEyedAtCameraZero)
     {
         super(fixedEyedAtCameraZero);
+        this.setNearClip(0);
         this.setFarClip(100000);
         transformations = new Transformations(this);
     }

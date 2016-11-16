@@ -1,6 +1,7 @@
 package tarotCardDistribution.view;
 
 import com.sun.istack.internal.NotNull;
+import javafx.geometry.Point3D;
 import tarotCardDistribution.model.Card;
 
 /**
@@ -12,8 +13,8 @@ import tarotCardDistribution.model.Card;
  */
 public class ViewCard extends RectangleMesh {
     private Card modelCard;
-    private static final float CARD_HEIGHT = 200;
-    private static final float CARD_WIDTH = CARD_HEIGHT * (55/88);
+    private static final float CARD_HEIGHT = 250;
+    private static final float CARD_WIDTH = CARD_HEIGHT * (float)(55.0/88.0);
     private static final float CARD_DEPTH = 2;
     private static final int CARD_FACE_TEXTURE_WIDTH = 1536;
     private static final int CARD_FACE_TEXTURE_HEIGHT = 2663;
@@ -26,9 +27,7 @@ public class ViewCard extends RectangleMesh {
      */
     public ViewCard(@NotNull Card modelCard)
     {
-        super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH,
-                "file:./res/" + modelCard.getName().toLowerCase() + ".jpg",
-                CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
+        super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/testCarte" + ".jpg", CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
         this.modelCard = modelCard;
     }
 
@@ -44,15 +43,28 @@ public class ViewCard extends RectangleMesh {
      * @param modelCard the model card related to this view card
      */
     public ViewCard(float width, float height, float depth,
-                    float textureFaceWidth, float textureFaceHeight, @NotNull Card modelCard)
+                    float textureFaceWidth, float textureFaceHeight, @NotNull Card modelCard, float x, float y, float z)
     {
-        super(width, height, depth, "file:./res/testCarte"
-                + ".jpg", textureFaceWidth, textureFaceHeight);
+        super(width, height, depth, "file:./res/testCarte" + ".jpg", textureFaceWidth, textureFaceHeight);
         this.modelCard = modelCard;
+        this.setTranslateX(x);
+        this.setTranslateY(y);
+        this.setTranslateZ(z);
     }
 
-
     //GETTERS - no documentation needed
+
+    public void setPosition(Point3D point3D)
+    {
+        this.setTranslateX(point3D.getX());
+        this.setTranslateY(point3D.getY());
+        this.setTranslateZ(point3D.getZ());
+    }
+
+    public Point3D getPosition()
+    {
+        return new Point3D(getTranslateX(), getTranslateY(), getTranslateZ());
+    }
 
     public Card getModelCard()
     {
