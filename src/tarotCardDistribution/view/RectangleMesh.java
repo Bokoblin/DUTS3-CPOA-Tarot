@@ -11,12 +11,13 @@ package tarotCardDistribution.view;
  * @see javafx.scene.Scene
  */
 
+import javafx.geometry.Point3D;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
 public class RectangleMesh extends MeshView{
-    private Transformations transformations;
+    protected Transformations transformations;
 
     RectangleMesh(float width, float height, float depth, String texturePath, float textureFaceWidth, float textureFaceHeight)
     {
@@ -81,6 +82,18 @@ public class RectangleMesh extends MeshView{
         this.setMaterial(material);
 
         transformations = new Transformations(this);
+    }
+
+    public void setPosition(Point3D point3D)
+    {
+        this.setTranslateX(point3D.getX());
+        this.setTranslateY(point3D.getY());
+        this.setTranslateZ(point3D.getZ());
+    }
+
+    public Point3D getPosition()
+    {
+        return new Point3D(getTranslateX(), getTranslateY(), getTranslateZ());
     }
 
     public Transformations getTransformations()

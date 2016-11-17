@@ -34,6 +34,9 @@ public class GameViewTests extends Application
     @BeforeClass
     public static void initApplication()
     {
+        Card.resetClassForTesting();
+        Hand.resetClassForTesting();
+        Talon.resetClassForTesting();
         Thread thread = new Thread("JavaFX Application Thread") {
             @Override
             public void run() {
