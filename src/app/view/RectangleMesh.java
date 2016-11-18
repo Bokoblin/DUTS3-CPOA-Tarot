@@ -1,4 +1,4 @@
-package tarotCardDistribution.view;
+package app.view;
 
 /**
  * The RectangleMesh class is a pre-defined rectangle mesh extended from MeshView

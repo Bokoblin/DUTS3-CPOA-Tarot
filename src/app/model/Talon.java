@@ -11,11 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.model;
+package app.model;
 
 import exceptions.*;
-
-import java.util.ArrayList;
 
 /**
  * The {@code Talon} class extends {@code CardGroup},

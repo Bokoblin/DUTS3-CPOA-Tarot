@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.view;
+package app.view;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -23,8 +23,8 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
-import tarotCardDistribution.controller.*;
-import tarotCardDistribution.model.*;
+import app.controller.*;
+import app.model.*;
 import exceptions.ViewCardUpdateExistException;
 
 import java.util.*;
@@ -102,16 +102,17 @@ public class AppView extends Scene implements Observer{
 
         this.setOnMouseClicked(event -> {
             try {
-                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD,gameModel.getInitialDeck().getCardList().get(0)));
+                //TODO : To fix
+                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, gameModel.getInitialDeck().get(1)));
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         });
 
         //Create the scene objects
         /*RectangleMesh table = new RectangleMesh(2000, 2000, 182, "file:./res/table.jpg", 1100, 1100);
         background.getChildren().add(table);*/
-        ViewCard viewCard =  new ViewCard(100, 200, 2, 1536, 2663, gameModel.getInitialDeck().getCardList().get(0));
+        ViewCard viewCard =  new ViewCard(100, 200, 2, 1536, 2663, gameModel.getInitialDeck().get(0));
         root3d.getChildren().add(viewCard);
         viewCardToGroup.put(viewCard, root3d);
         this.setCamera(new ViewCamera(true));
@@ -191,7 +192,6 @@ public class AppView extends Scene implements Observer{
      * This method is called by @update if the update type is @TURN_CARD
      * It apply a 180° on the 3D Card with a transition to show its other face
      * @since v0.6
-     * @version 0.6.3
      * @param   cardUpdate     the cardUpdate object.
      */
     private void turnBackCard(CardUpdate cardUpdate)

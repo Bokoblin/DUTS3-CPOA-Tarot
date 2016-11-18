@@ -13,7 +13,7 @@ limitations under the License.
 
 package tests;
 
-import tarotCardDistribution.model.*;
+import app.model.*;
 import exceptions.*;
 
 import org.junit.Before;
@@ -60,9 +60,9 @@ public class GameModelTests {
             throws CardNumberException, CardUniquenessException, CardGroupNumberException {
         try {
             GameModel gameModel = new GameModel();
-            assertTrue(gameModel.getInitialDeck().getCardList().size() == 78);
+            assertTrue(gameModel.getInitialDeck().size() == 78);
             assertTrue(gameModel.getTalon() != null);
-            assertTrue(gameModel.getTalon().getCardList().size() == 0);
+            assertTrue(gameModel.getTalon().size() == 0);
 
         } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
             System.err.println(e.getMessage());
@@ -88,14 +88,14 @@ public class GameModelTests {
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
             cardListToNotBeShuffled.addAll(cardListToBeShuffled);
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
             gameModel.shuffleCards();
             cardListToBeShuffled.clear();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
 
             assertNotEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
@@ -123,14 +123,14 @@ public class GameModelTests {
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
             cardListToNotBeShuffled.addAll(cardListToBeShuffled);
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
             gameModel.cutCards();
             cardListToBeShuffled.clear();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck().getCardList());
+            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
 
             assertNotEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
@@ -157,21 +157,21 @@ public class GameModelTests {
             gameModel = new GameModel();
 
             //Card repartition before dealing
-            assertTrue( !gameModel.getInitialDeck().getCardList().isEmpty());
-            assertTrue( gameModel.getTalon().getCardList().isEmpty());
+            assertTrue( !gameModel.getInitialDeck().isEmpty());
+            assertTrue( gameModel.getTalon().isEmpty());
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
-                    assertTrue(player.getCardList().isEmpty()) );
+                    assertTrue(player.isEmpty()) );
 
             gameModel.dealAllCards();
 
-            assertTrue( gameModel.getInitialDeck().getCardList().isEmpty());
+            assertTrue( gameModel.getInitialDeck().isEmpty());
 
             //each player has its 18 cards
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
-                    assertTrue(player.getCardList().size() == 18) );
+                    assertTrue(player.size() == 18) );
 
             //so do the chien
-            assertTrue(gameModel.getTalon().getCardList().size() == 6);
+            assertTrue(gameModel.getTalon().size() == 6);
 
         } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
             System.err.println(e.getMessage());
@@ -196,15 +196,15 @@ public class GameModelTests {
             gameModel = new GameModel();
             gameModel.dealAllCards();
 
-            assertTrue( gameModel.getInitialDeck().getCardList().isEmpty());
+            assertTrue( gameModel.getInitialDeck().isEmpty());
 
             gameModel.gatherAllCards();
 
             //Card repartition after gathering
-            assertTrue( gameModel.getInitialDeck().getCardList().size() == 78);
-            assertTrue( gameModel.getTalon().getCardList().isEmpty());
+            assertTrue( gameModel.getInitialDeck().size() == 78);
+            assertTrue( gameModel.getTalon().isEmpty());
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
-                    assertTrue(player.getCardList().isEmpty()) );
+                    assertTrue(player.isEmpty()) );
 
         } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
             System.err.println(e.getMessage());
@@ -234,7 +234,7 @@ public class GameModelTests {
             assertTrue( list2.isEmpty());
 
 
-            Card c = gameModel.randomCard(gameModel.getInitialDeck().getCardList());
+            Card c = gameModel.randomCard(gameModel.getInitialDeck());
             list1.add(c);
 
             assertTrue( list1.size() == 1);
@@ -272,17 +272,17 @@ public class GameModelTests {
 
             //Initialize with each card and occurence 0
             for( int i=0; i < 78; i++) {
-                occurenceCard.put( gameModel.getInitialDeck().getCardList().get(i), 0);
+                occurenceCard.put( gameModel.getInitialDeck().get(i), 0);
             }
 
             //Calling randomCard() method a high number of time to check if it is random
             for( int i=0; i < 1_000_000; i++) {
-                Card c = gameModel.randomCard(gameModel.getInitialDeck().getCardList());
+                Card c = gameModel.randomCard(gameModel.getInitialDeck());
                 occurenceCard.replace(c, occurenceCard.get(c), occurenceCard.get(c)+1);
             }
 
             //Checking percent rate
-            double mean = 1_000_000/gameModel.getInitialDeck().getCardList().size();
+            double mean = 1_000_000/gameModel.getInitialDeck().size();
             double delta = mean*0.05; //standard deviation of 5%
 
             for (Map.Entry<Card, Integer> mapEntry : occurenceCard.entrySet()) {
