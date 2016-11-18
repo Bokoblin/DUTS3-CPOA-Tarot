@@ -1,4 +1,4 @@
-package tarotCardDistribution.view;
+package app.view;
 
 import javafx.scene.PerspectiveCamera;
 

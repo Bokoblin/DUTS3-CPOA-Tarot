@@ -13,7 +13,7 @@ limitations under the License.
 
 package tests;
 
-import tarotCardDistribution.model.*;
+import app.model.*;
 import org.junit.*;
 import static org.junit.Assert.*;
 import exceptions.*;
@@ -218,7 +218,8 @@ public class StandaloneModelClassesTests {
         try {
             Hand hand = new Hand();
             for (int i = 1; i < 20; i++) {
-                hand.add(new Card() );
+                if (!hand.add(new Card() ))
+                    throw new CardNumberException("Card number limit has been reached.", hand.getNbMaxCards());
             }
             fail("Exception should be fired");
         }

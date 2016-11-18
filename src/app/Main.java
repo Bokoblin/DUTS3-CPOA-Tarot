@@ -11,15 +11,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution;
+package app;
 
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import tarotCardDistribution.controller.AppController;
-import tarotCardDistribution.model.GameModel;
-import tarotCardDistribution.view.AppView;
+import app.controller.AppController;
+import app.model.GameModel;
+import app.view.AppView;
 
 /**
  * The {@code Main} class inits MVC architecture and launch the architecture
@@ -45,13 +45,19 @@ public class Main extends Application {
         scene.setFill(Color.BLACK);
 
         //shuffling, cut, dealing
-        /*gameModel.chooseInitialDealer();
+        /*
+        gameModel.chooseInitialDealer();
         gameModel.handleDealing();
         gameModel.handleBids();
-        System.out.println(gameModel.toString());*/
+        System.out.println(gameModel.toString());
+        */
+        System.err.println("Model does not work currently since scanner removal\n" +
+                "Please see AppConsole package for a working model");
 
         //Game playing is not to be done
         primaryStage.show();
+        System.err.println("View has to be fixed by Alex");
+       // System.exit(0);
     }
 
     public static void main(String[] args) {

@@ -1,7 +1,7 @@
-package tarotCardDistribution.view;
+package app.view;
 
 import com.sun.istack.internal.NotNull;
-import tarotCardDistribution.model.Card;
+import app.model.Card;
 
 /**
  * The {@code ViewCard} class is a JavaFX extended node
