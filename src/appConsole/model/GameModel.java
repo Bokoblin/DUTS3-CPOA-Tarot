@@ -11,18 +11,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.model;
+package appConsole.model;
 
 import java.util.*;
+
+import app.model.*;
 import exceptions.*;
 
-import static tarotCardDistribution.model.PlayerHandler.PlayersCardinalPoint.South;
+import static app.model.PlayerHandler.PlayersCardinalPoint.South;
 
 /**
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.6.3
+ * @version v0.7
  * @since v0.2
  *
  * @see Observable
@@ -58,26 +60,21 @@ public class GameModel extends Observable {
         for (Suit s : Suit.values()) {
             if ( s != Suit.Trump) {
                 for (Rank r : Rank.values()) {
-                    try {
-                        initialDeck.add(new Card(s,r));
-                    } catch (CardUniquenessException | CardNumberException e) {
-                        System.err.println(e.getMessage());
-                    }
+                    if(!initialDeck.add(new Card(s,r)))
+                        throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
                 }
             }
             else {
                 for (int i = 1; i <= Card.getNbMaxTrumps(); i++) {
-                    try {
-                        initialDeck.add(new Card(Suit.Trump,i));
-                    } catch (CardUniquenessException | CardNumberException e) {
-                        System.err.println(e.getMessage());
-                    }
+                    if(!initialDeck.add(new Card(Suit.Trump,i)))
+                        throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
                 }
             }
         }
         try {
-            initialDeck.add(new Card("Excuse")); //create the Excuse
-        } catch (Exception e) {
+            if(!initialDeck.add(new Card("Excuse")))
+                throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
+        } catch (CardNameException e) {
             System.err.println(e.getMessage());
         }
 
@@ -96,7 +93,7 @@ public class GameModel extends Observable {
      * becomes the dealer
      * @since v0.5
      */
-    public void chooseInitialDealer() {
+    void chooseInitialDealer() {
         System.out.println("=== DEALER CHOOSING ===");
         //list of picked cards
         Map<Card, Hand> pickedCardsMap = new HashMap<>();
@@ -110,31 +107,36 @@ public class GameModel extends Observable {
                 System.out.println("Choose your card by entering its number between 0 and 77");
                 Scanner sc = new Scanner(System.in);
                 boolean choiceValid = false;
-                int numCard;
+                int numCard = 0;
                 do {
-                    numCard = sc.nextInt();
-                    if (Objects.equals(initialDeck.getCardList().get(numCard).getName(), "Excuse")) {
-                        initialDeck.getCardList().remove(initialDeck.getCardList().get(numCard));
-                        pickedCardsMap.put( initialDeck.getCardList().get(numCard), player);
-                    }
-                    else if ( numCard >= 0 && numCard < 78 && Objects.nonNull(initialDeck.getCardList().get(numCard)) ) {
-                        choiceValid = true;
-                        System.out.println("Your choice have been saved.");
-                    }
-                    else
+                    try {
+                        numCard = sc.nextInt();
+                        if ( numCard >= 0 && numCard < 78 && Objects.equals(initialDeck.get(numCard).getName(), "Excuse")) {
+                            initialDeck.remove(initialDeck.get(numCard));
+                            pickedCardsMap.put( initialDeck.get(numCard), player);
+                        }
+                        else if ( numCard >= 0 && numCard < 78 && Objects.nonNull(initialDeck.get(numCard)) ) {
+                            choiceValid = true;
+                            System.out.println("Your choice have been saved.");
+                        }
+                        else
+                            System.out.println("Your choice isn't valid, try again");
+                    } catch ( Exception e) {
                         System.out.println("Your choice isn't valid, try again");
+                        sc.nextLine();
+                    }
                 }
                 while (!choiceValid);
-                c = initialDeck.getCardList().get(numCard);
+                c = initialDeck.get(numCard);
             }
             else {
                 do {
-                    c = randomCard(initialDeck.getCardList());
+                    c = randomCard(initialDeck);
                 }
                 while (Objects.equals(c.getName(), "Excuse"));
             }
 
-            initialDeck.getCardList().remove(c);
+            initialDeck.remove(c);
             pickedCardsMap.put(c, player);
         });
 
@@ -152,11 +154,12 @@ public class GameModel extends Observable {
 
         pickedCardsMap.forEach( (card, player) -> card.setShown(false));
         pickedCardsMap.forEach((card, player) -> {
-            try {
-                initialDeck.add(card);
-            } catch (CardNumberException e) {
-                System.err.println(e.getMessage());
-            }
+            if(!initialDeck.add(card))
+                try {
+                    throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
+                } catch (CardNumberException e) {
+                    System.err.println(e.getMessage());
+                }
         });
         pickedCardsMap.clear();
     }
@@ -168,7 +171,7 @@ public class GameModel extends Observable {
      * and card deck is again shuffled, cut and dealt
      * @since v0.5
      */
-    public void handleDealing() {
+    void handleDealing() {
         //shuffles, cuts, deals (is repeated following result deck for each player)
         boolean hasPetitSec = false;
         do {
@@ -180,7 +183,7 @@ public class GameModel extends Observable {
             dealAllCards();
 
             //"Petit Sec" checking
-            ourPlayer.getCardList().forEach(c -> c.setShown(true));
+            ourPlayer.forEach(c -> c.setShown(true));
             System.out.println("Petit Sec checking...");
             for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
                     : playerHandler.getPlayersMap().entrySet()) {
@@ -202,22 +205,22 @@ public class GameModel extends Observable {
      * @see Collections
      * @see Random
      */
-    public void shuffleCards() {
+    private void shuffleCards() {
         long seed = System.nanoTime();
-        Collections.shuffle(initialDeck.getCardList(), new Random(seed));
+        Collections.shuffle(initialDeck, new Random(seed));
     }
 
     /**
      * Cuts cards
      * @since v0.5
      */
-    public void cutCards() {
+    private void cutCards() {
         //a cut list must contain more than 3 cards
         int splitIt;
         boolean isValidIterator = false;
 
         do {
-            splitIt = initialDeck.getCardList().indexOf(randomCard(initialDeck.getCardList()));
+            splitIt = initialDeck.indexOf(randomCard(initialDeck));
             if ( splitIt < 74 && splitIt > 3)
                 isValidIterator = true;
         }
@@ -227,43 +230,39 @@ public class GameModel extends Observable {
         List<Card> cut2 = new ArrayList<>();
 
         for (int i=0; i <= splitIt; i++)
-            cut1.add(initialDeck.getCardList().get(i));
+            cut1.add(initialDeck.get(i));
         for (int i = splitIt+1; i < initialDeck.size(); i++)
-            cut2.add(initialDeck.getCardList().get(i));
+            cut2.add(initialDeck.get(i));
 
-        initialDeck.getCardList().clear();
-        try {
-            initialDeck.addAll(cut2);
-            initialDeck.addAll(cut1);
-        } catch (CardNumberException e) {
-            System.err.println(e.getMessage());
-        }
+        initialDeck.clear();
+        initialDeck.addAll(cut2);
+        initialDeck.addAll(cut1);
     }
 
     /**
      * Deals card
      * @since v0.5
      */
-    public void dealAllCards() {
+    private void dealAllCards() {
         int cptNbCardGivenToSameHand = 0;
-        while( !initialDeck.getCardList().isEmpty()) {
+        while( !initialDeck.isEmpty()) {
             boolean chienReceiveCard = false;
-            if( talon.getCardList().size() < 6
+            if( talon.size() < 6
                     && initialDeck.size() < 78) { //Don't give first card to chien
                 if ( initialDeck.size() == 2 ) { //Don't give last card to chien
-                    moveCardBetweenDecks(initialDeck.getCardList(), talon.getCardList(), initialDeck.getCardList().get(0));
+                    moveCardBetweenDecks(initialDeck, talon, initialDeck.get(0));
                     chienReceiveCard = true;
                 }
                 else {
                     chienReceiveCard = ( (new Random().nextInt(2) != 0)); //simulate a "heads or tails"
                     if (chienReceiveCard) {
-                        moveCardBetweenDecks(initialDeck.getCardList(), talon.getCardList(), initialDeck.getCardList().get(0));
+                        moveCardBetweenDecks(initialDeck, talon, initialDeck.get(0));
                     }
                 }
             }
             if (!chienReceiveCard) {
-                moveCardBetweenDecks(initialDeck.getCardList(), playerHandler.getCurrentPlayer().getCardList(),
-                        initialDeck.getCardList().get(0));
+                moveCardBetweenDecks(initialDeck, playerHandler.getCurrentPlayer(),
+                        initialDeck.get(0));
                 cptNbCardGivenToSameHand++;
             }
             if (cptNbCardGivenToSameHand == 3) {
@@ -278,23 +277,23 @@ public class GameModel extends Observable {
      * to the initial deck
      * @since v0.6
      */
-    public void gatherAllCards() {
+    private void gatherAllCards() {
         playerHandler.getPlayersMap().forEach((cardinal,player)-> {
-            while ( !player.getCardList().isEmpty() ) {
-                moveCardBetweenDecks(player.getCardList(), initialDeck.getCardList(), player.getCardList().get(0));
+            while ( !player.isEmpty() ) {
+                moveCardBetweenDecks(player, initialDeck, player.get(0));
             }
         });
-        while ( !talon.getCardList().isEmpty() ) {
-            moveCardBetweenDecks(talon.getCardList(), initialDeck.getCardList(), talon.getCardList().get(0));
+        while ( !talon.isEmpty() ) {
+            moveCardBetweenDecks(talon, initialDeck, talon.get(0));
         }
-        initialDeck.getCardList().forEach(c -> c.setShown(false));
+        initialDeck.forEach(c -> c.setShown(false));
     }
 
     /**
      * Handle the Bids
      * @since v0.6
      */
-    public void handleBids() {
+    void handleBids() {
         chooseBids();
         while (ourPlayer.getBidChosen() == Bids.Pass) {
             System.out.println("You've chosen to pass. Re-dealing...");
@@ -319,7 +318,7 @@ public class GameModel extends Observable {
         playerHandler.getPlayersMap().forEach((cardinal,player)-> {
             if ( player == ourPlayer) {
                 System.out.println("Here are your cards :");
-                player.getCardList().forEach(c -> c.setShown(true));
+                player.forEach(c -> c.setShown(true));
                 System.out.println(ourPlayer.cardListToString());
                 System.out.println("Choose your Bids among those one :");
                 System.out.println("1. Small");
@@ -329,14 +328,18 @@ public class GameModel extends Observable {
                 System.out.println("5. Pass");
                 Scanner sc = new Scanner(System.in);
                 boolean choiceValid = false;
-                int numBids;
+                int numBids = 5;
                 do {
-                    numBids = sc.nextInt();
-                    if ( numBids <= 5 && numBids > 0 ) {
-                        choiceValid = true;
-                    }
-                    else
+                    try {
+                        numBids = sc.nextInt();
+                        if (numBids <= 5 && numBids > 0) {
+                            choiceValid = true;
+                        } else
+                            System.out.println("Your choice isn't valid, try again");
+                    } catch (Exception e) {
                         System.out.println("Your choice isn't valid, try again");
+                        sc.nextLine();
+                    }
                 }
                 while (!choiceValid);
 
@@ -373,12 +376,12 @@ public class GameModel extends Observable {
      */
     private void constituteEcart() {
         System.out.println("Showing the talon to all...");
-        talon.getCardList().forEach(c -> c.setShown(true));
+        talon.forEach(c -> c.setShown(true));
         System.out.println(talon.cardListToString());
         System.out.println("Placing talon's cards into taker's deck...");
 
-        while ( !talon.getCardList().isEmpty() ) {
-            moveCardBetweenDecks(talon.getCardList(), ourPlayer.getCardList(), talon.getCardList().get(0));
+        while ( !talon.isEmpty() ) {
+            moveCardBetweenDecks(talon, ourPlayer, talon.get(0));
         }
 
         System.out.println("Now, constitute your ecart by putting 6 of your deck's cards in the talon :");
@@ -412,7 +415,7 @@ public class GameModel extends Observable {
             while (!choiceValid);
             if ( ourPlayer.getInCardsList(choice).getSuit() != Suit.Trump)
                 ourPlayer.getInCardsList(choice).setShown(false);
-            moveCardBetweenDecks(ourPlayer.getCardList(), talon.getCardList(), ourPlayer.getInCardsList(choice));
+            moveCardBetweenDecks(ourPlayer, talon, ourPlayer.getInCardsList(choice));
             System.out.println("Taker : " + ourPlayer.cardListToString());
             System.out.println("Talon : " + talon.cardListToString());
         }
@@ -429,13 +432,13 @@ public class GameModel extends Observable {
      */
     private boolean checkTrumpPossibility() {
         int cpt = 0;
-        for ( Card c : ourPlayer.getCardList() ) {
+        for ( Card c : ourPlayer ) {
             if ( c.getSuit() == Suit.Trump || Objects.equals(c.getName(), "Excuse")
                     || c.getRank() == Rank.King) {
                 cpt++;
             }
         }
-        return cpt == ourPlayer.getCardList().size();
+        return cpt == ourPlayer.size();
     }
 
     /**
@@ -446,7 +449,7 @@ public class GameModel extends Observable {
      * @param target the target deck
      * @param c the card to move
      */
-    public void moveCardBetweenDecks(List<Card> source, List<Card> target, Card c) {
+    private void moveCardBetweenDecks(List<Card> source, List<Card> target, Card c) {
         source.remove(c);
         target.add(c);
     }
@@ -458,19 +461,9 @@ public class GameModel extends Observable {
      *
      * @return a random card
      */
-    public Card randomCard(List<Card> list) {
+    private Card randomCard(List<Card> list) {
         int index = new Random().nextInt(list.size());
         return list.get(index);
-    }
-
-    /**
-     * Notify observers with the type of card update
-     * @since v0.6
-     */
-    public void updateCard(CardUpdate cardUpdate)
-    {
-        setChanged();
-        notifyObservers(cardUpdate);
     }
 
     /**
@@ -485,29 +478,16 @@ public class GameModel extends Observable {
         for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
                 : playerHandler.getPlayersMap().entrySet()) {
             result += "Player " + playerHandler.getPlayerName(player.getValue()) + " : ";
-            for ( Card c : player.getValue().getCardList()) {
+            for ( Card c : player.getValue()) {
                 result += c.getName() + "; ";
             }
             result +=  "\n";
         }
         result += "Talon : ";
-        for ( Card c : talon.getCardList()) {
+        for ( Card c : talon) {
             result += c.getName() + "; ";
         }
 
         return result;
-    }
-
-    //GETTERS - no documentation needed
-
-    public CardGroup getInitialDeck()
-    {
-        return initialDeck;
-    }
-    public PlayerHandler getPlayerHandler() {
-        return playerHandler;
-    }
-    public Talon getTalon() {
-        return talon;
     }
 }

@@ -11,10 +11,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.model;
+package app.model;
 
 import exceptions.*;
-import java.util.ArrayList;
+
 import java.util.Objects;
 
 /**
@@ -55,11 +55,11 @@ public class Hand extends CardGroup{
      * (First of Trump as only Trump and no excuse)
      * @since v0.5
      */
-    boolean checkHasPetitSec() {
+    public boolean checkHasPetitSec() {
         int nbTrumps = 0;
         boolean hasLePetit = false;
         boolean hasExcuse = false;
-        for (Card c : cardList) {
+        for (Card c : this) {
             if (c.getSuit() == Suit.Trump )
                 nbTrumps++;
             if ( c.getSuit() == null)

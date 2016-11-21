@@ -1,11 +1,6 @@
-package tarotCardDistribution.model;
-
-//TODO : Documentation
+package app.model;
 
 import com.sun.istack.internal.NotNull;
-import tarotCardDistribution.model.ActionPerformedOnCard;
-import tarotCardDistribution.model.Card;
-import tarotCardDistribution.model.CardGroup;
 
 /**
  * This class is a container which is passed when calling notifyObservers() method.
@@ -19,6 +14,7 @@ public class CardUpdate {
     private Card card;
     private ActionPerformedOnCard type;
 
+    //TODO : Documentation
     public CardUpdate(ActionPerformedOnCard type, @NotNull Card card) throws Exception {
         if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS)
         {
@@ -29,6 +25,7 @@ public class CardUpdate {
         this.type = type;
     }
 
+    //TODO : Documentation
     public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, @NotNull CardGroup cardGroup)
     {
         this.cardGroup = cardGroup;

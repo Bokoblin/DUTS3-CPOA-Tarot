@@ -1,4 +1,4 @@
-package tarotCardDistribution.view;
+package app.view;
 
 import javafx.scene.PerspectiveCamera;
 
@@ -11,6 +11,7 @@ import javafx.scene.PerspectiveCamera;
 public class ViewCamera extends PerspectiveCamera {
     private Transformations transformations;
 
+    //TODO : Documentation
     public ViewCamera(boolean fixedEyedAtCameraZero)
     {
         super(fixedEyedAtCameraZero);

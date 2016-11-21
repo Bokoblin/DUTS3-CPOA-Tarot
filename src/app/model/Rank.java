@@ -11,28 +11,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.controller;
+package app.model;
 
-import tarotCardDistribution.model.GameModel;
-import tarotCardDistribution.view.AppView;
+import java.util.Random;
 
 /**
- * The {@code AppController} class consists in the MVC architecture controller
+ * The {@code Rank} enumeration defines all ranks
+ * that can be assigned to a card
  * @author Arthur
- * @version v0.2
- * @since v0.2
+ * @version v0.5
+ * @since v0.1
  */
-public class AppController {
-    private GameModel gameModel;
-    private AppView appView;
+public enum Rank {
+    Ace,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Knight,
+    Queen,
+    King;
 
-
-    //SETTERS - no documentation needed
-
-    public void setGameModel(GameModel gameModel) {
-        this.gameModel = gameModel;
-    }
-    public void setAppView(AppView appView) {
-        this.appView = appView;
+    /**
+     * Method returning a random rank among enum ones
+     * @since v0.5
+     *
+     * @return a random rank
+     * @see Random
+     */
+    public static Rank randomRank() {
+        int pick = new Random().nextInt(Rank.values().length);
+        return Rank.values()[pick];
     }
 }
