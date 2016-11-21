@@ -1,4 +1,4 @@
-package tarotCardDistribution.model;
+package app.model;
 
 import exceptions.CardGroupNumberException;
 

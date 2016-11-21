@@ -1,6 +1,6 @@
 package exceptions;
 
-import tarotCardDistribution.model.CardUpdate;
+import app.model.CardUpdate;
 
 /**
  * Exception class on card update

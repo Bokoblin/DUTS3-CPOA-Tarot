@@ -1,4 +1,9 @@
-package tarotCardDistribution.view;
+package app.view;
+
+import javafx.geometry.Point3D;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.MeshView;
 
 /**
  * The RectangleMesh class is a pre-defined rectangle mesh extended from MeshView
@@ -10,15 +15,10 @@ package tarotCardDistribution.view;
  * @see java.util.Observer
  * @see javafx.scene.Scene
  */
-
-import javafx.geometry.Point3D;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
-
-public class RectangleMesh extends MeshView{
+public class RectangleMesh extends MeshView {
     protected Transformations transformations;
 
+    //TODO Documentation
     RectangleMesh(float width, float height, float depth, String texturePath, float textureFaceWidth, float textureFaceHeight)
     {
         super();
@@ -76,14 +76,14 @@ public class RectangleMesh extends MeshView{
         );
         this.setMesh(mesh);
 
-        PhongMaterial material = null;
-        material = new PhongMaterial();
+        PhongMaterial material = new PhongMaterial();
         material.setDiffuseMap(image);
         this.setMaterial(material);
 
         transformations = new Transformations(this);
     }
 
+    //TODO Documentation
     public void setPosition(Point3D point3D)
     {
         this.setTranslateX(point3D.getX());
@@ -91,11 +91,13 @@ public class RectangleMesh extends MeshView{
         this.setTranslateZ(point3D.getZ());
     }
 
+
+    //GETTERS - no documentation needed
+
     public Point3D getPosition()
     {
         return new Point3D(getTranslateX(), getTranslateY(), getTranslateZ());
     }
-
     public Transformations getTransformations()
     {
         return transformations;

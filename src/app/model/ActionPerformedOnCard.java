@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.model;
+package app.model;
 
 /**
  * The {@code ActionPerformedOnCard} enumeration defines actions

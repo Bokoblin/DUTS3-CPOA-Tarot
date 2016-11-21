@@ -1,10 +1,21 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.6.3
+Current version : v0.7.0
 
 =========================================================================
-v0.6.3 (14/11/16) :
+
+v0.7.0 (21/11/16) :
+- Added appConsole package with console-only GameModel and main
+- CardGroup class is now an ArrayList<Card> inherited class
+- Finished turnCard method
+- Some corrections
+- Refactored packages
+
+
+--------------------------------------------------------------------
+
+v0.6.4 (15/11/16) :
 - Some corrections for the transitions
 
 

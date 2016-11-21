@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tarotCardDistribution.view;
+package app.view;
 
 import com.sun.istack.internal.NotNull;
 import javafx.animation.KeyFrame;
@@ -22,8 +22,8 @@ import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
-import tarotCardDistribution.controller.*;
-import tarotCardDistribution.model.*;
+import app.controller.*;
+import app.model.*;
 import exceptions.ViewCardUpdateExistException;
 
 import java.util.*;
@@ -32,7 +32,7 @@ import java.util.*;
  * The {@code AppView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.6
+ * @version v0.7
  * @since v0.2
  *
  * @see Observer
@@ -111,16 +111,17 @@ public class AppView extends Scene implements Observer{
 
         this.setOnMouseClicked(event -> {
             try {
-                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, gameModel.getInitialDeck().getCardList().get(1)));
+                //TODO : To fix
+                turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, gameModel.getInitialDeck().get(1)));
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         });
 
         //Create the scene objects
         RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH, "file:./res/table.jpg", 1100, 1100);
         background.getChildren().add(table);
-        ViewCard viewCard =  new ViewCard(gameModel.getInitialDeck().getCardList().get(1), this, hands[1]);
+        ViewCard viewCard =  new ViewCard(gameModel.getInitialDeck().get(1), this, hands[1]);
 
         //Lets define the camera
         this.setCamera(new ViewCamera(true));
@@ -201,7 +202,6 @@ public class AppView extends Scene implements Observer{
      * This method is called by @update if the update type is @TURN_CARD
      * It apply a 180° on the 3D Card with a transition to show its other face
      * @since v0.6
-     * @version 0.6.3
      * @param   cardUpdate     the cardUpdate object.
      */
     private void turnBackCard(CardUpdate cardUpdate)
@@ -378,7 +378,7 @@ public class AppView extends Scene implements Observer{
     /**
      * This method return the associated CardGroup of a JavaFx Group
      * Return the null if no specific group exist
-     * @since v0.6.5
+     * @since v0.7.0
      *
      * @param   viewgroup     the viewGroup object.
      */
@@ -396,8 +396,7 @@ public class AppView extends Scene implements Observer{
 
     /**
      * This method return the correct default position of a card depending on the group
-     * @since v0.6.5
-     * @version 0.6.5
+     * @since v0.7.0
      * @param   viewCard    the viewCard object.
      */
     public Point3D getCardDefaultPosition(@NotNull ViewCard viewCard)
@@ -421,25 +420,25 @@ public class AppView extends Scene implements Observer{
                     point3D = new Point3D(TABLE_SIZE - HAND_MARGIN_UP - ViewCard.getCardHeight(), HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, -ViewCard.getCardDepth());
                     break;
             }
-        } else if (viewCardToGroup.get(viewCard) == talon)
-        {
+        }
+        else if (viewCardToGroup.get(viewCard) == talon) {
             point3D = TALON_POSITION;
-        } else if (viewCardToGroup.get(viewCard) == initialDeck)
-        {
-
-        } else if (viewCardToGroup.get(viewCard) == root3d)
-        {
-
-        } else {
-
+        }
+        else if (viewCardToGroup.get(viewCard) == initialDeck) {
+            //TODO
+        }
+        else if (viewCardToGroup.get(viewCard) == root3d) {
+            //TODO
+        }
+        else {
+            //TODO
         }
         return point3D;
     }
 
     /**
      * This method return the correct default rotation of a card depending on the group
-     * @since v0.6.5
-     * @version 0.6.5
+     * @since v0.7
      * @param   viewCard    the viewCard object.
      */
     public double getCardDefaultRotation(@NotNull ViewCard viewCard)
@@ -462,17 +461,18 @@ public class AppView extends Scene implements Observer{
                     angle = 270;
                     break;
             }
-        } else if (viewCardToGroup.get(viewCard) == talon)
-        {
-
-        } else if (viewCardToGroup.get(viewCard) == initialDeck)
-        {
-
-        } else if (viewCardToGroup.get(viewCard) == root3d)
-        {
-
-        } else {
-
+        }
+        else if (viewCardToGroup.get(viewCard) == talon) {
+            //TODO
+        }
+        else if (viewCardToGroup.get(viewCard) == initialDeck) {
+            //TODO
+        }
+        else if (viewCardToGroup.get(viewCard) == root3d) {
+            //TODO
+        }
+        else {
+            //TODO
         }
         return angle;
     }
@@ -483,31 +483,14 @@ public class AppView extends Scene implements Observer{
     {
         return root3d;
     }
-    public Group getRootGUI()
-    {
-        return rootGUI;
-    }
-    public Group[] getHands()
-    {
-        return hands;
-    }
-    public Group getHand(PlayerHandler.PlayersCardinalPoint cardinalPoint)
-    {
-        return hands[cardinalPoint.ordinal()];
-    }
     public Group getTalon()
     {
         return talon;
-    }
-    public Group getInitialDeck()
-    {
-        return initialDeck;
     }
     public ViewCamera getViewCamera()
     {
         return (ViewCamera)getCamera();
     }
-
     public HashMap<ViewCard, Group> getViewCardToGroup() {
         return viewCardToGroup;
     }
