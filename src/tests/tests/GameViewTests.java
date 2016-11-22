@@ -62,6 +62,7 @@ public class GameViewTests extends Application
         root = new Group();
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
         } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
             e.getMessage();
         }
@@ -95,12 +96,12 @@ public class GameViewTests extends Application
     {
         Hand hand = gameModel.getPlayerHandler().getPlayer(PlayerHandler.PlayersCardinalPoint.South);
         Talon talon = gameModel.getTalon();
-        int nbNodeHandBefore = scene.cardGroupToViewGroup(hand).getChildren().size();
+        int nbNodeHandBefore = scene.getGroupFromCardGroup(hand).getChildren().size();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), hand));
-        assertTrue(scene.cardGroupToViewGroup(hand).getChildren().size() == nbNodeHandBefore+1);
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.cardGroupToViewGroup(hand).getChildren().get(0)).getModelCard(), talon));
-        assertTrue(scene.cardGroupToViewGroup(hand).getChildren().size() == nbNodeHandBefore);
+        assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore+1);
+        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
+        assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore);
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
     }
 

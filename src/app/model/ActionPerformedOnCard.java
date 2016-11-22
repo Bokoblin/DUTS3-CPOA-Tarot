@@ -19,13 +19,18 @@ package app.model;
  * to inform the view to do the similar action with its ViewCards
  * @author Arthur
  * @author Alexandre
- * @version v0.6
+ * @version v0.7.1
  * @since v0.6
  */
 public enum ActionPerformedOnCard {
     ADD_CARD,                   //To create a new ViewCard
-    TURN_CARD,                  //To turn a card (shown/hidden) - card must exist
-    MOVE_CARD_BETWEEN_GROUPS,   //To move a card between two groups - card must exist
-    REMOVE_CARD_FROM_GROUP,     //To move a card from a group to the table - card must exist
-    DELETE_CARD                 //To delete the related ViewCard - card must exist
+    TURN_CARD,                  //To turn a card (shown/hidden)
+    MOVE_CARD_BETWEEN_GROUPS,   //To move a card between two groups
+    REMOVE_CARD_FROM_GROUP,     //To move a card from a group to the table
+    DELETE_CARD,                //To delete the related ViewCard
+    SHUFFLE_CARDS,              //To shuffle all cards
+    CUT_DECK,                   //To cut the deck
+    SPREAD_CARDS,               //To spread all cards for choice
+    GATHER_CARDS,               //To gather all cards after choice
+
 }

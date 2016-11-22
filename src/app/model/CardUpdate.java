@@ -2,15 +2,17 @@ package app.model;
 
 import com.sun.istack.internal.NotNull;
 
+import java.util.List;
+
 /**
  * This class is a container which is passed when calling notifyObservers() method.
  * It indicate to view what action to perform on a specific card with sometimes a specific cardGroup.
  * @author Alexandre
- * @version v0.6.3
+ * @version v0.7.1
  * @since v0.6
  */
 public class CardUpdate {
-    private CardGroup cardGroup;
+    private List<Card> cardGroup;
     private Card card;
     private ActionPerformedOnCard type;
 
@@ -34,22 +36,34 @@ public class CardUpdate {
     /**
      * Constructs CardUpdate with a card, a group and a type
      * @since v0.6
-     *
+     *@param type the type
      * @param card the model card
+     * @param list the cardGroup
+     */
+    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, @NotNull List<Card> list)
+    {
+        this.cardGroup = list;
+        this.card = card;
+        this.type = type;
+    }
+
+    /**
+     * Constructs CardUpdate with a group and a type
+     * @since v0.7
+     *
      * @param type the type
      * @param cardGroup the cardGroup
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, @NotNull CardGroup cardGroup)
-    {
+    public CardUpdate(ActionPerformedOnCard type, @NotNull CardGroup cardGroup) {
         this.cardGroup = cardGroup;
-        this.card = card;
+        this.card = null;
         this.type = type;
     }
 
 
     //GETTERS - no documentation needed
 
-    public CardGroup getCardGroup() {
+    public List<Card> getCardGroup() {
         return cardGroup;
     }
     public Card getCard() {
