@@ -44,7 +44,7 @@ public class AppView extends Scene implements Observer{
     private static final float TABLE_DEPTH = 182;
     private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), TABLE_DEPTH);
     private static final float HAND_MARGIN_UP = 100;
-    private static final float HAND_MARGIN_LEFT = 200;
+    private static final float HAND_MARGIN_LEFT = (float)(0.2 * TABLE_SIZE);
     private static final float MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN_LEFT))/18;
 
     private GameModel gameModel;
@@ -81,14 +81,13 @@ public class AppView extends Scene implements Observer{
         cardGroupToGroup = new HashMap<>();
         root.getChildren().addAll(root3d, rootGUI);
         root3d.getChildren().addAll(background, talon, initialDeck);
-        for (int i =0; i<4; i++)
-        {
-            hands[i] = new Group();
-            root3d.getChildren().add(hands[i]);
-        }
+
         for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint : PlayerHandler.PlayersCardinalPoint.values())
         {
-            cardGroupToGroup.put(gameModel.getPlayerHandler().getPlayer(playersCardinalPoint), hands[playersCardinalPoint.ordinal()]);
+            hands[playersCardinalPoint.ordinal()] = new Group();
+            root3d.getChildren().add(hands[playersCardinalPoint.ordinal()]);
+            CardGroup cardGroup = gameModel.getPlayerHandler().getPlayer(playersCardinalPoint);
+            cardGroupToGroup.put(cardGroup, hands[playersCardinalPoint.ordinal()]);
         }
         cardGroupToGroup.put(gameModel.getTalon(), talon);
         cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
@@ -111,7 +110,6 @@ public class AppView extends Scene implements Observer{
 
         this.setOnMouseClicked(event -> {
             try {
-                //TODO : To fix
                 turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, gameModel.getInitialDeck().get(1)));
             } catch (Exception e) {
                 System.err.println(e.getMessage());
@@ -121,7 +119,7 @@ public class AppView extends Scene implements Observer{
         //Create the scene objects
         RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH, "file:./res/table.jpg", 1100, 1100);
         background.getChildren().add(table);
-        ViewCard viewCard =  new ViewCard(gameModel.getInitialDeck().get(1), this, hands[1]);
+        new ViewCard(gameModel.getInitialDeck().get(1), this, hands[3]);
 
         //Lets define the camera
         this.setCamera(new ViewCamera(true));
@@ -195,7 +193,7 @@ public class AppView extends Scene implements Observer{
         {
             throw new ViewCardUpdateExistException(cardUpdate, false);
         }
-        ViewCard viewCard = new ViewCard(cardUpdate.getCard(), this, cardGroupToViewGroup(cardUpdate.getCardGroup()));
+        new ViewCard(cardUpdate.getCard(), this, cardGroupToViewGroup(cardUpdate.getCardGroup()));
     }
 
     /**
@@ -408,16 +406,25 @@ public class AppView extends Scene implements Observer{
             switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)viewGroupToCardGroup(group)))
             {
                 case North:
-                    point3D = new Point3D(TABLE_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth() + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, HAND_MARGIN_UP, -ViewCard.getCardDepth());
+                    point3D = new Point3D(
+                            TABLE_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth() + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS,
+                            HAND_MARGIN_UP,
+                            -ViewCard.getCardDepth());
                     break;
                 case West:
-                    point3D = new Point3D(HAND_MARGIN_UP, HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, -ViewCard.getCardDepth());
+                    point3D = new Point3D((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2 + HAND_MARGIN_UP,
+                            -((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2) + HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS,
+                            -ViewCard.getCardDepth());
                     break;
                 case South:
-                    point3D = new Point3D(HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, TABLE_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(), -ViewCard.getCardDepth());
+                    point3D = new Point3D(HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS,
+                            TABLE_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(),
+                            -ViewCard.getCardDepth());
                     break;
                 case East:
-                    point3D = new Point3D(TABLE_SIZE - HAND_MARGIN_UP - ViewCard.getCardHeight(), HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, -ViewCard.getCardDepth());
+                    point3D = new Point3D(TABLE_SIZE - ViewCard.getCardWidth() -((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2) - HAND_MARGIN_UP,
+                            TABLE_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth() - ((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2),
+                            -ViewCard.getCardDepth());
                     break;
             }
         }

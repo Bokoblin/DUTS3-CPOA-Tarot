@@ -161,7 +161,8 @@ public class Card{
         nb = 0;
         cardList.clear();
     }
-
+    
+    //TODO : change this method by overwriting the compareTo method;
     /**
      * Compare two cards following their Suit and Rank
      * @since v0.5
