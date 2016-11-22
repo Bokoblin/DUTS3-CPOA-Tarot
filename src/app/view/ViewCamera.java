@@ -11,7 +11,12 @@ import javafx.scene.PerspectiveCamera;
 public class ViewCamera extends PerspectiveCamera {
     private Transformations transformations;
 
-    //TODO : Documentation
+    /**
+     * Constructs Perspective camera
+     * @since v0.2
+     *
+     * @param fixedEyedAtCameraZero see javafx doc :)
+     */
     public ViewCamera(boolean fixedEyedAtCameraZero)
     {
         super(fixedEyedAtCameraZero);

@@ -18,8 +18,20 @@ import javafx.scene.shape.MeshView;
 public class RectangleMesh extends MeshView {
     protected Transformations transformations;
 
-    //TODO Documentation
-    RectangleMesh(float width, float height, float depth, String texturePath, float textureFaceWidth, float textureFaceHeight)
+    /**
+     * Constructs a rectangle Mesh which is an
+     * extended class of meshView : a 3d object
+     * @since v0.2
+     *
+     * @param width defines the width of the mesh
+     * @param height defines the height of the mesh
+     * @param depth defines the depth of the mesh
+     * @param texturePath defines the path of the mesh texture
+     * @param textureFaceWidth defines the number of width pixels of the card front on the texture
+     * @param textureFaceHeight defines the number of height pixels of the card front on the texture
+     */
+    RectangleMesh(float width, float height, float depth,
+                  String texturePath, float textureFaceWidth, float textureFaceHeight)
     {
         super();
         float textureWidth = 0;

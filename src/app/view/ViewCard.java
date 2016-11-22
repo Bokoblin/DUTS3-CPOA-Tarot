@@ -14,7 +14,6 @@ import javafx.scene.transform.Rotate;
  */
 public class ViewCard extends RectangleMesh {
     private Card modelCard;
-    private AppView view;
     private static final float CARD_HEIGHT = 250;
     private static final float CARD_WIDTH = CARD_HEIGHT * (float)(55.0/88.0);
     private static final float CARD_DEPTH = 2;
@@ -33,7 +32,6 @@ public class ViewCard extends RectangleMesh {
     {
         super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/testCarte" + ".jpg", CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
         this.modelCard = modelCard;
-        this.view = view;
         group.getChildren().add(this);
         view.getViewCardToGroup().put(this, group);
         setPosition(view.getCardDefaultPosition(this));

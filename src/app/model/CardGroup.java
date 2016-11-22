@@ -27,12 +27,12 @@ import java.util.Objects;
  * @version v0.7
  * @since v0.1
  *
- * @see appConsole.model.CardGroup
- * @see appConsole.model.Card
  * @see ArrayList
  */
 public class CardGroup extends ArrayList<Card> {
     protected final int NB_MAX_CARDS;
+    private int id;
+    private static int nbInstances = 0;
 
     /**
      * Constructs a CardGroup
@@ -43,6 +43,7 @@ public class CardGroup extends ArrayList<Card> {
      */
     public CardGroup(int NB_MAX_CARDS) throws CardGroupNumberException {
         super();
+        id = nbInstances++;
         this.NB_MAX_CARDS = NB_MAX_CARDS;
     }
 
@@ -122,6 +123,17 @@ public class CardGroup extends ArrayList<Card> {
             if (Objects.equals(c.getName(), nameToFind))
                 return c;
         return null;
+    }
+
+    @Override
+    public boolean equals(Object object)
+    {
+        if (!(object instanceof CardGroup))
+        {
+            return false;
+        } else {
+            return ((CardGroup)object).id == this.id;
+        }
     }
 
     public int getNbMaxCards() {

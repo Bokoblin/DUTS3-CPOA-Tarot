@@ -56,8 +56,6 @@ public class Main extends Application {
 
         //Game playing is not to be done
         primaryStage.show();
-        System.err.println("View has to be fixed by Alex");
-       // System.exit(0);
     }
 
     public static void main(String[] args) {

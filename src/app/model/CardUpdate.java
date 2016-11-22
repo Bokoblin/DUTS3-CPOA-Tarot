@@ -14,7 +14,13 @@ public class CardUpdate {
     private Card card;
     private ActionPerformedOnCard type;
 
-    //TODO : Documentation
+    /**
+     * Constructs CardUpdate with a card and a type
+     * @since v0.6
+     *
+     * @param card the model card
+     * @param type the type
+     */
     public CardUpdate(ActionPerformedOnCard type, @NotNull Card card) throws Exception {
         if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS)
         {
@@ -25,7 +31,14 @@ public class CardUpdate {
         this.type = type;
     }
 
-    //TODO : Documentation
+    /**
+     * Constructs CardUpdate with a card, a group and a type
+     * @since v0.6
+     *
+     * @param card the model card
+     * @param type the type
+     * @param cardGroup the cardGroup
+     */
     public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, @NotNull CardGroup cardGroup)
     {
         this.cardGroup = cardGroup;
