@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * GameModel Unit tests
  *
  * @author Arthur
- * @version v0.5
+ * @version v0.7.1
  * @since v0.5
  */
 public class GameModelTests {
@@ -60,6 +60,7 @@ public class GameModelTests {
             throws CardNumberException, CardUniquenessException, CardGroupNumberException {
         try {
             GameModel gameModel = new GameModel();
+            gameModel.createCards();
             assertTrue(gameModel.getInitialDeck().size() == 78);
             assertTrue(gameModel.getTalon() != null);
             assertTrue(gameModel.getTalon().size() == 0);
@@ -85,6 +86,7 @@ public class GameModelTests {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
@@ -120,6 +122,7 @@ public class GameModelTests {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
@@ -155,6 +158,7 @@ public class GameModelTests {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
 
             //Card repartition before dealing
             assertTrue( !gameModel.getInitialDeck().isEmpty());
@@ -194,6 +198,7 @@ public class GameModelTests {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
             gameModel.dealAllCards();
 
             assertTrue( gameModel.getInitialDeck().isEmpty());
@@ -227,6 +232,7 @@ public class GameModelTests {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
 
             List<Card> list1 = new ArrayList<>();
             List<Card> list2 = new ArrayList<>();
@@ -267,6 +273,7 @@ public class GameModelTests {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
+            gameModel.createCards();
 
             Map<Card, Integer> occurenceCard = new HashMap<>();
 

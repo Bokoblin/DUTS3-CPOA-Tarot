@@ -39,23 +39,21 @@ public class Main extends Application {
         AppView scene = new AppView(root, gameModel, appController);
         appController.setGameModel(gameModel);
         appController.setAppView(scene);
+        gameModel.createCards();
+
         primaryStage.setTitle("JACQUOT JOLIVET S3A");
         primaryStage.setMaximized(true);
         primaryStage.setScene(scene);
         scene.setFill(Color.BLACK);
-
-        //shuffling, cut, dealing
-        /*
-        gameModel.chooseInitialDealer();
-        gameModel.handleDealing();
-        gameModel.handleBids();
-        System.out.println(gameModel.toString());
-        */
-        System.err.println("Model does not work currently since scanner removal\n" +
-                "Please see AppConsole package for a working model");
-
-        //Game playing is not to be done
         primaryStage.show();
+
+        Thread gameThread = new Thread(() -> {
+            gameModel.chooseInitialDealer();
+            gameModel.handleDealing();
+            gameModel.handleBids();
+            System.out.println(gameModel.toString());
+        });
+        gameThread.start();
     }
 
     public static void main(String[] args) {
