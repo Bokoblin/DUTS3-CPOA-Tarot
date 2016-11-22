@@ -24,7 +24,7 @@ import java.util.Objects;
  * It extends {@code ArrayList} class of jav.util package
  * @author Arthur
  * @author Alexandre
- * @version v0.7
+ * @version v0.7.1
  * @since v0.1
  *
  * @see ArrayList

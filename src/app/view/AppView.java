@@ -32,7 +32,7 @@ import java.util.*;
  * The {@code AppView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.7
+ * @version v0.7.2
  * @since v0.2
  *
  * @see Observer
@@ -42,7 +42,8 @@ public class AppView extends Scene implements Observer{
     //const
     private static final float TABLE_SIZE = 2000;
     private static final float TABLE_DEPTH = 182;
-    private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), TABLE_DEPTH);
+    private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), 0);
+    private static final Point3D INITIAL_DECK_POSITION = new Point3D(-300, TABLE_SIZE/2, -200);
     private static final float HAND_MARGIN_UP = 100;
     private static final float HAND_MARGIN_LEFT = (float)(0.2 * TABLE_SIZE);
     private static final float MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN_LEFT))/18;
@@ -111,6 +112,8 @@ public class AppView extends Scene implements Observer{
         this.setOnMouseClicked(event -> {
             try {
                 turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, gameModel.getInitialDeck().get(1)));
+                /*CardGroup group = viewGroupToCardGroup(hands[1]);
+                update(null, new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, gameModel.getInitialDeck().get(1), group));*/
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -119,7 +122,7 @@ public class AppView extends Scene implements Observer{
         //Create the scene objects
         RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH, "file:./res/table.jpg", 1100, 1100);
         background.getChildren().add(table);
-        new ViewCard(gameModel.getInitialDeck().get(1), this, hands[3]);
+        new ViewCard(gameModel.getInitialDeck().get(1), this, initialDeck);
 
         //Lets define the camera
         this.setCamera(new ViewCamera(true));
@@ -214,6 +217,7 @@ public class AppView extends Scene implements Observer{
         KeyValue initialTranslate = null;
         KeyValue finalTranslate = null;
         Point3D initialPosition = getCardDefaultPosition(viewCard);
+
         //If the card belong to a player deck the card will translate to the center of the table before rotating
         CardGroup cardGroup = viewGroupToCardGroup(viewCardToGroup.get(viewCard));
         if (cardGroup instanceof Hand)
@@ -238,8 +242,8 @@ public class AppView extends Scene implements Observer{
                     break;
             }
         } else {
-            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), initialPosition.getX());
-            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), initialPosition.getX());
+            initialTranslate = new KeyValue(viewCard.translateXProperty(), initialPosition.getX());
+            finalTranslate = new KeyValue(viewCard.translateXProperty(), initialPosition.getX());
         }
         double initialRotateY, finalRotateY;
         if (viewCard.getTransformations().getRotateY().getAngle() >= 180)
@@ -253,12 +257,12 @@ public class AppView extends Scene implements Observer{
         timeline.getKeyFrames().addAll(
                 new KeyFrame(Duration.ZERO, initialTranslate),
                 new KeyFrame(new Duration(500), finalTranslate),
-                new KeyFrame(new Duration(500), new KeyValue(viewCard.translateZProperty(), 0)),
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), -100)),
+                new KeyFrame(new Duration(500), new KeyValue(viewCard.translateZProperty(), initialPosition.getZ())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), initialPosition.getZ()-100)),
                 new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), initialRotateY)),
                 new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), finalRotateY)),
-                new KeyFrame(new Duration(1500), new KeyValue(viewCard.translateZProperty(), -100)),
-                new KeyFrame(new Duration(2000), new KeyValue(viewCard.translateZProperty(), 0)),
+                new KeyFrame(new Duration(1500), new KeyValue(viewCard.translateZProperty(), initialPosition.getZ()-100)),
+                new KeyFrame(new Duration(2000), new KeyValue(viewCard.translateZProperty(), initialPosition.getZ())),
                 new KeyFrame(new Duration(2000), finalTranslate),
                 new KeyFrame(new Duration(2500), initialTranslate)
         );
@@ -284,6 +288,15 @@ public class AppView extends Scene implements Observer{
         viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
         viewCardToGroup.replace(viewCard, group);
         group.getChildren().add(viewCard);
+
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), getCardDefaultPosition(viewCard).getX())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), getCardDefaultPosition(viewCard).getY())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), getCardDefaultPosition(viewCard).getZ())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
+        );
+        timeline.play();
     }
 
     /**
@@ -429,15 +442,12 @@ public class AppView extends Scene implements Observer{
             }
         }
         else if (viewCardToGroup.get(viewCard) == talon) {
-            point3D = TALON_POSITION;
+            point3D = new Point3D(TALON_POSITION.getX(), TALON_POSITION.getY(), TALON_POSITION.getZ() -ViewCard.getCardDepth()*(getNbViewCard(talon)));
         }
         else if (viewCardToGroup.get(viewCard) == initialDeck) {
-            //TODO
+            point3D = new Point3D(INITIAL_DECK_POSITION.getX(), INITIAL_DECK_POSITION.getY(), INITIAL_DECK_POSITION.getZ() -ViewCard.getCardDepth()*(getNbViewCard(talon)));
         }
         else if (viewCardToGroup.get(viewCard) == root3d) {
-            //TODO
-        }
-        else {
             //TODO
         }
         return point3D;
@@ -470,16 +480,13 @@ public class AppView extends Scene implements Observer{
             }
         }
         else if (viewCardToGroup.get(viewCard) == talon) {
-            //TODO
+            angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == initialDeck) {
-            //TODO
+            angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == root3d) {
-            //TODO
-        }
-        else {
-            //TODO
+            angle = 0;
         }
         return angle;
     }
