@@ -1,9 +1,16 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.7.2
+Current version : v0.7.3
 
 =========================================================================
+
+v0.7.3 (23/11/16) :
+- Corrected app out of memory when loading all cards
+- Corrected cardGroup to Group
+
+
+--------------------------------------------------------------------
 
 v0.7.2 (23/11/16) :
 - Rewritten compare card function
