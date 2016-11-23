@@ -22,7 +22,7 @@ import static app.model.PlayerHandler.PlayersCardinalPoint.South;
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.7.1
+ * @version v0.7.2
  * @since v0.2
  *
  * @see Observable
@@ -68,11 +68,12 @@ public class GameModel extends Observable {
      */
     public void createCards() {
         for (Suit s : Suit.values()) {
-            if ( s != Suit.Trump) {
+            if ( s != Suit.Trump && s != Suit.Excuse) {
                 for (Rank r : Rank.values()) {
                     try {
                         Card c = new Card(s,r);
-                        initialDeck.add(c);
+                        if(!initialDeck.add(c))
+                            throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
                         //updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, initialDeck));
 
                     } catch (CardUniquenessException | CardNumberException e) {
@@ -80,24 +81,28 @@ public class GameModel extends Observable {
                     }
                 }
             }
-            else {
+            else if ( s != Suit.Excuse){
                 for (int i = 1; i <= Card.getNbMaxTrumps(); i++) {
                     try {
                         Card c = new Card(Suit.Trump,i);
-                        initialDeck.add(c);
+                        if(!initialDeck.add(c))
+                            throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
                         //updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, initialDeck));
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
                     }
                 }
             }
-        }
-        try {
-            Card c = new Card("Excuse");//create the Excuse
-            initialDeck.add(c);
-            updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, initialDeck));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
+            else {
+                try {
+                    Card c = new Card(Suit.Excuse, -1);
+                    if(!initialDeck.add(c))
+                        throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
+                    updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, initialDeck));
+                } catch (CardNumberException | CardUniquenessException e) {
+                    System.err.println(e.getMessage());
+                }
+            }
         }
     }
 
@@ -149,7 +154,7 @@ public class GameModel extends Observable {
         for (Map.Entry<Card, Hand> mapEntry : pickedCardsMap.entrySet())
             if (Objects.isNull(minCard))
                 minCard = mapEntry.getKey();
-            else if ( Card.compareSmallerTo(mapEntry.getKey(), minCard) )
+            else if ( new Card.CardComparator().compare(mapEntry.getKey(), minCard) == -1 )
                 minCard = mapEntry.getKey();
 
         playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
@@ -287,6 +292,7 @@ public class GameModel extends Observable {
                 cptNbCardGivenToSameHand = 0;
             }
         }
+        playerHandler.getPlayersMap().forEach( (cardinal, hand) -> hand.sort( new Card.CardComparator() ));
     }
 
     /**
@@ -430,6 +436,7 @@ public class GameModel extends Observable {
             System.out.println("Talon : " + talon.cardListToString());
         }
         System.out.println("Ecart done...");
+        ourPlayer.sort(new Card.CardComparator());
     }
 
     /**
