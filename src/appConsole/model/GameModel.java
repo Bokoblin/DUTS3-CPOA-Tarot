@@ -24,7 +24,7 @@ import static app.model.PlayerHandler.PlayersCardinalPoint.South;
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.7
+ * @version v0.7.2
  * @since v0.2
  *
  * @see Observable
@@ -56,33 +56,54 @@ public class GameModel extends Observable {
         playerHandler = new PlayerHandler();
         ourPlayer = playerHandler.getPlayer(South);
 
-        //Cards creation
-        for (Suit s : Suit.values()) {
-            if ( s != Suit.Trump) {
-                for (Rank r : Rank.values()) {
-                    if(!initialDeck.add(new Card(s,r)))
-                        throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
-                }
-            }
-            else {
-                for (int i = 1; i <= Card.getNbMaxTrumps(); i++) {
-                    if(!initialDeck.add(new Card(Suit.Trump,i)))
-                        throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
-                }
-            }
-        }
-        try {
-            if(!initialDeck.add(new Card("Excuse")))
-                throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
-        } catch (CardNameException e) {
-            System.err.println(e.getMessage());
-        }
-
         //Chien creation
         try {
             talon = new Talon();
         } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
+        }
+
+        createCards();
+    }
+
+    /**
+     * Creates all cards and puts them in initialDeck
+     * @since v0.7.2
+     */
+    private void createCards() {
+        for (Suit s : Suit.values()) {
+            if ( s != Suit.Trump && s != Suit.Excuse) {
+                for (Rank r : Rank.values()) {
+                    try {
+                        Card c = new Card(s,r);
+                        if(!initialDeck.add(c))
+                            throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
+
+                    } catch (CardUniquenessException | CardNumberException e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+            }
+            else if ( s != Suit.Excuse){
+                for (int i = 1; i <= Card.getNbMaxTrumps(); i++) {
+                    try {
+                        Card c = new Card(Suit.Trump,i);
+                        if(!initialDeck.add(c))
+                            throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
+
+                    } catch (CardUniquenessException | CardNumberException e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+            }
+            else {
+                try {
+                    if(!initialDeck.add(new Card(Suit.Excuse, -1)))
+                        throw new CardNumberException("Card number limit has been reached.", initialDeck.getNbMaxCards());
+                } catch (CardNumberException | CardUniquenessException e) {
+                    System.err.println(e.getMessage());
+                }
+            }
         }
     }
 
@@ -147,7 +168,7 @@ public class GameModel extends Observable {
         for (Map.Entry<Card, Hand> mapEntry : pickedCardsMap.entrySet())
             if (Objects.isNull(minCard))
                 minCard = mapEntry.getKey();
-            else if ( Card.compareSmallerTo(mapEntry.getKey(), minCard) )
+            else if ( new Card.CardComparator().compare(mapEntry.getKey(), minCard) == -1 )
                 minCard = mapEntry.getKey();
 
         playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
@@ -270,6 +291,7 @@ public class GameModel extends Observable {
                 cptNbCardGivenToSameHand = 0;
             }
         }
+        playerHandler.getPlayersMap().forEach( (cardinal, hand) -> hand.sort( new Card.CardComparator() ));
     }
 
     /**
@@ -420,6 +442,7 @@ public class GameModel extends Observable {
             System.out.println("Talon : " + talon.cardListToString());
         }
         System.out.println("Ecart done...");
+        ourPlayer.sort(new Card.CardComparator());
     }
 
     /**

@@ -16,16 +16,23 @@ package app.model;
 import exceptions.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * The {@code Card} class contains all the information a card can contain,
- * statitistics on cards type, number and max number and a list of already
+ * statistics on cards type, number and max number and a list of already
  * instantiated cards to check card uniqueness
  * because there can't be multiple card with same suit and rank
+ *
+ * In this game there are only 78 cards :
+ *  - 56 Classic cards
+ *  - 21 Trump cards
+ *  - 1  Excuse card
+ *
  * @author Arthur
- * @version v0.6.2
+ * @version v0.7.2
  * @since v0.1
  *
  * @see Suit
@@ -33,9 +40,7 @@ import java.util.Objects;
  */
 public class Card{
     private static final int NB_MAX_CARDS = 78;
-    private static final int NB_MAX_CLASSICS = 56;
     private static final int NB_MAX_TRUMPS = 21;
-    private static final int NB_MAX_FOOLS = 1;
 
     private static int nb = 0;
     private static List<String> cardList = new ArrayList<>();
@@ -95,6 +100,7 @@ public class Card{
 
     /**
      * Constructs a trump card with a suit and a trump rank
+     * or the excuse with a null rank
      * @since v0.1
      *
      * @param suit defines card suit
@@ -116,41 +122,15 @@ public class Card{
 
         this.suit = suit;
         this.rank = null;
-        this.name = String.valueOf(suit)+String.valueOf(rank);
-        trumpRank = rank;
-        cardList.add(name);
-    }
-
-    /**
-     * Constructs a card with a suit and a rank
-     * @since v0.5
-     *
-     * @param name card name
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
-     */
-    public Card(String name)
-            throws CardNumberException, CardUniquenessException, CardNameException {
-        if (Objects.equals(name,"Excuse")) {
-            if (nb >= NB_MAX_CARDS)
-                throw new CardNumberException("Card number limits has been reached.", NB_MAX_CARDS);
-            else
-                nb++;
-
-            for (String s : cardList)
-                if (Objects.equals(s, name)) {
-                    throw new CardUniquenessException();
-                }
-
-            this.suit = null;
-            this.rank = null;
-            this.name = name;
-            trumpRank = -1;
-            cardList.add(name);
+        if ( suit == Suit.Trump) {
+            this.name = String.valueOf(suit) + String.valueOf(rank);
+            trumpRank = rank;
         }
         else {
-            throw new CardNameException();
+            this.name = String.valueOf(suit);
+            trumpRank = -1;
         }
+        cardList.add(name);
     }
 
     /**
@@ -161,39 +141,31 @@ public class Card{
         nb = 0;
         cardList.clear();
     }
-    
-    //TODO : change this method by overwriting the compareTo method;
-    /**
-     * Compare two cards following their Suit and Rank
-     * @since v0.5
-     * @return a boolean indicating if a card is smaller or not
-     */
-    public static boolean compareSmallerTo(Card c1, Card c2) {
-        //Both are not trumps
-        if ( c1.suit != Suit.Trump && c2.suit != Suit.Trump) {
-            if (c1.rank.ordinal() < c2.rank.ordinal())
-                return true;
-            else if (c1.rank.ordinal() > c2.rank.ordinal())
-                return false;
-            else { //Same rank
-                return c1.suit.ordinal() < c2.suit.ordinal();
-            }
-        }
-        //Card1 is a trump, Card2 is not a trump
-        else if ( c1.suit == Suit.Trump && c2.suit != Suit.Trump ) {
-            if (c1.trumpRank < c2.rank.ordinal())
-                return true;
-            else if (c1.trumpRank > c2.rank.ordinal())
-                return false;
-            else { //Same rank
-                return c1.trumpRank < c2.suit.ordinal();
-            }
-        }
-        //Both are trumps
-        else
-            return c1.trumpRank < c2.trumpRank;
-    }
 
+    /**
+     The {@code CardComparator} class compares two cards
+     following their Rank and Suit
+     * @author Arthur
+     * @version v0.7.2
+     * @since v0.7.2
+     */
+    public static class CardComparator implements Comparator<Card> {
+        public int compare(Card c1, Card c2){
+            //=== Cards are identical
+            if ( c1 == c2)
+                return 0;
+            //=== Cards have same suit
+            if ( c1.suit == c2.suit) {
+                if ( c1.suit != Suit.Trump)
+                    return ( c1.rank.ordinal() < c2.rank.ordinal() )? -1: 1;
+                else
+                    return ( c1.trumpRank < c2.trumpRank )? -1: 1;
+            }
+            //=== Card have different suit
+            else
+                return ( c1.suit.ordinal() < c2.suit.ordinal() )? -1: 1;
+        }
+    }
 
     //GETTERS - no documentation needed
 

@@ -14,6 +14,9 @@ limitations under the License.
 package app.view;
 
 import com.sun.istack.internal.NotNull;
+import exceptions.CardGroupNumberException;
+import exceptions.CardNumberException;
+import exceptions.CardUniquenessException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -42,7 +45,8 @@ public class AppView extends Scene implements Observer{
     //const
     private static final float TABLE_SIZE = 2000;
     private static final float TABLE_DEPTH = 182;
-    private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), TABLE_DEPTH);
+    private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2)-(ViewCard.getCardWidth()/2), (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), 0);
+    private static final Point3D INITIAL_DECK_POSITION = new Point3D(-300, TABLE_SIZE/2, -200);
     private static final float HAND_MARGIN_UP = 100;
     private static final float HAND_MARGIN_LEFT = (float)(0.2 * TABLE_SIZE);
     private static final float MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN_LEFT))/18;
@@ -83,15 +87,11 @@ public class AppView extends Scene implements Observer{
         root3d.getChildren().addAll(background, talon, initialDeck);
 
         for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint :
-                PlayerHandler.PlayersCardinalPoint.values())
-        {
+                PlayerHandler.PlayersCardinalPoint.values()) {
             hands[playersCardinalPoint.ordinal()] = new Group();
             root3d.getChildren().add(hands[playersCardinalPoint.ordinal()]);
-            CardGroup cardGroup = model.getPlayerHandler().getPlayer(playersCardinalPoint);
-            cardGroupToGroup.put(cardGroup, hands[playersCardinalPoint.ordinal()]);
         }
-        cardGroupToGroup.put(model.getTalon(), talon);
-        cardGroupToGroup.put(model.getInitialDeck(), initialDeck);
+        updateCardGroupToGroup();
 
         //Define the scene events
         this.setOnKeyPressed(keyEvent -> {
@@ -125,7 +125,6 @@ public class AppView extends Scene implements Observer{
         RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH,
                 "file:./res/table.jpg", 1100, 1100);
         background.getChildren().add(table);
-        //new ViewCard(model.getInitialDeck().get(1), this, hands[3]);
 
         //Lets define the camera
         this.setCamera(new ViewCamera(true));
@@ -143,6 +142,24 @@ public class AppView extends Scene implements Observer{
     }
 
     /**
+     * Because of the keys of the @cardGroupToGroup change,
+     * whe have to update this HashMap before search keys on it.
+     * @since v0.7.6
+     *
+     */
+    public void updateCardGroupToGroup()
+    {
+        for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint :
+                PlayerHandler.PlayersCardinalPoint.values())
+        {
+            CardGroup cardGroup = gameModel.getPlayerHandler().getPlayer(playersCardinalPoint);
+            cardGroupToGroup.put(cardGroup, hands[playersCardinalPoint.ordinal()]);
+        }
+        cardGroupToGroup.put(gameModel.getTalon(), talon);
+        cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
+    }
+
+    /**
      * This method is called whenever the observed object is changed.
      * It determines which object of the gameModel has been changed with arg
      * parameter and updates view in consequence
@@ -154,6 +171,7 @@ public class AppView extends Scene implements Observer{
     @Override
     public void update(Observable o, Object arg)
     {
+        updateCardGroupToGroup();
         if (arg instanceof CardUpdate)
         {
             CardUpdate cardUpdate = (CardUpdate)arg;
@@ -221,34 +239,17 @@ public class AppView extends Scene implements Observer{
         Timeline timeline = new Timeline();
         KeyValue initialTranslate = null;
         KeyValue finalTranslate = null;
-        Point3D cardPosition = getCardDefaultPosition(viewCard);
 
-        //If the card belong to a player deck, it will translate to the center of the table before rotating
+        //If the card belong to a player deck the card will translate to the center of the table before rotating
         CardGroup cardGroup = getCardGroupFromGroup(viewCardToGroup.get(viewCard));
+
         if (cardGroup instanceof Hand)
         {
-            switch (gameModel.getPlayerHandler().getPlayerCardinalPoint((Hand)cardGroup))
-            {
-                case North:
-                    initialTranslate = new KeyValue(viewCard.translateYProperty(), cardPosition.getY());
-                    finalTranslate = new KeyValue(viewCard.translateYProperty(), cardPosition.getY() + 220);
-                    break;
-                case West:
-                    initialTranslate = new KeyValue(viewCard.translateXProperty(), cardPosition.getX());
-                    finalTranslate = new KeyValue(viewCard.translateXProperty(), cardPosition.getX() + 220);
-                    break;
-                case South:
-                    initialTranslate = new KeyValue(viewCard.translateYProperty(), cardPosition.getY());
-                    finalTranslate = new KeyValue(viewCard.translateYProperty(), cardPosition.getY() -220);
-                    break;
-                case East:
-                    initialTranslate = new KeyValue(viewCard.translateXProperty(), cardPosition.getX());
-                    finalTranslate = new KeyValue(viewCard.translateXProperty(), cardPosition.getX() -220);
-                    break;
-            }
+            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
+            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 200);
         } else {
-            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), cardPosition.getX());
-            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), cardPosition.getX());
+            initialTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
+            finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
         }
         double initialRotateY, finalRotateY;
         if (viewCard.getTransformations().getRotateY().getAngle() >= 180)
@@ -262,12 +263,12 @@ public class AppView extends Scene implements Observer{
         timeline.getKeyFrames().addAll(
                 new KeyFrame(Duration.ZERO, initialTranslate),
                 new KeyFrame(new Duration(500), finalTranslate),
-                new KeyFrame(new Duration(500), new KeyValue(viewCard.translateZProperty(), 0)),
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), -100)),
+                new KeyFrame(new Duration(500), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), 0)),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), -100)),
                 new KeyFrame(new Duration(1000), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), initialRotateY)),
                 new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getRotateY().angleProperty(), finalRotateY)),
-                new KeyFrame(new Duration(1500), new KeyValue(viewCard.translateZProperty(), -100)),
-                new KeyFrame(new Duration(2000), new KeyValue(viewCard.translateZProperty(), 0)),
+                new KeyFrame(new Duration(1500), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), -100)),
+                new KeyFrame(new Duration(2000), new KeyValue(viewCard.getTransformations().getTranslate().zProperty(), 0)),
                 new KeyFrame(new Duration(2000), finalTranslate),
                 new KeyFrame(new Duration(2500), initialTranslate)
         );
@@ -293,6 +294,15 @@ public class AppView extends Scene implements Observer{
         viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
         viewCardToGroup.replace(viewCard, group);
         group.getChildren().add(viewCard);
+
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), getCardDefaultPosition(viewCard).getX())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), getCardDefaultPosition(viewCard).getY())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), getCardDefaultPosition(viewCard).getZ())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
+        );
+        timeline.play();
     }
 
     /**
@@ -478,15 +488,12 @@ public class AppView extends Scene implements Observer{
             }
         }
         else if (viewCardToGroup.get(viewCard) == talon) {
-            point3D = TALON_POSITION;
+            point3D = new Point3D(TALON_POSITION.getX(), TALON_POSITION.getY(), TALON_POSITION.getZ() -ViewCard.getCardDepth()*(getNbViewCard(talon)));
         }
         else if (viewCardToGroup.get(viewCard) == initialDeck) {
-            //TODO
+            point3D = new Point3D(INITIAL_DECK_POSITION.getX(), INITIAL_DECK_POSITION.getY(), INITIAL_DECK_POSITION.getZ() -ViewCard.getCardDepth()*(getNbViewCard(initialDeck)));
         }
         else if (viewCardToGroup.get(viewCard) == root3d) {
-            //TODO
-        }
-        else {
             //TODO
         }
         return point3D;
@@ -521,16 +528,13 @@ public class AppView extends Scene implements Observer{
             }
         }
         else if (viewCardToGroup.get(viewCard) == talon) {
-            //TODO
+            angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == initialDeck) {
-            //TODO
+            angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == root3d) {
-            //TODO
-        }
-        else {
-            //TODO
+            angle = 0;
         }
         return angle;
     }

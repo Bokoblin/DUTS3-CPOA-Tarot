@@ -25,7 +25,7 @@ public class Transformations {
         rotateY = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.Y_AXIS);
         rotateZ = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.Z_AXIS);
         translate = new Translate(0,0,0);
-        object.getTransforms().addAll(rotateX, rotateY, rotateZ, translate);
+        object.getTransforms().addAll(translate, rotateX, rotateY, rotateZ); //The order of adding the transformations is important !
     }
 
 

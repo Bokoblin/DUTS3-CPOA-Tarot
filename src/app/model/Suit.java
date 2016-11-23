@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * The {@code Suit} enumeration defines all suits that can be assigned to a card
  * @author Arthur
- * @version v0.5
+ * @version v0.7.2
  * @since v0.1
  */
 public enum Suit {
@@ -26,7 +26,8 @@ public enum Suit {
     Diamond,
     Heart,
     Spade,
-    Trump;
+    Trump,
+    Excuse;
 
     /**
      * Get a random suit among enum ones
@@ -36,7 +37,7 @@ public enum Suit {
      * @see Random
      */
     public static Suit randomSuit() {
-        int pick = new Random().nextInt(Suit.values().length);
+        int pick = new Random().nextInt(Suit.values().length-1); // w/o Excuse
         return Suit.values()[pick];
     }
 }

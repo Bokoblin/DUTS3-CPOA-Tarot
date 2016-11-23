@@ -91,7 +91,6 @@ public class RectangleMesh extends MeshView {
         PhongMaterial material = new PhongMaterial();
         material.setDiffuseMap(image);
         this.setMaterial(material);
-
         transformations = new Transformations(this);
     }
 
