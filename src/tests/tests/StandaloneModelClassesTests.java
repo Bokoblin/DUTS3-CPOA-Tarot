@@ -22,7 +22,7 @@ import exceptions.*;
  * Standalone Unit tests for model classes
  *
  * @author Arthur
- * @version v0.5
+ * @version v0.7.2
  * @since v0.1
  */
 public class StandaloneModelClassesTests {
@@ -146,6 +146,45 @@ public class StandaloneModelClassesTests {
             fail("Exception shouldn't be fired");
         }
     }
+
+
+    /**
+     * Test if cards are correctly compared
+     * following their Suit and Rank
+     * @since v0.7.2
+     */
+    @Test
+    public void CardComparisonTest() {
+        try {
+            Card trumpCard1 = new Card( Suit.Trump, 11);
+            Card trumpCard2 = new Card( Suit.Trump, 18);
+            Card classicCard1 = new Card( Suit.Heart, Rank.Eight);
+            Card classicCard2 = new Card( Suit.Heart, Rank.Queen);
+            Card classicCard3 = new Card( Suit.Spade, Rank.King);
+            Card excuse = new Card(Suit.Excuse, -1);
+
+            Card.CardComparator cardComparator = new Card.CardComparator();
+
+            //Same Type comparison
+            assertTrue(cardComparator.compare(trumpCard1, trumpCard1) == 0);      //11 = 11
+            assertTrue(cardComparator.compare(classicCard1, classicCard1) == 0);  //Eight = Eight
+            assertTrue(cardComparator.compare(excuse, excuse) == 0);              //Excuse = Excuse
+            assertTrue(cardComparator.compare(trumpCard1, trumpCard2) == -1);     //11 < 18
+            assertTrue(cardComparator.compare(classicCard1, classicCard2) == -1); //Eight < Queen
+
+            //NotSame Type comparison
+            assertTrue(cardComparator.compare(trumpCard1, classicCard1) == 1);  //Trump > Heart
+            assertTrue(cardComparator.compare(classicCard3, trumpCard1) == -1); //Spade < Trump
+            assertTrue(cardComparator.compare(classicCard1, excuse) == -1);     //Heart < Excuse
+            assertTrue(cardComparator.compare(trumpCard1, excuse) == -1);       //Trump < Excuse
+
+        } catch (CardNumberException | CardUniquenessException e) {
+            System.err.println(e.getMessage());
+            fail("Exception shouldn't be fired");
+        }
+    }
+
+
 
     /**
      * Tests CardNumberException that should be fired

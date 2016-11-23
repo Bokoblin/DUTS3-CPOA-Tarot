@@ -24,7 +24,7 @@ import java.util.Objects;
  * It extends {@code ArrayList} class of jav.util package
  * @author Arthur
  * @author Alexandre
- * @version v0.7
+ * @version v0.7.1
  * @since v0.1
  *
  * @see ArrayList
@@ -126,17 +126,25 @@ public class CardGroup extends ArrayList<Card> {
     }
 
     @Override
-    public boolean equals(Object object)
-    {
-        if (!(object instanceof CardGroup))
-        {
-            return false;
-        } else {
-            return ((CardGroup)object).id == this.id;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        CardGroup cards = (CardGroup) o;
+
+        return id == cards.id;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + id;
+        return result;
     }
 
     public int getNbMaxCards() {
         return NB_MAX_CARDS;
     }
+
 }

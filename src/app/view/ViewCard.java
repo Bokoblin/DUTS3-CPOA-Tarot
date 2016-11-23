@@ -16,9 +16,9 @@ public class ViewCard extends RectangleMesh {
     private Card modelCard;
     private static final float CARD_HEIGHT = 250;
     private static final float CARD_WIDTH = CARD_HEIGHT * (float)(55.0/88.0);
-    private static final float CARD_DEPTH = 2;
-    private static final int CARD_FACE_TEXTURE_WIDTH = 1536;
-    private static final int CARD_FACE_TEXTURE_HEIGHT = 2663;
+    private static final float CARD_DEPTH = 1;
+    private static final int CARD_FACE_TEXTURE_WIDTH = 153;
+    private static final int CARD_FACE_TEXTURE_HEIGHT = 266;
 
     /**
      * Constructs a view card with a model card, a view and a group
