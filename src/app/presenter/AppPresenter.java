@@ -11,20 +11,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package app.controller;
+package app.presenter;
 
 import app.model.GameModel;
 import app.view.AppView;
 
 /**
- * The {@code AppController} class consists in the MVC architecture controller
+ * The {@code AppPresenter} class consists in the MVC architecture presenter
  * @author Arthur
- * @version v0.2
+ * @version v0.8
  * @since v0.2
  */
-public class AppController {
+public class AppPresenter {
     private GameModel gameModel;
     private AppView appView;
+
+
+    /**
+     * Transmits user choice to the model
+     * @since v0.8
+     *
+     * @param choice the user choice
+     */
+    public void transmitUserChoice(int choice) throws Exception {
+        if ( choice < 0)
+            try {
+                throw new Exception("choice is invalid");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        else
+            gameModel.setUserChoice(choice);
+    }
 
 
     //SETTERS - no documentation needed
