@@ -13,11 +13,12 @@ limitations under the License.
 
 package app;
 
+import app.presenter.AppPresenter;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import app.controller.AppController;
 import app.model.GameModel;
 import app.view.AppView;
 
@@ -25,7 +26,7 @@ import app.view.AppView;
  * The {@code Main} class inits MVC architecture and launch the architecture
  * @author Alexandre
  * @author Arthur
- * @version v0.6
+ * @version v0.8
  * @since v0.2
  *
  * @see Application
@@ -33,12 +34,13 @@ import app.view.AppView;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
+        Platform.setImplicitExit(false);
         Group root = new Group();
         GameModel gameModel = new GameModel();
-        AppController appController = new AppController();
-        AppView scene = new AppView(root, gameModel, appController);
-        appController.setGameModel(gameModel);
-        appController.setAppView(scene);
+        AppPresenter appPresenter = new AppPresenter();
+        AppView scene = new AppView(root, gameModel, appPresenter);
+        appPresenter.setGameModel(gameModel);
+        appPresenter.setAppView(scene);
         gameModel.createCards();
 
         primaryStage.setTitle("JACQUOT JOLIVET S3A");
@@ -47,13 +49,13 @@ public class Main extends Application {
         scene.setFill(Color.BLACK);
         primaryStage.show();
 
-        Thread gameThread = new Thread(() -> {
+//        Thread gameThread = new Thread(() -> {
             gameModel.chooseInitialDealer();
             gameModel.handleDealing();
             gameModel.handleBids();
             System.out.println(gameModel.toString());
-        });
-        gameThread.start();
+//        });
+//        gameThread.start();
     }
 
     public static void main(String[] args) {
