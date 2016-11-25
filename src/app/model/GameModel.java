@@ -127,8 +127,8 @@ public class GameModel extends Observable {
             Card c;
             if ( player == ourPlayer) {
                 System.out.println("Choose your card by clicking on it");
-                boolean choiceValid = false;
-                int numCard = 0;
+                boolean choiceValid = true;
+                int numCard = 2;
                 do {
                     //TODO : View selection of a card among the 78
                 }
