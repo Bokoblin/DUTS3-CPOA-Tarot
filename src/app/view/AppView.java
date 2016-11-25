@@ -113,6 +113,7 @@ public class AppView extends Scene implements Observer{
             gameModel.getInitialDeck().forEach((c) -> {
                 if(Objects.equals(c.getName(), "Excuse")) {
                     try {
+                        c.setShown(!c.isShown());
                         turnBackCard(new CardUpdate(ActionPerformedOnCard.TURN_CARD, c));
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
@@ -223,6 +224,9 @@ public class AppView extends Scene implements Observer{
             throw new ViewCardUpdateExistException(cardUpdate, false);
         }
         new ViewCard(cardUpdate.getCard(), this, getGroupFromCardGroup((CardGroup) cardUpdate.getCardGroup()));
+
+        //Check if the card must be turned by default
+        turnBackCard(cardUpdate);
     }
 
     /**
@@ -255,12 +259,11 @@ public class AppView extends Scene implements Observer{
             finalTranslate = new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), 0);
         }
         double initialRotateY, finalRotateY;
-        if (viewCard.getTransformations().getRotateY().getAngle() >= 180)
+        initialRotateY = viewCard.getTransformations().getRotateY().getAngle();
+        if (cardUpdate.getCard().isShown())
         {
-            initialRotateY = 180;
             finalRotateY = 0;
         } else {
-            initialRotateY = 0;
             finalRotateY = 180;
         }
         timeline.getKeyFrames().addAll(

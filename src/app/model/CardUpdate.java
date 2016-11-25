@@ -73,7 +73,6 @@ public class CardUpdate {
         this.type = type;
     }
 
-
     //GETTERS - no documentation needed
 
     public List<Card> getCardGroup() {
