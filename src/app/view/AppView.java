@@ -175,32 +175,35 @@ public class AppView extends Scene implements Observer{
         if (arg instanceof CardUpdate)
         {
             CardUpdate cardUpdate = (CardUpdate)arg;
-            try {
-                switch (cardUpdate.getType())
-                {
-                    case ADD_CARD:
-                        addNewCard(cardUpdate);
-                        break;
-                    case TURN_CARD:
-                        turnBackCard(cardUpdate);
-                        break;
-                    case MOVE_CARD_BETWEEN_GROUPS:
-                        changeCardGroup(cardUpdate);
-                        break;
-                    case REMOVE_CARD_FROM_GROUP:
-                        removeCardFromGroup(cardUpdate);
-                        break;
-                    case DELETE_CARD:
-                        removeCard(cardUpdate);
-                        break;
-                    case SPREAD_CARDS:
-                        spreadAllCards(cardUpdate.getCardGroup());
-                    default:
-                        break;
-                }
-            } catch (ViewCardUpdateExistException e)
+            if (cardUpdate.getType() != null)
             {
-                System.err.println(e.getMessage());
+                try {
+                    switch (cardUpdate.getType())
+                    {
+                        case ADD_CARD:
+                            addNewCard(cardUpdate);
+                            break;
+                        case TURN_CARD:
+                            turnBackCard(cardUpdate);
+                            break;
+                        case MOVE_CARD_BETWEEN_GROUPS:
+                            changeCardGroup(cardUpdate);
+                            break;
+                        case REMOVE_CARD_FROM_GROUP:
+                            removeCardFromGroup(cardUpdate);
+                            break;
+                        case DELETE_CARD:
+                            removeCard(cardUpdate);
+                            break;
+                        case SPREAD_CARDS:
+                            spreadAllCards(cardUpdate.getCardGroup());
+                        default:
+                            break;
+                    }
+                } catch (ViewCardUpdateExistException e)
+                {
+                    System.err.println(e.getMessage());
+                }
             }
         }
     }

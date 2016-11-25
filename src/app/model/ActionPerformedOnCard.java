@@ -32,5 +32,4 @@ public enum ActionPerformedOnCard {
     CUT_DECK,                   //To cut the deck
     SPREAD_CARDS,               //To spread all cards for choice
     GATHER_CARDS,               //To gather all cards after choice
-
 }

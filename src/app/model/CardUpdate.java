@@ -23,10 +23,15 @@ public class CardUpdate {
      * @param card the model card
      * @param type the type
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card) throws Exception {
-        if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS)
+    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card) {
+        if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS || type == ActionPerformedOnCard.SHUFFLE_CARDS
+                || type == ActionPerformedOnCard.SPREAD_CARDS || type == ActionPerformedOnCard.GATHER_CARDS
+                || type == ActionPerformedOnCard.CUT_DECK)
         {
-            throw new Exception("Cannot move a card without specifying the destination group.");
+            System.err.println("Cannot do the specific action : " + type.toString() + " without specifying the group. The update will be canceled.");
+            this.card = null;
+            this.cardGroup = null;
+            this.type = null;
         }
         this.card = card;
         this.cardGroup = null;
@@ -54,7 +59,15 @@ public class CardUpdate {
      * @param type the type
      * @param cardGroup the cardGroup
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull CardGroup cardGroup) {
+    public CardUpdate(ActionPerformedOnCard type, @NotNull CardGroup cardGroup)  {
+        if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS || type == type.ADD_CARD ||
+                type == ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP || type == ActionPerformedOnCard.DELETE_CARD)
+        {
+            System.err.println("Cannot do the specific action : " + type.toString() + " without specifying the card. The update will be canceled.");
+            this.card = null;
+            this.cardGroup = null;
+            this.type = null;
+        }
         this.cardGroup = cardGroup;
         this.card = null;
         this.type = type;
