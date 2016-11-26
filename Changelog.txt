@@ -5,6 +5,16 @@ Current version : v0.7.3
 
 =========================================================================
 
+v0.8.1 (26/11/16) :
+- Enabled back model thread for it to be executed alongside view
+- Added delays in model to correctly render distribution in view
+- Added missing animation type stubs
+- Fixed some cards face visible issues
+- Fixed program not exiting on window closing
+
+
+--------------------------------------------------------------------
+
 v0.8 (24/11/16) :
 - Added stub user request for card, bid choice through view and presenter
 - lots of code enhancement (fixes and visual tweaks)

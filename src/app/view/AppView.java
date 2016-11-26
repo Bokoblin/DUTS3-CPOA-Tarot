@@ -13,28 +13,29 @@ limitations under the License.
 
 package app.view;
 
+import app.model.*;
+import app.presenter.AppPresenter;
 import com.sun.istack.internal.NotNull;
+import exceptions.NullViewCardException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
-import java.util.*;
 
-import app.presenter.*;
-import app.model.*;
-import exceptions.NullViewCardException;
+import java.util.*;
 
 
 /**
  * The {@code AppView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.8
+ * @version v0.8.1
  * @since v0.2
  *
  * @see Observer
@@ -55,10 +56,11 @@ public class AppView extends Scene implements Observer{
     private AppPresenter appPresenter;
     private Group root3d;
     private Group rootGUI;
+    private Group background;
+    private Group initialDeck;
+    private Group pickedCardDeck;
     private Group talon;
     private Group[] hands = new Group[4];
-    private Group initialDeck;
-    private Group background;
     private HashMap<CardGroup, Group> cardGroupToGroup;
     private HashMap<ViewCard, Group> viewCardToGroup;
 
@@ -80,12 +82,13 @@ public class AppView extends Scene implements Observer{
         root3d = new Group();
         rootGUI = new Group();
         background = new Group();
-        talon = new Group();
         initialDeck = new Group();
+        pickedCardDeck = new Group();
+        talon = new Group();
         viewCardToGroup = new HashMap<>();
         cardGroupToGroup = new HashMap<>();
         root.getChildren().addAll(root3d, rootGUI);
-        root3d.getChildren().addAll(background, talon, initialDeck);
+        root3d.getChildren().addAll(background, talon, initialDeck, pickedCardDeck);
 
         for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint :
                 PlayerHandler.PlayersCardinalPoint.values()) {
@@ -160,6 +163,7 @@ public class AppView extends Scene implements Observer{
         }
         cardGroupToGroup.put(gameModel.getTalon(), talon);
         cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
+        cardGroupToGroup.put(gameModel.getPickedCardsDeck(), pickedCardDeck);
     }
 
 
@@ -201,8 +205,21 @@ public class AppView extends Scene implements Observer{
                     case DELETE_CARD:
                         removeCard(cardUpdate);
                         break;
+                    case SHUFFLE_CARDS:
+                        shuffleDeck(cardUpdate.getCardGroup());
+                        break;
+                    case SORT_DECK:
+                        sortDeck(cardUpdate.getCardGroup());
+                        break;
+                    case CUT_DECK:
+                        cutDeck(cardUpdate.getCardGroup());
+                        break;
                     case SPREAD_CARDS:
                         spreadAllCards(cardUpdate.getCardGroup());
+                        break;
+                    case GATHER_CARDS:
+                        gatherAllCards(cardUpdate.getCardGroup());
+                        break;
                     default:
                         break;
                 }
@@ -229,7 +246,7 @@ public class AppView extends Scene implements Observer{
         }
     }
 
-    
+
     /**
      * This method handles click event for selecting a card
      * that allows dealer choosing
@@ -288,7 +305,9 @@ public class AppView extends Scene implements Observer{
         {
             throw new NullViewCardException(cardUpdate, false);
         }
-        new ViewCard(cardUpdate.getCard(), this, getGroupFromCardGroup(cardUpdate.getCardGroup()));
+        ViewCard viewCard = new ViewCard(cardUpdate.getCard(), this,
+                getGroupFromCardGroup(cardUpdate.getCardGroup()));
+        turnBackCard(viewCard.getModelCard());
     }
 
     /**
@@ -301,11 +320,12 @@ public class AppView extends Scene implements Observer{
 
         ViewCard viewCard = getViewCard(card);
 
-        Timeline timeline = new Timeline();
-        KeyValue initialTranslate;
-        KeyValue finalTranslate;
+        if (viewCard != null && (viewCard.isShown() != viewCard.getModelCard().isShown()) ) {
 
-        if (viewCard != null) {
+            viewCard.setShown(!viewCard.isShown());
+            Timeline timeline = new Timeline();
+            KeyValue initialTranslate;
+            KeyValue finalTranslate;
             CardGroup cardGroup = getCardGroupFromGroup(viewCardToGroup.get(viewCard));
 
             DoubleProperty cardY = viewCard.getTransformations().getTranslate().yProperty();
@@ -341,8 +361,8 @@ public class AppView extends Scene implements Observer{
                     new KeyFrame(new Duration(2000), finalTranslate),
                     new KeyFrame(new Duration(2500), initialTranslate)
             );
+            timeline.play();
         }
-        timeline.play();
     }
 
 
@@ -359,19 +379,23 @@ public class AppView extends Scene implements Observer{
         {
             throw new NullViewCardException(cardUpdate, true);
         }
-        Group group = getGroupFromCardGroup(cardUpdate.getCardGroup());
-        viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
-        viewCardToGroup.replace(viewCard, group);
-        group.getChildren().add(viewCard);
+        Platform.runLater(() -> {
+            Group oldGroup = viewCardToGroup.get(viewCard);
+            Group newGroup = getGroupFromCardGroup(cardUpdate.getCardGroup());
+            oldGroup.getChildren().remove(viewCard);
+            viewCardToGroup.replace(viewCard, newGroup);
+            oldGroup.getChildren().remove(viewCard);
+            newGroup.getChildren().add(viewCard);
 
-        Timeline timeline = new Timeline();
-        timeline.getKeyFrames().addAll(
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), getCardDefaultPosition(viewCard).getX())),
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), getCardDefaultPosition(viewCard).getY())),
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), getCardDefaultPosition(viewCard).getZ())),
-                new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
-        );
-        timeline.play();
+            Timeline timeline = new Timeline();
+            timeline.getKeyFrames().addAll(
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), getCardDefaultPosition(viewCard).getX())),
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), getCardDefaultPosition(viewCard).getY())),
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), getCardDefaultPosition(viewCard).getZ())),
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
+            );
+            timeline.play();
+        });
     }
 
 
@@ -411,8 +435,18 @@ public class AppView extends Scene implements Observer{
      * @since v0.7.1
      * @param   cardGroup     the cardUpdate object.
      */
-    private void shuffleAllCards(CardGroup cardGroup) throws NullViewCardException {
+    private void shuffleDeck(CardGroup cardGroup) throws NullViewCardException {
         //TODO : SHUFFLING CARDS ANIMATION
+    }
+
+    /**
+     * This method is called by @update if the update type is @SORT_DECK
+     * It sorts a deck of card following cards priority from Tarot's rules
+     * @since v0.8.1
+     * @param   cardGroup     the cardUpdate object.
+     */
+    private void sortDeck(List<Card> cardGroup) throws NullViewCardException {
+        //TODO : SORTING DECK ANIMATION
     }
 
     /**
@@ -438,6 +472,17 @@ public class AppView extends Scene implements Observer{
         and line break depending on cards number.
         The cards must fit on the table (resized if needed)
          */
+    }
+
+
+    /**
+     * This method is called by @update if the update type is @GATHER_CARDS
+     * It gather all cards to a predefined deck
+     * @since v0.8.1
+     * @param   cardGroup     the cardUpdate object.
+     */
+    private void gatherAllCards(CardGroup cardGroup) throws NullViewCardException {
+        //TODO : GATHER ALL CARDS ANIMATION
     }
 
 
@@ -547,6 +592,10 @@ public class AppView extends Scene implements Observer{
                     break;
             }
         }
+        else if (viewCardToGroup.get(viewCard) == pickedCardDeck) {
+            point3D = new Point3D(TALON_POSITION.getX(), TALON_POSITION.getY(), TALON_POSITION.getZ()
+                    - ViewCard.getCardDepth()*(getNbViewCard(talon)));
+        }
         else if (viewCardToGroup.get(viewCard) == talon) {
             point3D = new Point3D(TALON_POSITION.getX(), TALON_POSITION.getY(), TALON_POSITION.getZ()
                     - ViewCard.getCardDepth()*(getNbViewCard(talon)));
@@ -593,6 +642,9 @@ public class AppView extends Scene implements Observer{
             angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == initialDeck) {
+            angle = 0;
+        }
+        else if (viewCardToGroup.get(viewCard) == pickedCardDeck) {
             angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == root3d) {
