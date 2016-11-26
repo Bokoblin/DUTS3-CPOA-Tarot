@@ -13,20 +13,20 @@ limitations under the License.
 
 package app;
 
+import app.model.GameModel;
 import app.presenter.AppPresenter;
+import app.view.AppView;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import app.model.GameModel;
-import app.view.AppView;
 
 /**
  * The {@code Main} class inits MVC architecture and launch the architecture
  * @author Alexandre
  * @author Arthur
- * @version v0.8
+ * @version v0.8.1
  * @since v0.2
  *
  * @see Application
@@ -49,13 +49,18 @@ public class Main extends Application {
         scene.setFill(Color.BLACK);
         primaryStage.show();
 
-//        Thread gameThread = new Thread(() -> {
+        Thread gameThread = new Thread(() -> {
             gameModel.chooseInitialDealer();
             gameModel.handleDealing();
             gameModel.handleBids();
             System.out.println(gameModel.toString());
-//        });
-//        gameThread.start();
+        });
+        gameThread.start();
+
+        primaryStage.setOnCloseRequest(event -> {
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     public static void main(String[] args) {
