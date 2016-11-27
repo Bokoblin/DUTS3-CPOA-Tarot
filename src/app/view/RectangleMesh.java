@@ -9,14 +9,14 @@ import javafx.scene.shape.MeshView;
  * The RectangleMesh class is a pre-defined rectangle mesh extended from MeshView
  * It create the mesh points from the specified coordinates, apply the specified texture and have a list of Transformations
  * @author Alexandre
- * @version v0.6
+ * @version v0.8
  * @since v0.2
  *
  * @see java.util.Observer
  * @see javafx.scene.Scene
  */
 public class RectangleMesh extends MeshView {
-    protected Transformations transformations;
+    private Transformations transformations;
 
     /**
      * Constructs a rectangle Mesh which is an
@@ -34,8 +34,8 @@ public class RectangleMesh extends MeshView {
                   String texturePath, float textureFaceWidth, float textureFaceHeight)
     {
         super();
-        float textureWidth = 0;
-        float textureHeight = 0;
+        float textureWidth;
+        float textureHeight;
         javafx.scene.image.Image image;
         image = new javafx.scene.image.Image(texturePath);
         textureHeight = (float)image.getHeight();
@@ -94,16 +94,8 @@ public class RectangleMesh extends MeshView {
         transformations = new Transformations(this);
     }
 
-    //TODO Documentation
-    public void setPosition(Point3D point3D)
-    {
-        this.setTranslateX(point3D.getX());
-        this.setTranslateY(point3D.getY());
-        this.setTranslateZ(point3D.getZ());
-    }
 
-
-    //GETTERS - no documentation needed
+    //GETTERS & SETTERS - no documentation needed
 
     public Point3D getPosition()
     {
@@ -112,5 +104,11 @@ public class RectangleMesh extends MeshView {
     public Transformations getTransformations()
     {
         return transformations;
+    }
+
+    public void setPosition(Point3D point3D) {
+        this.setTranslateX(point3D.getX());
+        this.setTranslateY(point3D.getY());
+        this.setTranslateZ(point3D.getZ());
     }
 }
