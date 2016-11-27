@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -136,16 +136,16 @@ public class AppView extends Scene implements Observer{
             }
         });
 
-        this.setOnMouseClicked(event -> {
-            gameModel.getPlayerHandler().getPlayer(South).forEach((c) -> {
-                try {
-                    c.setShown(!c.isShown());
-                    turnBackCard(c);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                }
-            });
-        });
+        this.setOnMouseClicked(event -> gameModel.getPlayerHandler().
+                getPlayer(South).forEach((c) -> {
+            try {
+                c.setShown(!c.isShown());
+                flipBackCard(c);
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }));
+
     }
 
 
@@ -190,12 +190,12 @@ public class AppView extends Scene implements Observer{
                         case ADD_CARD:
                             addNewCard(cardUpdate);
                             break;
-                        case TURN_CARD:
+                        case FLIP_CARD:
                             if (cardUpdate.getCard() == null) {
                                 for (Card c : cardUpdate.getCardGroup())
-                                    turnBackCard(c);
+                                    flipBackCard(c);
                             } else
-                                turnBackCard(cardUpdate.getCard());
+                                flipBackCard(cardUpdate.getCard());
                             break;
                         case MOVE_CARD_BETWEEN_GROUPS:
                             changeCardGroup(cardUpdate);
@@ -217,9 +217,6 @@ public class AppView extends Scene implements Observer{
                             break;
                         case SPREAD_CARDS:
                             spreadAllCards(cardUpdate.getCardGroup());
-                            break;
-                        case GATHER_CARDS:
-                            gatherAllCards(cardUpdate.getCardGroup());
                             break;
                         default:
                             break;
@@ -256,7 +253,7 @@ public class AppView extends Scene implements Observer{
     private void handleCardPicking() {
         //TODO : CARD PICKING EVENT
         try {
-            appPresenter.transmitUserChoice(54);
+            appPresenter.transmitUserChoice(new Random().nextInt(78));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -308,16 +305,16 @@ public class AppView extends Scene implements Observer{
         }
         new ViewCard(cardUpdate.getCard(), this,
                 getGroupFromCardGroup(cardUpdate.getCardGroup()));
-        turnBackCard(cardUpdate.getCard());
+        flipBackCard(cardUpdate.getCard());
     }
 
     /**
-     * This method is called by @update if the update type is @TURN_CARD
+     * This method is called by @update if the update type is @FLIP_CARD
      * It apply a 180° on the 3D Card with a transition to show its other face
      * @since   v0.6
      * @param   card     the cardUpdate object.
      */
-    private void turnBackCard(@NotNull Card card) throws NullViewCardException {
+    private void flipBackCard(@NotNull Card card) throws NullViewCardException {
 
         ViewCard viewCard = getViewCard(card);
 
@@ -442,10 +439,10 @@ public class AppView extends Scene implements Observer{
     /**
      * This method is called by @update if the update type is @SORT_DECK
      * It sorts a deck of card following cards priority from Tarot's rules
-     * @since v0.8.1
+     * @since   v0.8.1
      * @param   cardGroup     the cardUpdate object.
      */
-    private void sortDeck(List<Card> cardGroup) throws NullViewCardException {
+    private void sortDeck(CardGroup cardGroup) throws NullViewCardException {
         //TODO : SORTING DECK ANIMATION
     }
 
@@ -465,7 +462,7 @@ public class AppView extends Scene implements Observer{
      * @since v0.7.1
      * @param   cardGroup     the cardUpdate object.
      */
-    private void spreadAllCards(List<Card> cardGroup) throws NullViewCardException {
+    private void spreadAllCards(CardGroup cardGroup) throws NullViewCardException {
         //TODO : SPREADING CARDS ANIMATION
         /*
         All cards will be displayed next to each other with a certain margin
@@ -476,20 +473,10 @@ public class AppView extends Scene implements Observer{
 
 
     /**
-     * This method is called by @update if the update type is @GATHER_CARDS
-     * It gather all cards to a predefined deck
-     * @since v0.8.1
-     * @param   cardGroup     the cardUpdate object.
-     */
-    private void gatherAllCards(CardGroup cardGroup) throws NullViewCardException {
-        //TODO : GATHER ALL CARDS ANIMATION
-    }
-
-
-    /**
      * This return the number of viewCard node in a Group
      * @since   v0.6.5
      * @param   group    the Group object.
+     * @return the number of viewCard node in a Group
      */
     private int getNbViewCard(Group group) {
         int nb = 0;
@@ -503,11 +490,13 @@ public class AppView extends Scene implements Observer{
 
 
     /**
-     * This method return the associated ViewCard of the actual scene of a Card model object
+     * This method return the associated ViewCard
+     * of the actual scene of a Card model object
      * If the ViewCard doesn't exist it return null
      * @since   v0.6
      *
-     * @param   card     the model card object.
+     * @param   card     the model card object
+     * @return  the associated ViewCard of a modelCard
      */
     private ViewCard getViewCard(Card card) {
         for (Map.Entry<ViewCard, Group> entry : viewCardToGroup.entrySet())
@@ -523,10 +512,11 @@ public class AppView extends Scene implements Observer{
 
     /**
      * This method return the associated JavaFX Group of a CardGroup
-     * Return the @root3d group if no specific group exist
+     * return the @root3d group if no specific group exist
      * @since   v0.6
      *
-     * @param   cardGroup     the cardGroup object.
+     * @param   cardGroup     the cardGroup object
+     * @return  the associated JavaFX Group of a CardGroup
      */
     public Group getGroupFromCardGroup(CardGroup cardGroup) {
         if (cardGroupToGroup.containsKey(cardGroup))
@@ -538,10 +528,11 @@ public class AppView extends Scene implements Observer{
 
     /**
      * This method return the associated CardGroup of a JavaFx Group
-     * Return the null if no specific group exist
+     * return the null if no specific group exist
      * @since   v0.7
      *
-     * @param   viewGroup     the viewGroup object.
+     * @param   viewGroup     the viewGroup object
+     * @return  the associated CardGroup of a JavaFx Group
      */
     private CardGroup getCardGroupFromGroup(Group viewGroup) {
         for (Map.Entry<CardGroup, Group> entry : cardGroupToGroup.entrySet())
@@ -555,9 +546,11 @@ public class AppView extends Scene implements Observer{
     }
 
     /**
-     * This method return the correct default position of a card depending on the group
+     * This method return the correct default position
+     * of a card depending on the group
      * @since   v0.7
-     * @param   viewCard    the viewCard object.
+     * @param   viewCard    the viewCard object
+     * @return  the default position of a card
      */
     public Point3D getCardDefaultPosition(@NotNull ViewCard viewCard) {
 
@@ -612,9 +605,11 @@ public class AppView extends Scene implements Observer{
 
 
     /**
-     * This method return the correct default rotation of a card depending on the group
+     * This method return the correct default rotation
+     * of a card depending on the group
      * @since   v0.7
-     * @param   viewCard    the viewCard object.
+     * @param   viewCard    the viewCard object
+     * @return  the default rotation of a card
      */
     public double getCardDefaultRotation(@NotNull ViewCard viewCard) {
         int angle = 0;

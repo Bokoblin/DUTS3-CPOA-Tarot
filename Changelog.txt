@@ -1,9 +1,19 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.8.1
+Current version : v0.8.2
 
 =========================================================================
+
+v0.8.2 (27/11/16) :
+-Lots of code improvements in model Classes, improved animation delay for Bids
+-Fixed player flip card animation after dealing caused by model issue
+-Changed card priority following project's instructions
+-Removed unneeded code
+
+
+
+--------------------------------------------------------------------
 
 v0.8.1 (27/11/16) :
 - Added cards images display in the app

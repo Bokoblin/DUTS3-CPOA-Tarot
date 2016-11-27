@@ -1,3 +1,16 @@
+/*
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package tests;
 
 import exceptions.CardGroupNumberException;
@@ -17,7 +30,7 @@ import static org.junit.Assert.*;
  * GameView Unit tests
  *
  * @author Alexandre
- * @version v0.6
+ * @version v0.8.2
  * @since v0.6
  */
 public class GameViewTests extends Application
@@ -79,7 +92,8 @@ public class GameViewTests extends Application
     {
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
-            gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0)));
+            gameModel.notifyObserversOfCardUpdate(
+                    new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0)));
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -98,9 +112,11 @@ public class GameViewTests extends Application
         Talon talon = gameModel.getTalon();
         int nbNodeHandBefore = scene.getGroupFromCardGroup(hand).getChildren().size();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), hand));
+        gameModel.notifyObserversOfCardUpdate(
+                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), hand));
         assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore+1);
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
+        gameModel.notifyObserversOfCardUpdate(
+                new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
         assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore);
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
     }
@@ -114,11 +130,13 @@ public class GameViewTests extends Application
     {
         Talon talon = gameModel.getTalon();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
+        gameModel.notifyObserversOfCardUpdate(
+                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
-            gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+            gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP,
+                    ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -133,10 +151,12 @@ public class GameViewTests extends Application
     public void removeCard()
     {
         Talon talon = gameModel.getTalon();
-        gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
+        gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD,
+                gameModel.getInitialDeck().get(0), talon));
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         try {
-            gameModel.updateCard(new CardUpdate(ActionPerformedOnCard.DELETE_CARD, ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+            gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.DELETE_CARD,
+                    ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }

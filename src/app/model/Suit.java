@@ -18,15 +18,15 @@ import java.util.Random;
 /**
  * The {@code Suit} enumeration defines all suits that can be assigned to a card
  * @author Arthur
- * @version v0.7.2
+ * @version v0.8.2
  * @since v0.1
  */
 public enum Suit {
-    Club,
-    Diamond,
-    Heart,
     Spade,
+    Heart,
     Trump,
+    Diamond,
+    Club,
     Excuse;
 
     /**

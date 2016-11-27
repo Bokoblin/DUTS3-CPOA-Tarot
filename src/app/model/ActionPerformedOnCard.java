@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,12 +19,12 @@ package app.model;
  * to inform the view to do the similar action with its ViewCards
  * @author Arthur
  * @author Alexandre
- * @version v0.8
+ * @version v0.8.2
  * @since v0.6
  */
 public enum ActionPerformedOnCard {
     ADD_CARD,                   //To create a new ViewCard
-    TURN_CARD,                  //To turn a card (shown/hidden)
+    FLIP_CARD,                  //To flip a card (shown/hidden)
     MOVE_CARD_BETWEEN_GROUPS,   //To move a card between two groups
     REMOVE_CARD_FROM_GROUP,     //To move a card from a group to the table
     DELETE_CARD,                //To delete the related ViewCard
