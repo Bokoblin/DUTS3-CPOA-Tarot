@@ -1,7 +1,6 @@
 package exceptions;
 
 import app.model.CardUpdate;
-import javafx.concurrent.Task;
 
 /**
  * Exception class on card update
