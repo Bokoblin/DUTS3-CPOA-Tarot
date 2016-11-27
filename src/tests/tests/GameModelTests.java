@@ -234,8 +234,8 @@ public class GameModelTests {
             gameModel = new GameModel();
             gameModel.createCards();
 
-            List<Card> list1 = new ArrayList<>();
-            List<Card> list2 = new ArrayList<>();
+            CardGroup list1 = new CardGroup(100);
+            CardGroup list2 = new CardGroup(100);
             assertTrue( list1.isEmpty());
             assertTrue( list2.isEmpty());
 

@@ -1,9 +1,28 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.7.3
+Current version : v0.9.0
 
 =========================================================================
+
+v0.9.0 (27/11/16) :
+- Spreading cards animation
+- Picking card to choose the dealer
+- Some corrections
+
+=========================================================================
+
+v0.8.0 (24/11/16 - 26/11/16) :
+- Enabled back model thread for it to be executed alongside view
+- Added delays in model to correctly render distribution in view
+- Added missing animation type stubs
+- Added stub user request for card, bid choice through view and presenter
+- lots of code enhancement (fixes and visual tweaks)
+- Fixed some cards face visible issues
+- Fixed program not exiting on window closing
+
+
+--------------------------------------------------------------------
 
 v0.7.3 (23/11/16) :
 - Corrected app out of memory when loading all cards

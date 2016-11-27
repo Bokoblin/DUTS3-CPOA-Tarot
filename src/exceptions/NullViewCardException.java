@@ -7,12 +7,12 @@ import javafx.concurrent.Task;
  * Exception class on card update
  *
  * @author Alexandre
- * @version v0.6
+ * @version v0.8
  * @since v0.5
  */
-public class ViewCardUpdateExistException extends Exception
+public class NullViewCardException extends Exception
 {
-    public ViewCardUpdateExistException(CardUpdate cardUpdate, boolean existExcepted)
+    public NullViewCardException(CardUpdate cardUpdate, boolean existExcepted)
     {
         super(createMessage(cardUpdate, existExcepted));
     }
@@ -32,6 +32,5 @@ public class ViewCardUpdateExistException extends Exception
             message += "not exist.";
         }
         return message;
-
     }
 }

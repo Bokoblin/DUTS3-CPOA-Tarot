@@ -1,19 +1,25 @@
 package app.view;
 
-import com.sun.istack.internal.NotNull;
 import app.model.Card;
+import app.model.CardGroup;
+import com.sun.istack.internal.NotNull;
+import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Rotate;
 
 /**
  * The {@code ViewCard} class is a JavaFX extended node
  * with some useful methods to help animating the cards on the table.
  * @author Alexandre
- * @version v0.7
+ * @version v0.8
  * @since v0.3
  */
 public class ViewCard extends RectangleMesh {
     private Card modelCard;
+    private AppView appView;
+    private boolean shown;
     private static final float CARD_HEIGHT = 250;
     private static final float CARD_WIDTH = CARD_HEIGHT * (float)(55.0/88.0);
     private static final float CARD_DEPTH = 1;
@@ -32,11 +38,40 @@ public class ViewCard extends RectangleMesh {
     {
         super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/testCarte" + ".jpg", CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
         this.modelCard = modelCard;
+        this.appView = view;
+        this.shown = true;
         group.getChildren().add(this);
         view.getViewCardToGroup().put(this, group);
         setPosition(view.getCardDefaultPosition(this));
         setRotationAxis(Rotate.Z_AXIS);
         setRotate(view.getCardDefaultRotation(this));
+
+        //Events :
+        this.setOnMouseClicked(event -> {
+            if (appView.isHandleCardPicking())
+            {
+                CardGroup cardGroup = appView.getCardGroupFromGroup(appView.getInitialDeck());  //Technically the card is still in initialDeck in the model.
+                if (cardGroup != null && cardGroup.contains(modelCard))
+                {
+                    try {
+                        appView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
+                        appView.setHandleCardPicking(false);
+                    } catch (Exception e)
+                    {
+                        System.err.print(e.toString());
+                    }
+                }
+            }
+        });
+
+        this.setOnMouseEntered(event -> {
+            if (appView.isHandleCardPicking() && appView.getRoot3d().getChildren().contains(this))
+            {
+                appView.setCursor(Cursor.HAND);
+            }
+        });
+
+        this.setOnMouseExited(event -> appView.setCursor(Cursor.DEFAULT));
     }
 
     /**
@@ -66,5 +101,12 @@ public class ViewCard extends RectangleMesh {
     }
     public static float getCardDepth() {
         return CARD_DEPTH;
+    }
+    public boolean isShown() {
+        return shown;
+    }
+
+    public void setShown(boolean shown) {
+        this.shown = shown;
     }
 }

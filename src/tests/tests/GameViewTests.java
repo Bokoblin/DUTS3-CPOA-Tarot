@@ -7,7 +7,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.stage.Stage;
 import org.junit.*;
-import app.controller.*;
+import app.presenter.*;
 import app.model.*;
 import app.view.*;
 
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
  */
 public class GameViewTests extends Application
 {
-    private static AppController appController;
+    private static AppPresenter appPresenter;
     private static GameModel gameModel;
     private static AppView scene;
     private static Group root;
@@ -66,7 +66,7 @@ public class GameViewTests extends Application
         } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
             e.getMessage();
         }
-        scene = new AppView(root, gameModel, appController);
+        scene = new AppView(root, gameModel, appPresenter);
     }
 
     /**
@@ -152,10 +152,10 @@ public class GameViewTests extends Application
     public void start(Stage primaryStage) throws Exception {
         root = new Group();
         gameModel = new GameModel();
-        appController = new AppController();
-        scene = new AppView(root, gameModel, appController);
-        appController.setGameModel(gameModel);
-        appController.setAppView(scene);
+        appPresenter = new AppPresenter();
+        scene = new AppView(root, gameModel, appPresenter);
+        appPresenter.setGameModel(gameModel);
+        appPresenter.setAppView(scene);
 
         primaryStage.setScene(scene);
     }
