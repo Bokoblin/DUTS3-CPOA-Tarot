@@ -22,7 +22,7 @@ import exceptions.*;
  * Standalone Unit tests for model classes
  *
  * @author Arthur
- * @version v0.8.2
+ * @version v0.9
  * @since v0.1
  */
 public class StandaloneModelClassesTests {
@@ -100,7 +100,7 @@ public class StandaloneModelClassesTests {
     public void AddCardsToTheHand()
             throws CardNumberException, CardGroupNumberException {
         try {
-            Hand hand = new Hand();
+            Hand hand = new Hand(18);
             for (int i = 1; i <= 18; i++) {
                 hand.add(new Card() );
             }
@@ -126,7 +126,7 @@ public class StandaloneModelClassesTests {
         try {
             assertTrue(Hand.getNbHands() == 0);
             for (int i = 1; i < 4; i++) {
-                assertTrue(new Hand().size() == 0);
+                assertTrue(new Hand(18).size() == 0);
             }
             assertTrue(Hand.getNbHands() == 3);
         } catch (CardGroupNumberException e) {
@@ -258,7 +258,7 @@ public class StandaloneModelClassesTests {
     public void CardNumberExceptionTest()
             throws CardNumberException, CardGroupNumberException {
         try {
-            Hand hand = new Hand();
+            Hand hand = new Hand(18);
             for (int i = 1; i < 20; i++) {
                 if (!hand.add(new Card() ))
                     throw new CardNumberException("Card number limit has been reached.", hand.getNbMaxCards());
@@ -284,7 +284,7 @@ public class StandaloneModelClassesTests {
 
         try {
             for (int i = 0; i < 5; i++) {
-                new Hand();
+                new Hand(18);
             }
             fail("Exception should be fired");
         } catch (CardGroupNumberException e) {

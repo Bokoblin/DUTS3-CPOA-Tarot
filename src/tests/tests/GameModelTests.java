@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * GameModel Unit tests
  *
  * @author Arthur
- * @version v0.8.2
+ * @version v0.9
  * @since v0.5
  */
 public class GameModelTests {
@@ -51,21 +51,18 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.5
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void GameModelInstantiationTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void GameModelInstantiationTest() throws CardGroupNumberException {
         try {
             GameModel gameModel = new GameModel();
             gameModel.createCards();
-            assertTrue(gameModel.getInitialDeck().size() == 78);
+            assertTrue(gameModel.getWholeCardsDeck().size() == 78);
             assertTrue(gameModel.getTalon() != null);
             assertTrue(gameModel.getTalon().size() == 0);
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }
@@ -76,13 +73,10 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.5
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void shufflingCardsTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void shufflingCardsTest() throws CardGroupNumberException {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
@@ -90,18 +84,18 @@ public class GameModelTests {
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getWholeCardsDeck());
             cardListToNotBeShuffled.addAll(cardListToBeShuffled);
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
             gameModel.shuffleCards();
             cardListToBeShuffled.clear();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getWholeCardsDeck());
 
             assertNotEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }
@@ -112,13 +106,10 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.5
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void cuttingCardsTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void cuttingCardsTest() throws CardGroupNumberException {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
@@ -126,18 +117,18 @@ public class GameModelTests {
 
             List<Card> cardListToBeShuffled = new ArrayList<>();
             List<Card> cardListToNotBeShuffled = new ArrayList<>();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getWholeCardsDeck());
             cardListToNotBeShuffled.addAll(cardListToBeShuffled);
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
             gameModel.cutDeck();
             cardListToBeShuffled.clear();
-            cardListToBeShuffled.addAll(gameModel.getInitialDeck());
+            cardListToBeShuffled.addAll(gameModel.getWholeCardsDeck());
 
             assertNotEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }
@@ -148,27 +139,24 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.6
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void dealAllCardsTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void dealAllCardsTest() throws CardGroupNumberException {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
             gameModel.createCards();
 
             //Card repartition before dealing
-            assertTrue( !gameModel.getInitialDeck().isEmpty());
+            assertTrue( !gameModel.getWholeCardsDeck().isEmpty());
             assertTrue( gameModel.getTalon().isEmpty());
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
                     assertTrue(player.isEmpty()) );
 
             gameModel.dealAllCards();
 
-            assertTrue( gameModel.getInitialDeck().isEmpty());
+            assertTrue( gameModel.getWholeCardsDeck().isEmpty());
 
             //each player has its 18 cards
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
@@ -177,7 +165,7 @@ public class GameModelTests {
             //so do the chien
             assertTrue(gameModel.getTalon().size() == 6);
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }
@@ -188,30 +176,27 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.6
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void gatherAllCardsTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void gatherAllCardsTest() throws CardGroupNumberException {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
             gameModel.createCards();
             gameModel.dealAllCards();
 
-            assertTrue( gameModel.getInitialDeck().isEmpty());
+            assertTrue( gameModel.getWholeCardsDeck().isEmpty());
 
             gameModel.gatherAllCards();
 
             //Card repartition after gathering
-            assertTrue( gameModel.getInitialDeck().size() == 78);
+            assertTrue( gameModel.getWholeCardsDeck().size() == 78);
             assertTrue( gameModel.getTalon().isEmpty());
             gameModel.getPlayerHandler().getPlayersMap().forEach( (cardinal,player)->
                     assertTrue(player.isEmpty()) );
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }
@@ -222,13 +207,10 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.6
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void moveCardsBetweenDecksTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void moveCardsBetweenDecksTest() throws CardGroupNumberException {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
@@ -240,7 +222,7 @@ public class GameModelTests {
             assertTrue( list2.isEmpty());
 
 
-            Card c = gameModel.randomCard(gameModel.getInitialDeck());
+            Card c = gameModel.randomCard(gameModel.getWholeCardsDeck());
             list1.add(c);
 
             assertTrue( list1.size() == 1);
@@ -252,7 +234,7 @@ public class GameModelTests {
             assertTrue( list2.size() == 1);
 
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }
@@ -263,13 +245,10 @@ public class GameModelTests {
      * No exception should be fired
      * @since v0.6
      *
-     * @throws CardNumberException if user tries to create too much cards
-     * @throws CardUniquenessException if user tries to create too identical cards
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     @Test
-    public void randomCardTest()
-            throws CardNumberException, CardUniquenessException, CardGroupNumberException {
+    public void randomCardTest() throws CardGroupNumberException {
         GameModel gameModel;
         try {
             gameModel = new GameModel();
@@ -279,17 +258,17 @@ public class GameModelTests {
 
             //Initialize with each card and occurrence 0
             for( int i=0; i < 78; i++) {
-                occurrenceCard.put( gameModel.getInitialDeck().get(i), 0);
+                occurrenceCard.put( gameModel.getWholeCardsDeck().get(i), 0);
             }
 
             //Calling randomCard() method a high number of time to check if it is random
             for( int i=0; i < 1_000_000; i++) {
-                Card c = gameModel.randomCard(gameModel.getInitialDeck());
+                Card c = gameModel.randomCard(gameModel.getWholeCardsDeck());
                 occurrenceCard.replace(c, occurrenceCard.get(c), occurrenceCard.get(c)+1);
             }
 
             //Checking percent rate
-            double mean = 1_000_000/gameModel.getInitialDeck().size();
+            double mean = 1_000_000/gameModel.getWholeCardsDeck().size();
             double delta = mean*0.05; //standard deviation of 5%
 
             for (Map.Entry<Card, Integer> mapEntry : occurrenceCard.entrySet()) {
@@ -298,7 +277,7 @@ public class GameModelTests {
             System.out.println("I=[" + (mean-delta) + ", " + (mean+delta) +"]");
 
 
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
             fail("Exception shouldn't be fired");
         }

@@ -14,7 +14,6 @@ limitations under the License.
 package app.view;
 
 import app.model.*;
-import static app.model.PlayerHandler.PlayersCardinalPoint.*;
 import app.presenter.AppPresenter;
 import com.sun.istack.internal.NotNull;
 import exceptions.NullViewCardException;
@@ -36,15 +35,17 @@ import java.util.*;
  * The {@code AppView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.8
+ * @version v0.9
  * @since v0.2
  *
  * @see Observer
  * @see Scene
  */
-public class AppView extends Scene implements Observer{
+public class AppView extends Scene implements Observer {
 
-    private static final float TABLE_SIZE = 2000;
+    private static final float TABLE_SIZE = 2500;
+    private static final float MARGIN_TABLE = 130;
+    private static final float MARGIN_CARDS = 30;
     private static final float TABLE_DEPTH = 182;
     private static final float HAND_MARGIN_UP = 100;
     private static final float HAND_MARGIN_LEFT = (float)(0.2 * TABLE_SIZE);
@@ -52,13 +53,16 @@ public class AppView extends Scene implements Observer{
     private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2) - (ViewCard.getCardWidth()/2),
             (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), 0);
     private static final Point3D INITIAL_DECK_POSITION = new Point3D(-300, TABLE_SIZE/2, -200);
+    private static final Point3D PICKED_CARD_DECK_POSITION = new Point3D(MARGIN_TABLE,
+            TABLE_SIZE-MARGIN_TABLE-ViewCard.getCardHeight(), 0);
 
+    private boolean handleCardPicking;
     private GameModel gameModel;
     private AppPresenter appPresenter;
     private Group root3d;
     private Group rootGUI;
     private Group background;
-    private Group initialDeck;
+    private Group wholeCardsDeck;
     private Group pickedCardDeck;
     private Group talon;
     private Group[] hands = new Group[4];
@@ -77,19 +81,20 @@ public class AppView extends Scene implements Observer{
 
         this.gameModel = model;
         this.appPresenter = controller;
+        this.handleCardPicking = false;
         model.addObserver(this);
 
         //Create the groups
         root3d = new Group();
         rootGUI = new Group();
         background = new Group();
-        initialDeck = new Group();
+        wholeCardsDeck = new Group();
         pickedCardDeck = new Group();
         talon = new Group();
         viewCardToGroup = new HashMap<>();
         cardGroupToGroup = new HashMap<>();
         root.getChildren().addAll(root3d, rootGUI);
-        root3d.getChildren().addAll(background, talon, initialDeck, pickedCardDeck);
+        root3d.getChildren().addAll(background, talon, wholeCardsDeck, pickedCardDeck);
 
         for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint :
                 PlayerHandler.PlayersCardinalPoint.values()) {
@@ -98,7 +103,6 @@ public class AppView extends Scene implements Observer{
         }
         updateCardGroupToGroup();
 
-
         //Create the scene objects
         RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH,
                 "file:./res/table.jpg", 1100, 1100);
@@ -106,9 +110,9 @@ public class AppView extends Scene implements Observer{
 
         //Define the camera
         this.setCamera(new ViewCamera(true));
-        this.getViewCamera().setTranslateX(1000);
-        this.getViewCamera().setTranslateY(3300);
-        this.getViewCamera().setTranslateZ(-2900);
+        this.getViewCamera().setTranslateX(TABLE_SIZE/2);
+        this.getViewCamera().setTranslateY(4000);
+        this.getViewCamera().setTranslateZ(-3500);
         getViewCamera().getTransformations().getRotateX().setAngle(35);
 
         //Define the light
@@ -135,17 +139,6 @@ public class AppView extends Scene implements Observer{
                     break;
             }
         });
-
-        this.setOnMouseClicked(event -> gameModel.getPlayerHandler().
-                getPlayer(South).forEach((c) -> {
-            try {
-                c.setShown(!c.isShown());
-                flipBackCard(c);
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
-        }));
-
     }
 
 
@@ -155,8 +148,8 @@ public class AppView extends Scene implements Observer{
      * @since v0.7
      *
      */
-    public void updateCardGroupToGroup()
-    {
+    private void updateCardGroupToGroup() {
+        cardGroupToGroup = new HashMap<>();
         for (PlayerHandler.PlayersCardinalPoint playersCardinalPoint :
                 PlayerHandler.PlayersCardinalPoint.values())
         {
@@ -164,7 +157,8 @@ public class AppView extends Scene implements Observer{
             cardGroupToGroup.put(cardGroup, hands[playersCardinalPoint.ordinal()]);
         }
         cardGroupToGroup.put(gameModel.getTalon(), talon);
-        cardGroupToGroup.put(gameModel.getInitialDeck(), initialDeck);
+        cardGroupToGroup.put(gameModel.getWholeCardsDeck(), wholeCardsDeck);
+        cardGroupToGroup.put(gameModel.getToPickDeck(), wholeCardsDeck);
         cardGroupToGroup.put(gameModel.getPickedCardsDeck(), pickedCardDeck);
     }
 
@@ -185,52 +179,54 @@ public class AppView extends Scene implements Observer{
         {
             CardUpdate cardUpdate = (CardUpdate)arg;
             if (cardUpdate.getType() != null) {
-                try {
-                    switch (cardUpdate.getType()) {
-                        case ADD_CARD:
-                            addNewCard(cardUpdate);
-                            break;
-                        case FLIP_CARD:
-                            if (cardUpdate.getCard() == null) {
-                                for (Card c : cardUpdate.getCardGroup())
-                                    flipBackCard(c);
-                            } else
-                                flipBackCard(cardUpdate.getCard());
-                            break;
-                        case MOVE_CARD_BETWEEN_GROUPS:
-                            changeCardGroup(cardUpdate);
-                            break;
-                        case REMOVE_CARD_FROM_GROUP:
-                            removeCardFromGroup(cardUpdate);
-                            break;
-                        case DELETE_CARD:
-                            removeCard(cardUpdate);
-                            break;
-                        case SHUFFLE_CARDS:
-                            shuffleDeck(cardUpdate.getCardGroup());
-                            break;
-                        case SORT_DECK:
-                            sortDeck(cardUpdate.getCardGroup());
-                            break;
-                        case CUT_DECK:
-                            cutDeck(cardUpdate.getCardGroup());
-                            break;
-                        case SPREAD_CARDS:
-                            spreadAllCards(cardUpdate.getCardGroup());
-                            break;
-                        default:
-                            break;
+                Platform.runLater(() -> {
+                    try {
+                        switch (cardUpdate.getType()) {
+                            case ADD_CARD:
+                                addNewCard(cardUpdate);
+                                break;
+                            case FLIP_CARD:
+                                if (cardUpdate.getCard() == null) {
+                                    for (Card c : cardUpdate.getCardGroup())
+                                        flipBackCard(c, 2500);
+                                } else
+                                    flipBackCard(cardUpdate.getCard(), 2500);
+                                break;
+                            case MOVE_CARD_BETWEEN_GROUPS:
+                                changeCardGroup(cardUpdate);
+                                break;
+                            case REMOVE_CARD_FROM_GROUP:
+                                removeCardFromGroup(cardUpdate);
+                                break;
+                            case DELETE_CARD:
+                                removeCard(cardUpdate);
+                                break;
+                            case SHUFFLE_CARDS:
+                                shuffleDeck(cardUpdate.getCardGroup());
+                                break;
+                            case SORT_DECK:
+                                sortDeck(cardUpdate.getCardGroup());
+                                break;
+                            case CUT_DECK:
+                                cutDeck(cardUpdate.getCardGroup());
+                                break;
+                            case SPREAD_CARDS:
+                                spreadAllCards(cardUpdate.getCardGroup());
+                                break;
+                            default:
+                                break;
+                        }
+                    } catch (NullViewCardException e) {
+                        System.err.println(e.getMessage());
                     }
-                } catch (NullViewCardException e) {
-                    System.err.println(e.getMessage());
-                }
+                });
             }
         }
         else if ( arg instanceof ViewActionExpected) {
             switch (((ViewActionExpected)arg))
             {
                 case PICK_CARD:
-                    handleCardPicking();
+                    handleCardPicking = true;
                     break;
                 case CHOOSE_ECART_CARD:
                     handleCardChoosing();
@@ -241,21 +237,6 @@ public class AppView extends Scene implements Observer{
                 default:
                     break;
             }
-        }
-    }
-
-
-    /**
-     * This method handles click event for selecting a card
-     * that allows dealer choosing
-     * @since   v0.8
-     */
-    private void handleCardPicking() {
-        //TODO : CARD PICKING EVENT
-        try {
-            appPresenter.transmitUserChoice(new Random().nextInt(78));
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -299,13 +280,13 @@ public class AppView extends Scene implements Observer{
      * @param   cardUpdate     the cardUpdate object.
      */
     private void addNewCard(CardUpdate cardUpdate) throws NullViewCardException {
-        if (getViewCard(cardUpdate.getCard()) != null)
+        if (getViewCardFromCard(cardUpdate.getCard()) != null)
         {
             throw new NullViewCardException(cardUpdate, false);
         }
         new ViewCard(cardUpdate.getCard(), this,
                 getGroupFromCardGroup(cardUpdate.getCardGroup()));
-        flipBackCard(cardUpdate.getCard());
+        flipBackCard(cardUpdate.getCard(), 0);
     }
 
     /**
@@ -314,9 +295,14 @@ public class AppView extends Scene implements Observer{
      * @since   v0.6
      * @param   card     the cardUpdate object.
      */
-    private void flipBackCard(@NotNull Card card) throws NullViewCardException {
+    private void flipBackCard(@NotNull Card card, int animationTime) {
+        if (animationTime<5)
+        {
+            //To prevent keyFrames from mixing
+            animationTime = 5;
+        }
 
-        ViewCard viewCard = getViewCard(card);
+        ViewCard viewCard = getViewCardFromCard(card);
 
         if (viewCard != null && (viewCard.isShown() != viewCard.getModelCard().isShown()) ) {
 
@@ -337,26 +323,26 @@ public class AppView extends Scene implements Observer{
                 initialTranslate = new KeyValue(cardY, 0);
                 finalTranslate = new KeyValue(cardY, 0);
             }
+
             double initialRotateY, finalRotateY;
             initialRotateY = viewCard.getTransformations().getRotateY().getAngle();
-            if (viewCard.getTransformations().getRotateY().getAngle() >= 180) {
+
+            if (viewCard.getTransformations().getRotateY().getAngle() >= 180)
                 finalRotateY = 0;
-            }
-            else {
+            else
                 finalRotateY = 180;
-            }
 
             timeline.getKeyFrames().addAll(
                     new KeyFrame(Duration.ZERO, initialTranslate),
-                    new KeyFrame(new Duration(500) , finalTranslate),
-                    new KeyFrame(new Duration(500) , new KeyValue( cardZ, 0) ),
-                    new KeyFrame(new Duration(1000), new KeyValue( cardZ, -100) ),
-                    new KeyFrame(new Duration(1000), new KeyValue( cardAngle, initialRotateY) ),
-                    new KeyFrame(new Duration(1500), new KeyValue( cardAngle, finalRotateY) ),
-                    new KeyFrame(new Duration(1500), new KeyValue( cardZ, -100) ),
-                    new KeyFrame(new Duration(2000), new KeyValue( cardZ, 0) ),
-                    new KeyFrame(new Duration(2000), finalTranslate),
-                    new KeyFrame(new Duration(2500), initialTranslate)
+                    new KeyFrame(new Duration(animationTime*0.2) , finalTranslate),
+                    new KeyFrame(new Duration(animationTime*0.2) , new KeyValue( cardZ, 0) ),
+                    new KeyFrame(new Duration(animationTime*0.4), new KeyValue( cardZ, -100) ),
+                    new KeyFrame(new Duration(animationTime*0.4), new KeyValue( cardAngle, initialRotateY) ),
+                    new KeyFrame(new Duration(animationTime*0.6), new KeyValue( cardAngle, finalRotateY) ),
+                    new KeyFrame(new Duration(animationTime*0.6), new KeyValue( cardZ, -100) ),
+                    new KeyFrame(new Duration(animationTime*0.8), new KeyValue( cardZ, 0) ),
+                    new KeyFrame(new Duration(animationTime*0.8), finalTranslate),
+                    new KeyFrame(new Duration(animationTime), initialTranslate)
             );
             timeline.play();
         }
@@ -371,28 +357,63 @@ public class AppView extends Scene implements Observer{
      * @param   cardUpdate     the cardUpdate object.
      */
     private void changeCardGroup(CardUpdate cardUpdate) throws NullViewCardException {
-        ViewCard viewCard = getViewCard(cardUpdate.getCard());
+        ViewCard viewCard = getViewCardFromCard(cardUpdate.getCard());
+
         if (viewCard == null)
-        {
             throw new NullViewCardException(cardUpdate, true);
-        }
-        Platform.runLater(() -> {
+        else {
             Group oldGroup = viewCardToGroup.get(viewCard);
             Group newGroup = getGroupFromCardGroup(cardUpdate.getCardGroup());
             oldGroup.getChildren().remove(viewCard);
             viewCardToGroup.replace(viewCard, newGroup);
-            oldGroup.getChildren().remove(viewCard);
             newGroup.getChildren().add(viewCard);
 
             Timeline timeline = new Timeline();
             timeline.getKeyFrames().addAll(
-                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), getCardDefaultPosition(viewCard).getX())),
-                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), getCardDefaultPosition(viewCard).getY())),
-                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), getCardDefaultPosition(viewCard).getZ())),
-                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(),
+                            getCardDefaultPosition(viewCard).getX())),
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(),
+                            getCardDefaultPosition(viewCard).getY())),
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(),
+                            getCardDefaultPosition(viewCard).getZ())),
+                    new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(),
+                            getCardDefaultRotation(viewCard)))
             );
             timeline.play();
-        });
+        }
+    }
+
+
+    /**
+     * This method is called by @update if the update type is @MOVE_CARD_BETWEEN_GROUPS
+     * It move a ViewCard associated with a model Card to another JavaFX Group
+     * @since   v0.6
+     *
+     * @param   cardUpdate     the cardUpdate object.
+     * @param specificPosition the destination position
+     */
+    private void changeCardGroup(CardUpdate cardUpdate, Point3D specificPosition)
+            throws NullViewCardException {
+        ViewCard viewCard = getViewCardFromCard(cardUpdate.getCard());
+        if (viewCard == null)
+        {
+            throw new NullViewCardException(cardUpdate, true);
+        }
+
+        Group oldGroup = viewCardToGroup.get(viewCard);
+        Group newGroup = getGroupFromCardGroup(cardUpdate.getCardGroup());
+        oldGroup.getChildren().remove(viewCard);
+        viewCardToGroup.replace(viewCard, newGroup);
+        newGroup.getChildren().add(viewCard);
+
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), specificPosition.getX())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), specificPosition.getY())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), specificPosition.getZ())),
+                new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
+        );
+        timeline.play();
     }
 
 
@@ -417,7 +438,7 @@ public class AppView extends Scene implements Observer{
      * @param   cardUpdate     the cardUpdate object.
      */
     private void removeCard(CardUpdate cardUpdate) throws NullViewCardException {
-        ViewCard viewCard = getViewCard(cardUpdate.getCard());
+        ViewCard viewCard = getViewCardFromCard(cardUpdate.getCard());
         if (viewCard == null)
         {
             throw new NullViewCardException(cardUpdate, true);
@@ -425,6 +446,7 @@ public class AppView extends Scene implements Observer{
         viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
         viewCardToGroup.remove(viewCard);
     }
+
 
     /**
      * This method is called by @update if the update type is @SHUFFLE_CARDS
@@ -436,6 +458,7 @@ public class AppView extends Scene implements Observer{
         //TODO : SHUFFLING CARDS ANIMATION
     }
 
+
     /**
      * This method is called by @update if the update type is @SORT_DECK
      * It sorts a deck of card following cards priority from Tarot's rules
@@ -443,8 +466,53 @@ public class AppView extends Scene implements Observer{
      * @param   cardGroup     the cardUpdate object.
      */
     private void sortDeck(CardGroup cardGroup) throws NullViewCardException {
-        //TODO : SORTING DECK ANIMATION
+
+        cardGroup.forEach( (card) -> {
+            ViewCard viewCard = getViewCardFromCard(card);
+
+            if (viewCard != null) {
+                Point3D newPosition = new Point3D(0, 0, 0);
+                Group group = viewCardToGroup.get(viewCard);
+                final int CARD_INDEX = cardGroup.indexOf(viewCard.getModelCard());
+
+                switch (gameModel.getPlayerHandler().getPlayerCardinalPoint( (Hand)getCardGroupFromGroup(group) ) )
+                {
+                    case North:
+                        newPosition = new Point3D( TABLE_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth()
+                                - CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS,
+                                HAND_MARGIN_UP, CARD_INDEX+ViewCard.getCardDepth());
+                        break;
+                    case West:
+                        newPosition = new Point3D((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2
+                                + HAND_MARGIN_UP, (-1)*((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2)
+                                + HAND_MARGIN_LEFT + CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS, CARD_INDEX+ViewCard.getCardDepth());
+                        break;
+                    case South:
+                        newPosition = new Point3D( HAND_MARGIN_LEFT + CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS,
+                                TABLE_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(),CARD_INDEX+ViewCard.getCardDepth());
+                        break;
+                    case East:
+                        newPosition = new Point3D(TABLE_SIZE - ViewCard.getCardWidth() -((ViewCard.getCardHeight()
+                                - ViewCard.getCardWidth())/2) - HAND_MARGIN_UP, TABLE_SIZE - HAND_MARGIN_LEFT
+                                - ViewCard.getCardWidth() - ((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2)
+                                - CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS, CARD_INDEX+ViewCard.getCardDepth());
+                        break;
+                }
+
+                Timeline timeline = new Timeline();
+                timeline.getKeyFrames().addAll(
+                        new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateXProperty(), newPosition.getX())),
+                        new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateYProperty(), newPosition.getY())),
+                        new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), newPosition.getZ())),
+                        new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
+                );
+                timeline.play();
+                viewCard.toFront();
+            }
+        });
+
     }
+
 
     /**
      * This method is called by @update if the update type is @CUT_DECK
@@ -456,6 +524,7 @@ public class AppView extends Scene implements Observer{
         //TODO : CUTTING DECK ANIMATION
     }
 
+
     /**
      * This method is called by @update if the update type is @SPREAD_CARDS
      * It spreads the card of a group on the table
@@ -463,12 +532,21 @@ public class AppView extends Scene implements Observer{
      * @param   cardGroup     the cardUpdate object.
      */
     private void spreadAllCards(CardGroup cardGroup) throws NullViewCardException {
-        //TODO : SPREADING CARDS ANIMATION
-        /*
-        All cards will be displayed next to each other with a certain margin
-        and line break depending on cards number.
-        The cards must fit on the table (resized if needed)
-         */
+        int nbCardInRow = (int)((TABLE_SIZE - MARGIN_TABLE*2)/(ViewCard.getCardWidth()+MARGIN_CARDS));
+        int i = 0;
+        int j = 0;
+        for(Card card : cardGroup)
+        {
+            Point3D position = new Point3D(MARGIN_TABLE + i*(MARGIN_CARDS+ViewCard.getCardWidth()), MARGIN_TABLE
+                    + j*(MARGIN_CARDS+ViewCard.getCardHeight()), -ViewCard.getCardDepth());
+            changeCardGroup(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, card, null), position);
+            i++;
+            if (i>nbCardInRow-1)
+            {
+                i=0;
+                j++;
+            }
+        }
     }
 
 
@@ -498,7 +576,7 @@ public class AppView extends Scene implements Observer{
      * @param   card     the model card object
      * @return  the associated ViewCard of a modelCard
      */
-    private ViewCard getViewCard(Card card) {
+    private ViewCard getViewCardFromCard(Card card) {
         for (Map.Entry<ViewCard, Group> entry : viewCardToGroup.entrySet())
         {
             if (entry.getKey().getModelCard() == card)
@@ -512,13 +590,14 @@ public class AppView extends Scene implements Observer{
 
     /**
      * This method return the associated JavaFX Group of a CardGroup
-     * return the @root3d group if no specific group exist
+     * Return   the @root3d group if no specific group exist
      * @since   v0.6
      *
      * @param   cardGroup     the cardGroup object
      * @return  the associated JavaFX Group of a CardGroup
      */
     public Group getGroupFromCardGroup(CardGroup cardGroup) {
+        updateCardGroupToGroup();
         if (cardGroupToGroup.containsKey(cardGroup))
             return cardGroupToGroup.get(cardGroup);
         else
@@ -528,13 +607,14 @@ public class AppView extends Scene implements Observer{
 
     /**
      * This method return the associated CardGroup of a JavaFx Group
-     * return the null if no specific group exist
+     * Return the null if no specific group exist
      * @since   v0.7
      *
      * @param   viewGroup     the viewGroup object
      * @return  the associated CardGroup of a JavaFx Group
      */
-    private CardGroup getCardGroupFromGroup(Group viewGroup) {
+    public CardGroup getCardGroupFromGroup(Group viewGroup) {
+        updateCardGroupToGroup();
         for (Map.Entry<CardGroup, Group> entry : cardGroupToGroup.entrySet())
         {
             if (entry.getValue() == viewGroup)
@@ -544,6 +624,7 @@ public class AppView extends Scene implements Observer{
         }
         return null;
     }
+
 
     /**
      * This method return the correct default position
@@ -586,19 +667,19 @@ public class AppView extends Scene implements Observer{
             }
         }
         else if (viewCardToGroup.get(viewCard) == pickedCardDeck) {
-            point3D = new Point3D(TALON_POSITION.getX(), TALON_POSITION.getY(), TALON_POSITION.getZ()
-                    - ViewCard.getCardDepth()*(getNbViewCard(talon)));
+            point3D = new Point3D(PICKED_CARD_DECK_POSITION.getX() + (ViewCard.getCardWidth() + MARGIN_CARDS) * getNbViewCard(pickedCardDeck),
+                    PICKED_CARD_DECK_POSITION.getY(), PICKED_CARD_DECK_POSITION.getZ() - ViewCard.getCardDepth());
         }
         else if (viewCardToGroup.get(viewCard) == talon) {
             point3D = new Point3D(TALON_POSITION.getX(), TALON_POSITION.getY(), TALON_POSITION.getZ()
                     - ViewCard.getCardDepth()*(getNbViewCard(talon)));
         }
-        else if (viewCardToGroup.get(viewCard) == initialDeck) {
+        else if (viewCardToGroup.get(viewCard) == wholeCardsDeck) {
             point3D = new Point3D(INITIAL_DECK_POSITION.getX(), INITIAL_DECK_POSITION.getY(),
-                    INITIAL_DECK_POSITION.getZ() -ViewCard.getCardDepth()*(getNbViewCard(initialDeck)));
+                    INITIAL_DECK_POSITION.getZ() -ViewCard.getCardDepth()*(getNbViewCard(wholeCardsDeck)));
         }
         else if (viewCardToGroup.get(viewCard) == root3d) {
-            //TODO : STATEMENT EMPTY
+            point3D = new Point3D(0,0, -ViewCard.getCardDepth());
         }
         return point3D;
     }
@@ -636,7 +717,7 @@ public class AppView extends Scene implements Observer{
         else if (viewCardToGroup.get(viewCard) == talon) {
             angle = 0;
         }
-        else if (viewCardToGroup.get(viewCard) == initialDeck) {
+        else if (viewCardToGroup.get(viewCard) == wholeCardsDeck) {
             angle = 0;
         }
         else if (viewCardToGroup.get(viewCard) == pickedCardDeck) {
@@ -649,7 +730,7 @@ public class AppView extends Scene implements Observer{
     }
 
 
-    //GETTERS - no documentation needed
+    //GETTERS & SETTERS - no documentation needed
 
     public Group getRoot3d()
     {
@@ -665,5 +746,18 @@ public class AppView extends Scene implements Observer{
     }
     public HashMap<ViewCard, Group> getViewCardToGroup() {
         return viewCardToGroup;
+    }
+    public AppPresenter getAppPresenter() {
+        return appPresenter;
+    }
+    public boolean isHandlingCardPicking() {
+        return handleCardPicking;
+    }
+    public Group getWholeCardsDeck() {
+        return wholeCardsDeck;
+    }
+
+    public void setHandleCardPicking(boolean handleCardPicking) {
+        this.handleCardPicking = handleCardPicking;
     }
 }

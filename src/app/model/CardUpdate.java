@@ -19,7 +19,7 @@ import com.sun.istack.internal.NotNull;
  * This class is a container which is passed when calling notifyObservers() method.
  * It indicate to view what action to perform on a specific card with sometimes a specific cardGroup.
  * @author Alexandre
- * @version v0.8
+ * @version v0.9
  * @since v0.6
  */
 public class CardUpdate {
@@ -54,12 +54,13 @@ public class CardUpdate {
 
     /**
      * Constructs CardUpdate with a card, a group and a type
+     * Setting a null group will affect the card to the default view group
      * @since v0.6
      *@param type the type
      * @param card the model card
      * @param group the cardGroup
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, @NotNull CardGroup group)
+    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, CardGroup group)
     {
         this.cardGroup = group;
         this.card = card;
