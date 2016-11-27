@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * GameModel Unit tests
  *
  * @author Arthur
- * @version v0.7.1
+ * @version v0.8.2
  * @since v0.5
  */
 public class GameModelTests {
@@ -131,7 +131,7 @@ public class GameModelTests {
 
             assertEquals(cardListToBeShuffled, cardListToNotBeShuffled);
 
-            gameModel.cutCards();
+            gameModel.cutDeck();
             cardListToBeShuffled.clear();
             cardListToBeShuffled.addAll(gameModel.getInitialDeck());
 

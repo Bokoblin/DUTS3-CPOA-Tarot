@@ -22,7 +22,7 @@ import exceptions.*;
  * Standalone Unit tests for model classes
  *
  * @author Arthur
- * @version v0.8.1
+ * @version v0.8.2
  * @since v0.1
  */
 public class StandaloneModelClassesTests {
@@ -159,6 +159,7 @@ public class StandaloneModelClassesTests {
             Card classicCard1 = new Card( Suit.Heart, Rank.Eight);
             Card classicCard2 = new Card( Suit.Heart, Rank.Queen);
             Card classicCard3 = new Card( Suit.Spade, Rank.King);
+            Card classicCard4 = new Card( Suit.Club, Rank.King);
             Card excuse = new Card(Suit.Excuse, -1);
 
             Card.CardComparator cardComparator = new Card.CardComparator();
@@ -171,10 +172,14 @@ public class StandaloneModelClassesTests {
             assertTrue(cardComparator.compare(classicCard1, classicCard2) == -1); //Eight < Queen
 
             //NotSame Type comparison
-            assertTrue(cardComparator.compare(trumpCard1, classicCard1) == 1);  //Trump > Heart
-            assertTrue(cardComparator.compare(classicCard3, trumpCard1) == -1); //Spade < Trump
-            assertTrue(cardComparator.compare(classicCard1, excuse) == -1);     //Heart < Excuse
-            assertTrue(cardComparator.compare(trumpCard1, excuse) == -1);       //Trump < Excuse
+            assertTrue(cardComparator.compare(trumpCard1, classicCard1) == 1);    //Trump > Heart
+            assertTrue(cardComparator.compare(classicCard3, trumpCard1) == -1);   //Spade < Trump
+            assertTrue(cardComparator.compare(classicCard1, excuse) == -1);       //Heart < Excuse
+            assertTrue(cardComparator.compare(trumpCard1, excuse) == -1);         //Trump < Excuse
+            assertTrue(cardComparator.compare(classicCard2, classicCard4) == -1); //Heart < Club
+            assertTrue(cardComparator.compare(classicCard3, classicCard4) == -1); //Spade < Club
+            assertTrue(cardComparator.compare(trumpCard1, classicCard4) == -1);   //Trump < Club
+            assertTrue(cardComparator.compare(excuse, classicCard4) == 1);        //Excuse > Club
 
         } catch (CardNumberException | CardUniquenessException e) {
             System.err.println(e.getMessage());
