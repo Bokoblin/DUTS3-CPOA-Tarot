@@ -9,7 +9,7 @@ import java.util.Map;
  * The {@code PlayerHandler} class handles players creation
  * and their temporary status (dealer, shuffler, cutter, currentPlayer)
  * @author Arthur
- * @version v0.6
+ * @version v0.9
  * @since v0.6
  *
  * @see Hand
@@ -41,10 +41,10 @@ public class PlayerHandler {
      */
     public PlayerHandler() throws CardGroupNumberException {
         try {
-            north = new Hand();
-            west = new Hand();
-            south = new Hand();
-            east = new Hand();
+            north = new Hand(18);
+            west = new Hand(18);
+            south = new Hand(24);
+            east = new Hand(18);
         } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
         }

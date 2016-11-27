@@ -2,6 +2,8 @@ package app.view;
 
 import app.model.Card;
 import com.sun.istack.internal.NotNull;
+import app.model.CardGroup;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.transform.Rotate;
 
@@ -12,11 +14,12 @@ import java.util.HashMap;
  * with some useful methods to help animating the cards on the table.
  * @author Alexandre
  * @author Arthur
- * @version v0.8.1
+ * @version v0.9
  * @since v0.3
  */
 public class ViewCard extends RectangleMesh {
     private Card modelCard;
+    private AppView appView;
     private boolean shown;
     private static final float CARD_HEIGHT = 250;
     private static final float CARD_WIDTH = CARD_HEIGHT * (float)(55.0/88.0);
@@ -121,12 +124,42 @@ public class ViewCard extends RectangleMesh {
     {
         super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/" + getFileName(modelCard), CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
         this.modelCard = modelCard;
+        this.appView = view;
         this.shown = true;
         group.getChildren().add(this);
         view.getViewCardToGroup().put(this, group);
         setPosition(view.getCardDefaultPosition(this));
         setRotationAxis(Rotate.Z_AXIS);
         setRotate(view.getCardDefaultRotation(this));
+
+        //=== EVENTS
+
+        this.setOnMouseClicked(event -> {
+            if (appView.isHandlingCardPicking())
+            {
+                //Technically the card is still in toPickDeck in the model
+                CardGroup cardGroup = appView.getCardGroupFromGroup(appView.getWholeCardsDeck());
+                if (cardGroup != null && cardGroup.contains(modelCard))
+                {
+                    try {
+                        appView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
+                        appView.setHandleCardPicking(false);
+                    } catch (Exception e)
+                    {
+                        System.err.print(e.toString());
+                    }
+                }
+            }
+        });
+
+        this.setOnMouseEntered(event -> {
+            if (appView.isHandlingCardPicking() && appView.getRoot3d().getChildren().contains(this))
+            {
+                appView.setCursor(Cursor.HAND);
+            }
+        });
+
+        this.setOnMouseExited(event -> appView.setCursor(Cursor.DEFAULT));
     }
 
     /**

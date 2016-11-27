@@ -22,7 +22,7 @@ import java.util.Objects;
  * it consists in a group of cards representing a player
  *
  * @author Arthur
- * @version v0.6
+ * @version v0.9
  * @since v0.1
  *
  * @see CardGroup
@@ -38,9 +38,10 @@ public class Hand extends CardGroup{
      * @since v0.1
      *
      * @throws CardGroupNumberException if user tries to create too much hands
+     * @param NB_MAX_CARDS the number max of card that CardGroup can accept
      */
-    public Hand() throws CardGroupNumberException {
-        super(18); //Max number of cards for this group
+    public Hand(int NB_MAX_CARDS) throws CardGroupNumberException {
+        super(NB_MAX_CARDS); //Max number of cards for this group
         if ( nbHands >= NB_MAX_HANDS)
             throw new CardGroupNumberException(
                     "Hand instances limit has been reached.", NB_MAX_HANDS);
@@ -84,9 +85,6 @@ public class Hand extends CardGroup{
 
     public static int getNbHands() {
         return nbHands;
-    }
-    public static int getNbMaxHands() {
-        return NB_MAX_HANDS;
     }
     public Bids getBidChosen() {
         return bidChosen;

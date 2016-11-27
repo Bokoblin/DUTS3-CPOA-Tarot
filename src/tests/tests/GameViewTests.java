@@ -14,8 +14,6 @@ limitations under the License.
 package tests;
 
 import exceptions.CardGroupNumberException;
-import exceptions.CardNumberException;
-import exceptions.CardUniquenessException;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.stage.Stage;
@@ -30,7 +28,7 @@ import static org.junit.Assert.*;
  * GameView Unit tests
  *
  * @author Alexandre
- * @version v0.8.2
+ * @version v0.9
  * @since v0.6
  */
 public class GameViewTests extends Application
@@ -76,7 +74,7 @@ public class GameViewTests extends Application
         try {
             gameModel = new GameModel();
             gameModel.createCards();
-        } catch (CardNumberException | CardUniquenessException | CardGroupNumberException e) {
+        } catch (CardGroupNumberException e) {
             e.getMessage();
         }
         scene = new AppView(root, gameModel, appPresenter);
@@ -93,7 +91,12 @@ public class GameViewTests extends Application
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
             gameModel.notifyObserversOfCardUpdate(
-                    new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0)));
+                    new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0)));
+            try {
+                Thread.sleep(20);
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -113,10 +116,20 @@ public class GameViewTests extends Application
         int nbNodeHandBefore = scene.getGroupFromCardGroup(hand).getChildren().size();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), hand));
+                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0), hand));
+        try {
+            Thread.sleep(20);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
         assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore+1);
         gameModel.notifyObserversOfCardUpdate(
                 new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
+        try {
+            Thread.sleep(20);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
         assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore);
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
     }
@@ -131,12 +144,22 @@ public class GameViewTests extends Application
         Talon talon = gameModel.getTalon();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getInitialDeck().get(0), talon));
+                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0), talon));
+        try {
+            Thread.sleep(20);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
             gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP,
                     ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+            try {
+                Thread.sleep(20);
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -152,11 +175,21 @@ public class GameViewTests extends Application
     {
         Talon talon = gameModel.getTalon();
         gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD,
-                gameModel.getInitialDeck().get(0), talon));
+                gameModel.getWholeCardsDeck().get(0), talon));
+        try {
+            Thread.sleep(20);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         try {
             gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.DELETE_CARD,
                     ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
+            try {
+                Thread.sleep(20);
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
