@@ -22,7 +22,7 @@ import exceptions.*;
  * Standalone Unit tests for model classes
  *
  * @author Arthur
- * @version v0.7.2
+ * @version v0.8.1
  * @since v0.1
  */
 public class StandaloneModelClassesTests {
@@ -53,7 +53,7 @@ public class StandaloneModelClassesTests {
         assertTrue(Card.getNbMaxCards() == 78);
 
         try {
-            Card c = new Card(Suit.Heart, Rank.Ace);
+            new Card(Suit.Heart, Rank.Ace);
             assertTrue(Card.getNbCards() == 1);
         } catch (CardNumberException | CardUniquenessException e) {
             System.err.println(e.getMessage());
@@ -74,7 +74,7 @@ public class StandaloneModelClassesTests {
             throws CardNumberException {
         try {
             for (int i = 1; i <= 75; i++) {
-                Card c = new Card();
+                new Card();
             }
         }
         catch (CardNumberException e) {
@@ -126,8 +126,7 @@ public class StandaloneModelClassesTests {
         try {
             assertTrue(Hand.getNbHands() == 0);
             for (int i = 1; i < 4; i++) {
-                Hand hand = new Hand();
-                assertTrue(hand.size() == 0);
+                assertTrue(new Hand().size() == 0);
             }
             assertTrue(Hand.getNbHands() == 3);
         } catch (CardGroupNumberException e) {
@@ -137,8 +136,7 @@ public class StandaloneModelClassesTests {
 
         try {
             assertTrue( !Talon.exists() );
-            Talon chien = new Talon();
-            assertTrue(chien.size() == 0);
+            assertTrue(new Talon().size() == 0);
             assertTrue( Talon.exists() );
         }
         catch (CardGroupNumberException e) {
@@ -198,7 +196,7 @@ public class StandaloneModelClassesTests {
         //Instancing too much cards test
         try {
             for (int i = 1; i <= 79; i++) {
-                Card c = new Card();
+                new Card();
             }
             fail("Exception should be fired");
         }
@@ -281,7 +279,7 @@ public class StandaloneModelClassesTests {
 
         try {
             for (int i = 0; i < 5; i++) {
-                Hand hand = new Hand();
+                new Hand();
             }
             fail("Exception should be fired");
         } catch (CardGroupNumberException e) {
@@ -290,8 +288,8 @@ public class StandaloneModelClassesTests {
         }
 
         try {
-            Talon chien1 = new Talon();
-            Talon chien2 = new Talon();
+            new Talon();
+            new Talon();
             fail("Exception should be fired");
         } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());

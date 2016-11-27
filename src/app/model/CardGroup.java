@@ -38,7 +38,7 @@ public class CardGroup extends ArrayList<Card> {
      * Constructs a CardGroup
      *
      * @param NB_MAX_CARDS the max number of card a subclass of CardGroup can have
-     * @throws CardGroupNumberException
+     * @throws CardGroupNumberException if user tries to create too much cardGroup
      * @since v0.1
      */
     public CardGroup(int NB_MAX_CARDS) throws CardGroupNumberException {

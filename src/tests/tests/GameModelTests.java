@@ -275,24 +275,24 @@ public class GameModelTests {
             gameModel = new GameModel();
             gameModel.createCards();
 
-            Map<Card, Integer> occurenceCard = new HashMap<>();
+            Map<Card, Integer> occurrenceCard = new HashMap<>();
 
-            //Initialize with each card and occurence 0
+            //Initialize with each card and occurrence 0
             for( int i=0; i < 78; i++) {
-                occurenceCard.put( gameModel.getInitialDeck().get(i), 0);
+                occurrenceCard.put( gameModel.getInitialDeck().get(i), 0);
             }
 
             //Calling randomCard() method a high number of time to check if it is random
             for( int i=0; i < 1_000_000; i++) {
                 Card c = gameModel.randomCard(gameModel.getInitialDeck());
-                occurenceCard.replace(c, occurenceCard.get(c), occurenceCard.get(c)+1);
+                occurrenceCard.replace(c, occurrenceCard.get(c), occurrenceCard.get(c)+1);
             }
 
             //Checking percent rate
             double mean = 1_000_000/gameModel.getInitialDeck().size();
             double delta = mean*0.05; //standard deviation of 5%
 
-            for (Map.Entry<Card, Integer> mapEntry : occurenceCard.entrySet()) {
+            for (Map.Entry<Card, Integer> mapEntry : occurrenceCard.entrySet()) {
                 assertEquals(mean, mapEntry.getValue(), delta);
             }
             System.out.println("I=[" + (mean-delta) + ", " + (mean+delta) +"]");

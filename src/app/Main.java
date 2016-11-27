@@ -23,10 +23,18 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
- * The {@code Main} class inits MVC architecture and launch the architecture
+ * The {@code Main} class inits and launch game
+ *
+ * The app follows an MVP Architecture :
+ * GameModel notify its view observer, AppView
+ * AppView send user request to presenter, AppPresenter
+ * AppPresenter change the model, GameModel
+ *
+ * Our app implements a variant of MVP from CPOA TD2 (page 3)
+ *
  * @author Alexandre
  * @author Arthur
- * @version v0.8
+ * @version v0.8.1
  * @since v0.2
  *
  * @see Application
