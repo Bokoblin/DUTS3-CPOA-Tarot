@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,11 +17,11 @@ package app.model;
  * The {@code ViewActionExpected} enumeration defines actions
  * that model awaits from view to resume its logic
  * @author Arthur
- * @version v0.8
+ * @version v0.10
  * @since v0.8
  */
 public enum ViewActionExpected {
-    PICK_CARD,    //To choose a card among blinking ones (Dealer designation)
+    PICK_CARD,    //To choose a card among spreaded ones (Dealer designation)
     CHOOSE_ECART_CARD,  //To choose a card among blinking ones (Ecart designation)
     CHOOSE_BID,   //To choose a bid among those shown
 }

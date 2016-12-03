@@ -14,8 +14,7 @@ limitations under the License.
 package tests;
 
 import app.model.*;
-import exceptions.*;
-
+import exceptions.CardGroupNumberException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -228,7 +227,7 @@ public class GameModelTests {
             assertTrue( list1.size() == 1);
             assertTrue( list2.isEmpty());
 
-            gameModel.moveCardBetweenDecks(list1, list2, c);
+            gameModel.moveCardBetweenDecks(list1, list2, c, true);
 
             assertTrue( list1.isEmpty());
             assertTrue( list2.size() == 1);

@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -34,7 +34,7 @@ import javafx.stage.Stage;
  *
  * @author Alexandre
  * @author Arthur
- * @version v0.8.1
+ * @version v0.10
  * @since v0.2
  *
  * @see Application
@@ -42,7 +42,6 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Platform.setImplicitExit(false);
         Group root = new Group();
         GameModel gameModel = new GameModel();
         AppPresenter appPresenter = new AppPresenter();
@@ -57,18 +56,12 @@ public class Main extends Application {
         scene.setFill(Color.BLACK);
         primaryStage.show();
 
-        Thread gameThread = new Thread(() -> {
-            gameModel.chooseInitialDealer();
-            gameModel.handleDealing();
-            gameModel.handleBids();
-            System.out.println(gameModel.toString());
-        });
-        gameThread.start();
-
         primaryStage.setOnCloseRequest(event -> {
             Platform.exit();
             System.exit(0);
         });
+
+        gameModel.getGameThread().start();
     }
 
     public static void main(String[] args) {

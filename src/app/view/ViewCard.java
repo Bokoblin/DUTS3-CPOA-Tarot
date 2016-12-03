@@ -1,8 +1,21 @@
+/*
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package app.view;
 
 import app.model.Card;
-import com.sun.istack.internal.NotNull;
 import app.model.CardGroup;
+import app.model.ViewActionExpected;
+import com.sun.istack.internal.NotNull;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.transform.Rotate;
@@ -14,7 +27,7 @@ import java.util.HashMap;
  * with some useful methods to help animating the cards on the table.
  * @author Alexandre
  * @author Arthur
- * @version v0.9
+ * @version v0.10
  * @since v0.3
  */
 public class ViewCard extends RectangleMesh {
@@ -29,8 +42,7 @@ public class ViewCard extends RectangleMesh {
 
     private static final HashMap<String, String> fileNameMap;
 
-    static
-    {
+    static {
         fileNameMap = new HashMap<>();
         fileNameMap.put("ClubAce", "Tarot_nouveau_Clubs_Ace.jpg");
         fileNameMap.put("ClubTwo", "Tarot_nouveau_Clubs_02.jpg");
@@ -112,6 +124,7 @@ public class ViewCard extends RectangleMesh {
         fileNameMap.put("Excuse", "Tarot_nouveau_Excuse.jpg");
     }
 
+
     /**
      * Constructs a view card with a model card, a view and a group
      * @since v0.6.2
@@ -122,7 +135,8 @@ public class ViewCard extends RectangleMesh {
      */
     public ViewCard(@NotNull Card modelCard, @NotNull AppView view, @NotNull Group group)
     {
-        super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/" + getFileName(modelCard), CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
+        super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/" + getFileName(modelCard),
+                CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
         this.modelCard = modelCard;
         this.appView = view;
         this.shown = true;
@@ -134,16 +148,27 @@ public class ViewCard extends RectangleMesh {
 
         //=== EVENTS
 
+        this.setOnMouseEntered(event -> {
+            if ( appView.isHandlingCardPicking() && appView.getRoot3d().getChildren().contains(this) ) {
+                appView.setCursor(Cursor.HAND);
+            }
+        });
+
         this.setOnMouseClicked(event -> {
             if (appView.isHandlingCardPicking())
             {
-                //Technically the card is still in toPickDeck in the model
-                CardGroup cardGroup = appView.getCardGroupFromGroup(appView.getWholeCardsDeck());
+                CardGroup cardGroup;
+                if( appView.getGameModel().getAwaitsUserEvent() == ViewActionExpected.PICK_CARD)
+                    cardGroup = appView.getCardGroupFromGroup(appView.getWholeCardsDeck());
+                else
+                    cardGroup = appView.getCardGroupFromGroup(appView.getSouth());
+
                 if (cardGroup != null && cardGroup.contains(modelCard))
                 {
                     try {
                         appView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
                         appView.setHandleCardPicking(false);
+                        appView.getToolTip().setText("Please wait");
                     } catch (Exception e)
                     {
                         System.err.print(e.toString());
@@ -152,15 +177,9 @@ public class ViewCard extends RectangleMesh {
             }
         });
 
-        this.setOnMouseEntered(event -> {
-            if (appView.isHandlingCardPicking() && appView.getRoot3d().getChildren().contains(this))
-            {
-                appView.setCursor(Cursor.HAND);
-            }
-        });
-
         this.setOnMouseExited(event -> appView.setCursor(Cursor.DEFAULT));
     }
+
 
     /**
      * Constructs a view card with a model card
@@ -170,9 +189,11 @@ public class ViewCard extends RectangleMesh {
      */
     public ViewCard(@NotNull Card modelCard)
     {
-        super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/" + getFileName(modelCard), CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
+        super(CARD_WIDTH, CARD_HEIGHT, CARD_DEPTH, "file:./res/" + getFileName(modelCard),
+                CARD_FACE_TEXTURE_WIDTH, CARD_FACE_TEXTURE_HEIGHT);
         this.modelCard = modelCard;
     }
+
 
     /**
      * This method gets filename of the card image thanks to the card name
@@ -187,19 +208,19 @@ public class ViewCard extends RectangleMesh {
     }
 
 
-    //GETTERS - no documentation needed
+    //GETTERS & SETTERS - no documentation needed
 
     public Card getModelCard()
     {
         return modelCard;
     }
-    public static float getCardWidth() {
+    public static float getWidth() {
         return CARD_WIDTH;
     }
-    public static float getCardHeight() {
+    public static float getHeight() {
         return CARD_HEIGHT;
     }
-    public static float getCardDepth() {
+    public static float getDepth() {
         return CARD_DEPTH;
     }
     public boolean isShown() {

@@ -1,32 +1,21 @@
 package samples.card3DAlexandreSample;
 
-import javafx.animation.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.Path;
 import javafx.scene.shape.TriangleMesh;
-import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class Main extends Application {
-
-    private Scene scene;
-    private SubScene subScene;
-    private RotateTransition rotateTransition;
-    private ParallelTransition parallelTransition;
-    private Rotate rotation;
-    private Rotate rotation2;
 
     static MeshView create3DRectangle(float width, float height, float deep)
     {
@@ -84,8 +73,8 @@ public class Main extends Application {
         primaryStage.setTitle("La super carte!");
         Group root = new Group();
         Group root3d = new Group();
-        scene = new Scene(root);
-        subScene = new SubScene(root3d, 600, 600, true, SceneAntialiasing.BALANCED);
+        Scene scene = new Scene(root);
+        SubScene subScene = new SubScene(root3d, 600, 600, true, SceneAntialiasing.BALANCED);
         primaryStage.setScene(scene);
 
         PhongMaterial mat = new PhongMaterial();
@@ -109,13 +98,19 @@ public class Main extends Application {
         camera.setRotationAxis(Rotate.X_AXIS);
         camera.setFarClip(100000);
 
+        Label stateTitle = new Label("hello");
+        stateTitle.setTranslateX(100);
+        stateTitle.setTranslateY(10);
+        stateTitle.setTextFill(Color.BLACK);
+        root.getChildren().add(stateTitle);
+
         root.getChildren().add(subScene);
-        root.getChildren().add(new Label("coucou tu veux voir ma b ... anane !"));
+        root.getChildren().add(new Label("Test"));
 
         primaryStage.show();
 
 
-        rotation = new Rotate(0, 100, 150, 0.5, Rotate.Y_AXIS);
+        Rotate rotation = new Rotate(0, 100, 150, 0.5, Rotate.Y_AXIS);
         rectangle.getTransforms().add(rotation);
 
         Timeline timeline = new Timeline();
@@ -126,7 +121,7 @@ public class Main extends Application {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
 
-        rotation2 = new Rotate(0, 100, 150, 2, Rotate.X_AXIS);
+        Rotate rotation2 = new Rotate(0, 100, 150, 2, Rotate.X_AXIS);
         rectangle.getTransforms().add(rotation2);
 
         Timeline timeline2 = new Timeline();
@@ -150,19 +145,16 @@ public class Main extends Application {
         parallelTransition.setCycleCount(Timeline.INDEFINITE);
         parallelTransition.play();*/
 
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                switch (event.getCode()) {
-                    case UP:    camera.setTranslateY(camera.getTranslateY()+1); break;
-                    case DOWN:  camera.setTranslateY(camera.getTranslateY()-1); break;
-                    case RIGHT:    camera.setTranslateX(camera.getTranslateX()-1); break;
-                    case LEFT:  camera.setTranslateX(camera.getTranslateX()+1); break;
-                    case PAGE_UP:    camera.setTranslateZ(camera.getTranslateZ()+10); break;
-                    case PAGE_DOWN:  camera.setTranslateZ(camera.getTranslateZ()-10); break;
-                    case Z:    camera.setRotate(camera.getRotate()+1); break;
-                    case S:  camera.setRotate(camera.getRotate()-1); break;
-                }
+        scene.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case UP:    camera.setTranslateY(camera.getTranslateY()+1); break;
+                case DOWN:  camera.setTranslateY(camera.getTranslateY()-1); break;
+                case RIGHT:    camera.setTranslateX(camera.getTranslateX()-1); break;
+                case LEFT:  camera.setTranslateX(camera.getTranslateX()+1); break;
+                case PAGE_UP:    camera.setTranslateZ(camera.getTranslateZ()+10); break;
+                case PAGE_DOWN:  camera.setTranslateZ(camera.getTranslateZ()-10); break;
+                case Z:    camera.setRotate(camera.getRotate()+1); break;
+                case S:  camera.setRotate(camera.getRotate()-1); break;
             }
         });
     }
