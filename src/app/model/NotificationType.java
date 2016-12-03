@@ -14,14 +14,18 @@ limitations under the License.
 package app.model;
 
 /**
- * The {@code UserEventType} enumeration defines actions
- * that model awaits from view to resume its logic
+ * The {@code NotificationType} enumeration defines type
+ * of notification that are sent through notifyObserver.
+ * This allows Observer to have a personalized action depending
+ * on notification type
  * @author Arthur
  * @version v0.10
  * @since v0.8
  */
-public enum UserEventType {
-    PICK_CARD,    //To choose a card among spreaded ones (Dealer designation)
-    CHOOSE_ECART_CARD,  //To choose a card among blinking ones (Ecart designation)
-    CHOOSE_BID,   //To choose a bid among those shown
+public enum NotificationType {
+    PICK_CARD,                  //To choose a card among spreaded ones (Dealer designation)
+    CHOOSE_BID,                 //To choose a bid among those shown
+    CHOOSE_ECART_CARD,          //To choose a card among blinking ones (Ecart constitution)
+    UNAUTHORIZED_CARD_CHOICE    //To display an error message
+
 }

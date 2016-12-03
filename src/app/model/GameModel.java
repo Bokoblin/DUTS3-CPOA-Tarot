@@ -43,7 +43,7 @@ public class GameModel extends Observable {
     private PlayerHandler playerHandler;
     private Talon talon;
     private Hand ourPlayer;
-    private UserEventType awaitsUserEvent;
+    private NotificationType awaitsUserEvent;
     private Thread gameThread;
     private GameState gameState;
     private int userChoice;
@@ -159,7 +159,7 @@ public class GameModel extends Observable {
             Card c;
             if ( player == ourPlayer) {
 
-                waitObserverUserEvent(UserEventType.PICK_CARD);
+                waitObserverUserEvent(NotificationType.PICK_CARD);
                 c = toPickDeck.get(userChoice);
                 userChoice = -1;
             }
@@ -331,7 +331,7 @@ public class GameModel extends Observable {
         playerHandler.getPlayersMap().forEach((cardinalPoint,player) -> {
             if ( player == ourPlayer) {
                 flipDeck(ourPlayer, true);
-                waitObserverUserEvent(UserEventType.CHOOSE_BID);
+                waitObserverUserEvent(NotificationType.CHOOSE_BID);
 
                 try {
                     ourPlayer.setBidChosen(Bids.valueOf(userChoice));
@@ -367,7 +367,7 @@ public class GameModel extends Observable {
             boolean choiceValid;
             Card c;
             do {
-                waitObserverUserEvent(UserEventType.CHOOSE_ECART_CARD);
+                waitObserverUserEvent(NotificationType.CHOOSE_ECART_CARD);
 
                 c = ourPlayer.get(userChoice);
 
@@ -380,8 +380,8 @@ public class GameModel extends Observable {
                 }
                 else {
                     choiceValid = false;
-                    //TODO: CALL CONTROLLER TO DISPLAY ERROR MESSAGE
-                    System.out.println("You can't choose a Trump, a King or Excuse");
+                    setChanged();
+                    notifyObservers(NotificationType.UNAUTHORIZED_CARD_CHOICE);
                 }
                 userChoice = -1;
             }
@@ -627,10 +627,10 @@ public class GameModel extends Observable {
      * following action type
      *
      * @since v0.8.2
-     * @see UserEventType
+     * @see NotificationType
      * @param action the expected action from view
      */
-    private void waitObserverUserEvent(UserEventType action) {
+    private void waitObserverUserEvent(NotificationType action) {
         awaitsUserEvent = action;
         if ( countObservers() != 0 ) {
             setChanged();
@@ -640,13 +640,13 @@ public class GameModel extends Observable {
             }
         }
         else { //if no observers, set default values
-            if ( action == UserEventType.PICK_CARD) {
+            if ( action == NotificationType.PICK_CARD) {
                 userChoice = new Random().nextInt(78);
             }
-            else if ( action == UserEventType.CHOOSE_BID) {
+            else if ( action == NotificationType.CHOOSE_BID) {
                 userChoice = 1 + (new Random().nextInt(5));
             }
-            else if ( action == UserEventType.CHOOSE_ECART_CARD) {
+            else if ( action == NotificationType.CHOOSE_ECART_CARD) {
                 userChoice = new Random().nextInt(playerHandler.
                         getPlayer(PlayerHandler.PlayersCardinalPoint.South).size() );
             }
@@ -675,7 +675,7 @@ public class GameModel extends Observable {
     public Hand getOurPlayer() {
         return ourPlayer;
     }
-    public UserEventType getAwaitsUserEvent() {
+    public NotificationType getAwaitsUserEvent() {
         return awaitsUserEvent;
     }
     public Thread getGameThread() {

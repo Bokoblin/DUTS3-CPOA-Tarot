@@ -9,7 +9,7 @@ v0.10-dev :
 
 Features :
 - Added game state
-- Added on-screen text
+- Added on-screen text (section title, tooltips, errors)
 - Removed console text
 - Added Ecart constitution user event
 - Added Bid choosing user event
