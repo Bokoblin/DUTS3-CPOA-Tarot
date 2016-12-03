@@ -13,16 +13,19 @@ limitations under the License.
 
 package tests;
 
+import app.model.*;
+import app.presenter.AppPresenter;
+import app.view.AppView;
+import app.view.ViewCard;
 import exceptions.CardGroupNumberException;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.stage.Stage;
-import org.junit.*;
-import app.presenter.*;
-import app.model.*;
-import app.view.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * GameView Unit tests
@@ -91,7 +94,7 @@ public class GameViewTests extends Application
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
             gameModel.notifyObserversOfCardUpdate(
-                    new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0)));
+                    new CardUpdate(CardUpdateType.ADD_CARD, gameModel.getWholeCardsDeck().get(0)));
             try {
                 Thread.sleep(20);
             } catch (Exception e) {
@@ -116,7 +119,7 @@ public class GameViewTests extends Application
         int nbNodeHandBefore = scene.getGroupFromCardGroup(hand).getChildren().size();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0), hand));
+                new CardUpdate(CardUpdateType.ADD_CARD, gameModel.getWholeCardsDeck().get(0), hand));
         try {
             Thread.sleep(20);
         } catch (Exception e) {
@@ -124,7 +127,7 @@ public class GameViewTests extends Application
         }
         assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore+1);
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
+                new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
         try {
             Thread.sleep(20);
         } catch (Exception e) {
@@ -144,7 +147,7 @@ public class GameViewTests extends Application
         Talon talon = gameModel.getTalon();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0), talon));
+                new CardUpdate(CardUpdateType.ADD_CARD, gameModel.getWholeCardsDeck().get(0), talon));
         try {
             Thread.sleep(20);
         } catch (Exception e) {
@@ -153,7 +156,7 @@ public class GameViewTests extends Application
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
-            gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP,
+            gameModel.notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.REMOVE_CARD_FROM_GROUP,
                     ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
             try {
                 Thread.sleep(20);
@@ -174,7 +177,7 @@ public class GameViewTests extends Application
     public void removeCard()
     {
         Talon talon = gameModel.getTalon();
-        gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD,
+        gameModel.notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD,
                 gameModel.getWholeCardsDeck().get(0), talon));
         try {
             Thread.sleep(20);
@@ -183,7 +186,7 @@ public class GameViewTests extends Application
         }
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         try {
-            gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.DELETE_CARD,
+            gameModel.notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.DELETE_CARD,
                     ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
             try {
                 Thread.sleep(20);

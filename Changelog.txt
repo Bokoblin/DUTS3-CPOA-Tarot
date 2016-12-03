@@ -1,9 +1,25 @@
 Project Name : Tarot Card Distribution
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.9.0
+Current version : v0.10-dev
 
 =========================================================================
+
+v0.10-dev :
+
+Features :
+- Added game state
+- Added on-screen text
+- Removed console text
+- Added Ecart constitution user event
+- Added Bid choosing user event
+
+Issues :
+- sorting in conflict with mouse events -> Disabled pre-Ecart sorting
+- AppView's rootGUI, camera handling to rewrite for correct displaying
+    of on-screen text and buttons
+
+--------------------------------------------------------------------
 
 v0.9.0 (27/11/16) :
 - Added spreading cards animation

@@ -14,15 +14,15 @@ limitations under the License.
 package app.model;
 
 /**
- * The {@code ActionPerformedOnCard} enumeration defines actions
+ * The {@code CardUpdateType} enumeration defines actions
  * that are done on cards. They are passed in model:notifyObserver()
  * to inform the view to do the similar action with its ViewCards
  * @author Arthur
  * @author Alexandre
- * @version v0.8.2
+ * @version v0.10
  * @since v0.6
  */
-public enum ActionPerformedOnCard {
+public enum CardUpdateType {
     ADD_CARD,                   //To create a new ViewCard
     FLIP_CARD,                  //To flip a card (shown/hidden)
     MOVE_CARD_BETWEEN_GROUPS,   //To move a card between two groups

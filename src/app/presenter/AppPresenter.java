@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import app.view.AppView;
 /**
  * The {@code AppPresenter} class consists in the MVC architecture presenter
  * @author Arthur
- * @version v0.8
+ * @version v0.10
  * @since v0.2
  */
 public class AppPresenter {
@@ -33,12 +33,12 @@ public class AppPresenter {
      *
      * @param choice the user choice
      */
-    public void transmitUserChoice(int choice) throws Exception {
+    public void transmitUserChoice(int choice) {
         if ( choice < 0)
             try {
                 throw new Exception("choice is invalid");
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         else
             gameModel.setUserChoice(choice);

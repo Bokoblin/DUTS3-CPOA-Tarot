@@ -22,15 +22,21 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 
 /**
@@ -76,6 +82,12 @@ public class AppView extends Scene implements Observer {
     //GUI elements
     private Label stateTitle;
     private Label toolTip;
+    private Button bidSmall;
+    private Button bidGuard;
+    private Button bidGuardWithout;
+    private Button bidGuardAgainst;
+    private Button bidPass;
+    private VBox bidBox;
 
     private boolean handleCardPicking;
 
@@ -135,7 +147,7 @@ public class AppView extends Scene implements Observer {
         stateTitle.setScaleX(2);
         stateTitle.setScaleY(2);
         stateTitle.setTextFill(Color.WHITE);
-        stateTitle.setFont(new Font("Aria", 40));
+        stateTitle.setFont(new Font(40));
 
         toolTip = new Label();
         toolTip.setTranslateX(3000);
@@ -143,13 +155,55 @@ public class AppView extends Scene implements Observer {
         toolTip.setScaleX(2);
         toolTip.setScaleY(2);
         toolTip.setTextFill(Color.WHITE);
-        toolTip.setFont(new Font("Aria", 35));
+        toolTip.setFont(new Font(35));
+
+        bidSmall = new Button("Small");
+        bidSmall.setTextFill(Color.WHITE);
+        bidSmall.setOnAction(event -> {
+            appPresenter.transmitUserChoice(1);
+            bidBox.setVisible(false);
+        });
+        bidGuard = new Button("Guard");
+        bidGuard.setTextFill(Color.WHITE);
+        bidGuard.setOnAction(event -> {
+            appPresenter.transmitUserChoice(2);
+            bidBox.setVisible(false);
+        });
+        bidGuardWithout = new Button("Guard Without The Kitty");
+        bidGuardWithout.setTextFill(Color.WHITE);
+        bidGuardWithout.setOnAction(event  -> {
+            appPresenter.transmitUserChoice(3);
+            bidBox.setVisible(false);
+        });
+        bidGuardAgainst = new Button("Guard Against The Kitty");
+        bidGuardAgainst.setTextFill(Color.WHITE);
+        bidGuardAgainst.setOnAction(event -> {
+            appPresenter.transmitUserChoice(4);
+            bidBox.setVisible(false);
+        });
+        bidPass = new Button("Pass");
+        bidPass.setTextFill(Color.WHITE);
+        bidPass.setOnAction(event -> {
+            appPresenter.transmitUserChoice(5);
+            bidBox.setVisible(false);
+        });
+
+
+        bidBox = new VBox();
+        bidBox.setPadding(new Insets(10, 50, 50, 50));
+        bidBox.setSpacing(10);
+        bidBox.setScaleX(5);
+        bidBox.setScaleY(5);
+        bidBox.setTranslateX(3000);
+        bidBox.setTranslateY(600);
+        bidBox.getChildren().addAll(bidSmall, bidGuard, bidGuardWithout, bidGuardAgainst, bidPass);
+        bidBox.setVisible(false);
 
         //=== Add elements to groups
 
         background.getChildren().add(table);
         root.getChildren().addAll(root3D, rootGUI);
-        rootGUI.getChildren().addAll(stateTitle, toolTip);
+        rootGUI.getChildren().addAll(stateTitle, toolTip, bidBox);
         root3D.getChildren().addAll(background, talon, wholeCardsDeck, pickedCardDeck, pointLight);
         for ( Group hand : hands)
             root3D.getChildren().add(hand);
@@ -256,9 +310,9 @@ public class AppView extends Scene implements Observer {
                 });
             }
         }
-        else if ( arg instanceof ViewActionExpected) {
+        else if ( arg instanceof UserEventType) {
             Platform.runLater(() -> {
-                switch ( (ViewActionExpected)arg ) {
+                switch ( (UserEventType)arg ) {
                     case PICK_CARD:
                         handleCardPicking = true;
                         toolTip.setText("Please select a card by clicking on it");
@@ -268,7 +322,8 @@ public class AppView extends Scene implements Observer {
                         toolTip.setText("Please select a card from player South");
                         break;
                     case CHOOSE_BID:
-                        handleBidChoosing();
+                        bidBox.setVisible(true);
+                        toolTip.setText("Select a bid with the buttons below");
                         break;
                     default:
                         break;
@@ -298,10 +353,11 @@ public class AppView extends Scene implements Observer {
                     case PETIT_SEC_DETECTED:
                         stateTitle.setText("PETIT SEC DETECTED");
                         toolTip.setText("Please click on \"RE-DEAL\" button");
+                        //TODO : NAVIGATION SYSTEM
                         break;
                     case BID_CHOOSING:
                         stateTitle.setText("BID CHOOSING");
-                        toolTip.setText("Select a bid with the buttons below");
+                        toolTip.setText("Please wait...");
                         break;
                     case BID_CHOSEN:
                         handleBidChosen();
@@ -313,25 +369,12 @@ public class AppView extends Scene implements Observer {
                     case ECART_CONSTITUTED:
                         stateTitle.setText("ECART CONSTITUTED");
                         toolTip.setText("Game is finished\n you can go back to menu");
+                        //TODO : NAVIGATION SYSTEM
                         break;
                     default:
                         break;
                 }
             });
-        }
-    }
-
-
-    /**
-     * This method handles click event for selecting a bid
-     * @since   v0.8
-     */
-    private void handleBidChoosing() {
-        //TODO : BIDS CHOOSING EVENT
-        try {
-            appPresenter.transmitUserChoice(1 + (new Random().nextInt(5)) );
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -359,7 +402,6 @@ public class AppView extends Scene implements Observer {
                 toolTip.setText("You have chosen to Pass\n Please click on \"RE-DEAL\" button");
                 break;
             //TODO : NAVIGATION SYSTEM
-            // add button to constitute ecart or back menu
         }
     }
 
@@ -640,7 +682,7 @@ public class AppView extends Scene implements Observer {
         {
             Point3D position = new Point3D(MARGIN_TABLE + i*(MARGIN_CARDS+ViewCard.getWidth()), MARGIN_TABLE
                     + j*(MARGIN_CARDS+ViewCard.getHeight()), -ViewCard.getDepth());
-            changeCardGroup(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, card, null), position, 800);
+            changeCardGroup(new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, card, null), position, 800);
             i++;
             if (i>nbCardInRow-1)
             {
@@ -660,7 +702,7 @@ public class AppView extends Scene implements Observer {
 
         for(Card card : cardGroup )
         {
-            changeCardGroup(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, card, null),
+            changeCardGroup(new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, card, null),
                     INITIAL_DECK_POSITION, 1000);
         }
     }
@@ -846,7 +888,7 @@ public class AppView extends Scene implements Observer {
     }
 
 
-    //GETTERS & SETTERS - no documentation needed
+//GETTERS & SETTERS - no documentation needed
 
     public Group getRoot3d()
     {

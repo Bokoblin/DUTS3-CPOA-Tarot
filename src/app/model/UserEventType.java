@@ -14,13 +14,13 @@ limitations under the License.
 package app.model;
 
 /**
- * The {@code ViewActionExpected} enumeration defines actions
+ * The {@code UserEventType} enumeration defines actions
  * that model awaits from view to resume its logic
  * @author Arthur
  * @version v0.10
  * @since v0.8
  */
-public enum ViewActionExpected {
+public enum UserEventType {
     PICK_CARD,    //To choose a card among spreaded ones (Dealer designation)
     CHOOSE_ECART_CARD,  //To choose a card among blinking ones (Ecart designation)
     CHOOSE_BID,   //To choose a bid among those shown

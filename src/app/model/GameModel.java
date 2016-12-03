@@ -43,7 +43,7 @@ public class GameModel extends Observable {
     private PlayerHandler playerHandler;
     private Talon talon;
     private Hand ourPlayer;
-    private ViewActionExpected awaitsUserEvent;
+    private UserEventType awaitsUserEvent;
     private Thread gameThread;
     private GameState gameState;
     private int userChoice;
@@ -97,7 +97,7 @@ public class GameModel extends Observable {
                             throw new CardNumberException("Card number limit has been reached.",
                                     wholeCardsDeck.getNbMaxCards());
                         else
-                            notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, wholeCardsDeck));
+                            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
 
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
@@ -112,7 +112,7 @@ public class GameModel extends Observable {
                             throw new CardNumberException("Card number limit has been reached.",
                                     wholeCardsDeck.getNbMaxCards());
                         else
-                            notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, wholeCardsDeck));
+                            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
                     }
@@ -124,7 +124,7 @@ public class GameModel extends Observable {
                     if(!wholeCardsDeck.add(c))
                         throw new CardNumberException("Card number limit has been reached.",
                                 wholeCardsDeck.getNbMaxCards());
-                    notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, wholeCardsDeck));
+                    notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
                 } catch (CardNumberException | CardUniquenessException e) {
                     System.err.println(e.getMessage());
                 }
@@ -150,7 +150,7 @@ public class GameModel extends Observable {
         pauseModelFor(1000);
         while ( !wholeCardsDeck.isEmpty())
             moveCardBetweenDecks(wholeCardsDeck, toPickDeck, wholeCardsDeck.get(0), false);
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SPREAD_CARDS, toPickDeck));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.SPREAD_CARDS, toPickDeck));
         pauseModelFor(2000);
 
         //Handle dealer choosing
@@ -159,7 +159,7 @@ public class GameModel extends Observable {
             Card c;
             if ( player == ourPlayer) {
 
-                waitObserverUserEvent(ViewActionExpected.PICK_CARD);
+                waitObserverUserEvent(UserEventType.PICK_CARD);
                 c = toPickDeck.get(userChoice);
                 userChoice = -1;
             }
@@ -208,16 +208,13 @@ public class GameModel extends Observable {
         boolean hasPetitSec = false;
         do {
             changeGameState(GameState.CARDS_DEALING);
-            System.out.println("Shuffling cards...");
             shuffleCards();
-            System.out.println("Cutting cards...");
             cutDeck();
             dealAllCards();
 
             flipDeck(ourPlayer, true);
             pauseModelFor(3000);
 
-            System.out.println("Sorting cards...");
             //playerHandler.getPlayersMap().forEach( (cardinalPoint, playerHand) -> sortDeck(playerHand));
 
             pauseModelFor(3000);
@@ -296,7 +293,7 @@ public class GameModel extends Observable {
         while ( !toPickDeck.isEmpty() ) {
             moveCardBetweenDecks(toPickDeck, wholeCardsDeck, toPickDeck.get(0), false);
         }
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.GATHER_CARDS, wholeCardsDeck));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.GATHER_CARDS, wholeCardsDeck));
     }
 
 
@@ -330,32 +327,18 @@ public class GameModel extends Observable {
     private void chooseBids() {
 
         changeGameState(GameState.BID_CHOOSING);
-        System.out.println("\n=== BIDS ===\n");
 
         playerHandler.getPlayersMap().forEach((cardinalPoint,player) -> {
             if ( player == ourPlayer) {
-                System.out.println("Here are your cards :");
                 flipDeck(ourPlayer, true);
-                System.out.println(ourPlayer.cardListToString());
+                waitObserverUserEvent(UserEventType.CHOOSE_BID);
 
-                System.out.println("Choose your bid among those one :");
-                System.out.println("1. Small");
-                System.out.println("2. Guard");
-                System.out.println("3. GuardWithoutTheKitty");
-                System.out.println("4. GuardAgainstTheKitty");
-                System.out.println("5. Pass");
-
-                waitObserverUserEvent(ViewActionExpected.CHOOSE_BID);
                 try {
                     ourPlayer.setBidChosen(Bids.valueOf(userChoice));
                     userChoice = -1;
                     changeGameState(GameState.BID_CHOSEN);
-                    System.out.println("You have chosen the bid : " +
-                            String.valueOf(ourPlayer.getBidChosen()));
                 } catch (Exception e) {
-                    //TODO: HANDLE IT WITH ERROR CODE TO OBSERVERS FOR THEM TO DISPLAY IT
-                    System.err.println(e.getMessage());
-                    ourPlayer.setBidChosen(Bids.Pass);
+                    e.getMessage();
                 }
             }
             else {
@@ -384,7 +367,7 @@ public class GameModel extends Observable {
             boolean choiceValid;
             Card c;
             do {
-                waitObserverUserEvent(ViewActionExpected.CHOOSE_ECART_CARD);
+                waitObserverUserEvent(UserEventType.CHOOSE_ECART_CARD);
 
                 c = ourPlayer.get(userChoice);
 
@@ -397,7 +380,7 @@ public class GameModel extends Observable {
                 }
                 else {
                     choiceValid = false;
-                    //TODO: call controller to display error message
+                    //TODO: CALL CONTROLLER TO DISPLAY ERROR MESSAGE
                     System.out.println("You can't choose a Trump, a King or Excuse");
                 }
                 userChoice = -1;
@@ -466,7 +449,7 @@ public class GameModel extends Observable {
     public void shuffleCards() {
         long seed = System.nanoTime();
         Collections.shuffle(wholeCardsDeck, new Random(seed));
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SHUFFLE_CARDS, wholeCardsDeck));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.SHUFFLE_CARDS, wholeCardsDeck));
     }
 
 
@@ -478,7 +461,7 @@ public class GameModel extends Observable {
      */
     private void sortDeck(CardGroup cardGroup) {
         cardGroup.sort(new Card.CardComparator());
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SORT_DECK, cardGroup));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.SORT_DECK, cardGroup));
     }
 
 
@@ -510,7 +493,7 @@ public class GameModel extends Observable {
         wholeCardsDeck.addAll(cut2);
         wholeCardsDeck.addAll(cut1);
 
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.CUT_DECK, wholeCardsDeck));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.CUT_DECK, wholeCardsDeck));
     }
 
 
@@ -526,7 +509,7 @@ public class GameModel extends Observable {
         source.remove(c);
         target.add(c);
         if ( doesNotifyObserver)
-            notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, c, target));
+            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, c, target));
     }
 
 
@@ -593,7 +576,7 @@ public class GameModel extends Observable {
      */
     private void flipCard(Card c, boolean state) {
         c.setShown(state);
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.FLIP_CARD, c));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.FLIP_CARD, c));
     }
 
 
@@ -613,7 +596,7 @@ public class GameModel extends Observable {
      */
     private void flipDeck(CardGroup cardGroup, boolean state) {
         cardGroup.forEach(c -> c.setShown(state));
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.FLIP_CARD, cardGroup));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.FLIP_CARD, cardGroup));
     }
 
 
@@ -627,7 +610,7 @@ public class GameModel extends Observable {
         if ( countObservers() != 0) {
             setChanged();
             notifyObservers(cardUpdate);
-            if (cardUpdate.getType() != ActionPerformedOnCard.ADD_CARD) {
+            if (cardUpdate.getType() != CardUpdateType.ADD_CARD) {
                 pauseModelFor(300);
             }
         }
@@ -644,10 +627,10 @@ public class GameModel extends Observable {
      * following action type
      *
      * @since v0.8.2
-     * @see ViewActionExpected
+     * @see UserEventType
      * @param action the expected action from view
      */
-    private void waitObserverUserEvent(ViewActionExpected action) {
+    private void waitObserverUserEvent(UserEventType action) {
         awaitsUserEvent = action;
         if ( countObservers() != 0 ) {
             setChanged();
@@ -657,13 +640,13 @@ public class GameModel extends Observable {
             }
         }
         else { //if no observers, set default values
-            if ( action == ViewActionExpected.PICK_CARD) {
+            if ( action == UserEventType.PICK_CARD) {
                 userChoice = new Random().nextInt(78);
             }
-            else if ( action == ViewActionExpected.CHOOSE_BID) {
+            else if ( action == UserEventType.CHOOSE_BID) {
                 userChoice = 1 + (new Random().nextInt(5));
             }
-            else if ( action == ViewActionExpected.CHOOSE_ECART_CARD) {
+            else if ( action == UserEventType.CHOOSE_ECART_CARD) {
                 userChoice = new Random().nextInt(playerHandler.
                         getPlayer(PlayerHandler.PlayersCardinalPoint.South).size() );
             }
@@ -692,7 +675,7 @@ public class GameModel extends Observable {
     public Hand getOurPlayer() {
         return ourPlayer;
     }
-    public ViewActionExpected getAwaitsUserEvent() {
+    public UserEventType getAwaitsUserEvent() {
         return awaitsUserEvent;
     }
     public Thread getGameThread() {
