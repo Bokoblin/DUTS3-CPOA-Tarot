@@ -30,7 +30,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
 import java.util.HashMap;
@@ -82,11 +81,7 @@ public class AppView extends Scene implements Observer {
     //GUI elements
     private Label stateTitle;
     private Label toolTip;
-    private Button bidSmall;
-    private Button bidGuard;
-    private Button bidGuardWithout;
-    private Button bidGuardAgainst;
-    private Button bidPass;
+    private Label errorSnack;
     private VBox bidBox;
 
     private boolean handleCardPicking;
@@ -157,31 +152,39 @@ public class AppView extends Scene implements Observer {
         toolTip.setTextFill(Color.WHITE);
         toolTip.setFont(new Font(35));
 
-        bidSmall = new Button("Small");
+        errorSnack = new Label();
+        errorSnack.setTranslateX(1000);
+        errorSnack.setTranslateY(2700);
+        errorSnack.setScaleX(2);
+        errorSnack.setScaleY(2);
+        errorSnack.setTextFill(Color.RED);
+        errorSnack.setFont(new Font(30));
+
+        Button bidSmall = new Button("Small");
         bidSmall.setTextFill(Color.WHITE);
         bidSmall.setOnAction(event -> {
             appPresenter.transmitUserChoice(1);
             bidBox.setVisible(false);
         });
-        bidGuard = new Button("Guard");
+        Button bidGuard = new Button("Guard");
         bidGuard.setTextFill(Color.WHITE);
         bidGuard.setOnAction(event -> {
             appPresenter.transmitUserChoice(2);
             bidBox.setVisible(false);
         });
-        bidGuardWithout = new Button("Guard Without The Kitty");
+        Button bidGuardWithout = new Button("Guard Without The Kitty");
         bidGuardWithout.setTextFill(Color.WHITE);
         bidGuardWithout.setOnAction(event  -> {
             appPresenter.transmitUserChoice(3);
             bidBox.setVisible(false);
         });
-        bidGuardAgainst = new Button("Guard Against The Kitty");
+        Button bidGuardAgainst = new Button("Guard Against The Kitty");
         bidGuardAgainst.setTextFill(Color.WHITE);
         bidGuardAgainst.setOnAction(event -> {
             appPresenter.transmitUserChoice(4);
             bidBox.setVisible(false);
         });
-        bidPass = new Button("Pass");
+        Button bidPass = new Button("Pass");
         bidPass.setTextFill(Color.WHITE);
         bidPass.setOnAction(event -> {
             appPresenter.transmitUserChoice(5);
@@ -195,7 +198,7 @@ public class AppView extends Scene implements Observer {
         bidBox.setScaleX(5);
         bidBox.setScaleY(5);
         bidBox.setTranslateX(3000);
-        bidBox.setTranslateY(600);
+        bidBox.setTranslateY(800);
         bidBox.getChildren().addAll(bidSmall, bidGuard, bidGuardWithout, bidGuardAgainst, bidPass);
         bidBox.setVisible(false);
 
@@ -203,27 +206,11 @@ public class AppView extends Scene implements Observer {
 
         background.getChildren().add(table);
         root.getChildren().addAll(root3D, rootGUI);
-        rootGUI.getChildren().addAll(stateTitle, toolTip, bidBox);
+        rootGUI.getChildren().addAll(stateTitle, toolTip, errorSnack, bidBox);
         root3D.getChildren().addAll(background, talon, wholeCardsDeck, pickedCardDeck, pointLight);
         for ( Group hand : hands)
             root3D.getChildren().add(hand);
 
-        //=== EVENTS
-
-        this.setOnKeyPressed(keyEvent -> {
-            root3D.setRotationAxis(Rotate.Z_AXIS);
-            switch (keyEvent.getCode())
-            {
-                case D:
-                    root3D.setRotate(root3D.getRotate()-1);
-                    break;
-                case Q:
-                    root3D.setRotate(root3D.getRotate()+1);
-                    break;
-                default:
-                    break;
-            }
-        });
     }
 
 
@@ -310,20 +297,24 @@ public class AppView extends Scene implements Observer {
                 });
             }
         }
-        else if ( arg instanceof UserEventType) {
+        else if ( arg instanceof NotificationType) {
             Platform.runLater(() -> {
-                switch ( (UserEventType)arg ) {
+                switch ( (NotificationType)arg ) {
                     case PICK_CARD:
                         handleCardPicking = true;
                         toolTip.setText("Please select a card by clicking on it");
                         break;
                     case CHOOSE_ECART_CARD:
                         handleCardPicking = true;
-                        toolTip.setText("Please select a card from player South");
+                        toolTip.setText("You are the taker\nPlease select a card");
                         break;
                     case CHOOSE_BID:
                         bidBox.setVisible(true);
                         toolTip.setText("Select a bid with the buttons below");
+                        break;
+                    case UNAUTHORIZED_CARD_CHOICE:
+                        errorSnack.setText("You can't choose a Trump, a King or Excuse");
+                        new Timeline(new KeyFrame( Duration.millis(2500), t -> errorSnack.setText(""))).play();
                         break;
                     default:
                         break;
@@ -368,7 +359,7 @@ public class AppView extends Scene implements Observer {
                         break;
                     case ECART_CONSTITUTED:
                         stateTitle.setText("ECART CONSTITUTED");
-                        toolTip.setText("Game is finished\n you can go back to menu");
+                        toolTip.setText("Game is finished\nYou can go back to menu");
                         //TODO : NAVIGATION SYSTEM
                         break;
                     default:
@@ -387,19 +378,19 @@ public class AppView extends Scene implements Observer {
         stateTitle.setText("BID HAS BEEN CHOSEN");
         switch (gameModel.getOurPlayer().getBidChosen()) {
             case Small:
-                toolTip.setText("Small\n You can constitute your ecart");
+                toolTip.setText("Small\nYou can constitute your ecart");
                 break;
             case Guard:
-                toolTip.setText("Guard\n You can constitute your ecart");
+                toolTip.setText("Guard\nYou can constitute your ecart");
                 break;
             case GuardWithoutTheKitty:
-                toolTip.setText("Guard Without The Kitty\n Game is finished\n You can go back to menu");
+                toolTip.setText("Guard Without The Kitty\nGame is finished\nYou can go back to menu");
                 break;
             case GuardAgainstTheKitty:
-                toolTip.setText("Guard Against The Kitty\n Game is finished\n You can go back to menu");
+                toolTip.setText("Guard Against The Kitty\nGame is finished\nYou can go back to menu");
                 break;
             case Pass:
-                toolTip.setText("You have chosen to Pass\n Please click on \"RE-DEAL\" button");
+                toolTip.setText("You have chosen to Pass\nPlease click on \"RE-DEAL\" button");
                 break;
             //TODO : NAVIGATION SYSTEM
         }

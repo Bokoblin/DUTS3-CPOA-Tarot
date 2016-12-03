@@ -14,7 +14,7 @@ package app.view;
 
 import app.model.Card;
 import app.model.CardGroup;
-import app.model.UserEventType;
+import app.model.NotificationType;
 import com.sun.istack.internal.NotNull;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -158,7 +158,7 @@ public class ViewCard extends RectangleMesh {
             if (appView.isHandlingCardPicking())
             {
                 CardGroup cardGroup;
-                if( appView.getGameModel().getAwaitsUserEvent() == UserEventType.PICK_CARD)
+                if( appView.getGameModel().getAwaitsUserEvent() == NotificationType.PICK_CARD)
                     cardGroup = appView.getCardGroupFromGroup(appView.getWholeCardsDeck());
                 else
                     cardGroup = appView.getCardGroupFromGroup(appView.getSouth());
