@@ -19,14 +19,14 @@ import com.sun.istack.internal.NotNull;
  * This class is a container which is passed when calling notifyObservers() method.
  * It indicate to view what action to perform on a specific card with sometimes a specific cardGroup.
  * @author Alexandre
- * @version v0.9
+ * @version v0.10
  * @since v0.6
  */
 public class CardUpdate {
 
     private CardGroup cardGroup;
     private Card card;
-    private ActionPerformedOnCard type;
+    private CardUpdateType type;
 
 
     /**
@@ -36,10 +36,10 @@ public class CardUpdate {
      * @param card the model card
      * @param type the type
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card) {
-        if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS || type == ActionPerformedOnCard.SHUFFLE_CARDS
-                || type == ActionPerformedOnCard.SPREAD_CARDS || type == ActionPerformedOnCard.GATHER_CARDS
-                || type == ActionPerformedOnCard.CUT_DECK)
+    public CardUpdate(CardUpdateType type, @NotNull Card card) {
+        if (type == CardUpdateType.MOVE_CARD_BETWEEN_GROUPS || type == CardUpdateType.SHUFFLE_CARDS
+                || type == CardUpdateType.SPREAD_CARDS || type == CardUpdateType.GATHER_CARDS
+                || type == CardUpdateType.CUT_DECK)
         {
             System.err.println("Cannot do the specific action : " + type.toString() + " without specifying the group. The update will be canceled.");
             this.card = null;
@@ -60,7 +60,7 @@ public class CardUpdate {
      * @param card the model card
      * @param group the cardGroup
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull Card card, CardGroup group)
+    public CardUpdate(CardUpdateType type, @NotNull Card card, CardGroup group)
     {
         this.cardGroup = group;
         this.card = card;
@@ -75,9 +75,9 @@ public class CardUpdate {
      * @param type the type
      * @param cardGroup the cardGroup
      */
-    public CardUpdate(ActionPerformedOnCard type, @NotNull CardGroup cardGroup) {
-        if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS  || type == ActionPerformedOnCard.ADD_CARD ||
-                type == ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP || type == ActionPerformedOnCard.DELETE_CARD) {
+    public CardUpdate(CardUpdateType type, @NotNull CardGroup cardGroup) {
+        if (type == CardUpdateType.MOVE_CARD_BETWEEN_GROUPS  || type == CardUpdateType.ADD_CARD ||
+                type == CardUpdateType.REMOVE_CARD_FROM_GROUP || type == CardUpdateType.DELETE_CARD) {
             System.err.println("Cannot do the specific action : " + type.toString()
                     + " without specifying the card. The update will be canceled.");
             this.card = null;
@@ -97,7 +97,7 @@ public class CardUpdate {
     public Card getCard() {
         return card;
     }
-    public ActionPerformedOnCard getType() {
+    public CardUpdateType getType() {
         return type;
     }
 }

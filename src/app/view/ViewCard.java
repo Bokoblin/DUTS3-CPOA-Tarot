@@ -14,7 +14,7 @@ package app.view;
 
 import app.model.Card;
 import app.model.CardGroup;
-import app.model.ViewActionExpected;
+import app.model.UserEventType;
 import com.sun.istack.internal.NotNull;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
@@ -158,21 +158,16 @@ public class ViewCard extends RectangleMesh {
             if (appView.isHandlingCardPicking())
             {
                 CardGroup cardGroup;
-                if( appView.getGameModel().getAwaitsUserEvent() == ViewActionExpected.PICK_CARD)
+                if( appView.getGameModel().getAwaitsUserEvent() == UserEventType.PICK_CARD)
                     cardGroup = appView.getCardGroupFromGroup(appView.getWholeCardsDeck());
                 else
                     cardGroup = appView.getCardGroupFromGroup(appView.getSouth());
 
                 if (cardGroup != null && cardGroup.contains(modelCard))
                 {
-                    try {
-                        appView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
-                        appView.setHandleCardPicking(false);
-                        appView.getToolTip().setText("Please wait");
-                    } catch (Exception e)
-                    {
-                        System.err.print(e.toString());
-                    }
+                    appView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
+                    appView.setHandleCardPicking(false);
+                    appView.getToolTip().setText("Please wait");
                 }
             }
         });
