@@ -100,30 +100,34 @@ public class CardUpdate {
         subUpdates.add(cardUpdate);
     }
 
-    public synchronized void setAnimationFinished()
+    public void setAnimationFinished()
     {
-        animationFinished = true;
-        notifyAll();
+        synchronized (CardUpdate.class)
+        {
+            animationFinished = true;
+            CardUpdate.class.notifyAll();
+        }
     }
 
-    public synchronized void waitAnimations(AppPresenter appPresenter)
+    public void waitAnimations(AppPresenter appPresenter)
     {
         CardUpdate thisCU = this;
         class WaitThread extends Thread
         {
             @Override
-            public synchronized void run()
+            public void run()
             {
-                while (!checkUpdatesFinished(thisCU))
+                synchronized (CardUpdate.class)
                 {
-                    try {
-                        //wait();       because doesn't want to work...
-                        sleep(10);
-                    } catch (InterruptedException e) {
-                        System.err.println(e.getMessage());
+                    while (!checkUpdatesFinished(thisCU)) {
+                        try {
+                            CardUpdate.class.wait();
+                        } catch (InterruptedException e) {
+                            System.err.println(e.getMessage());
+                        }
                     }
+                    appPresenter.notifyEndAnimation(thisCU);
                 }
-                appPresenter.notifyEndAnimation(thisCU);
             }
 
             boolean checkUpdatesFinished(CardUpdate cardUpdate)
@@ -145,6 +149,7 @@ public class CardUpdate {
                 }
             }
         }
+
         WaitThread thread = new WaitThread();
         thread.start();
     }
