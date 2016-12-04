@@ -13,7 +13,10 @@ limitations under the License.
 
 package app.model;
 
+import app.presenter.AppPresenter;
 import com.sun.istack.internal.NotNull;
+
+import java.util.ArrayList;
 
 /**
  * This class is a container which is passed when calling notifyObservers() method.
@@ -27,6 +30,8 @@ public class CardUpdate {
     private CardGroup cardGroup;
     private Card card;
     private ActionPerformedOnCard type;
+    private boolean animationFinished = false;
+    private ArrayList<CardUpdate> subUpdates = new ArrayList<>();
 
 
     /**
@@ -77,7 +82,8 @@ public class CardUpdate {
      */
     public CardUpdate(ActionPerformedOnCard type, @NotNull CardGroup cardGroup) {
         if (type == ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS  || type == ActionPerformedOnCard.ADD_CARD ||
-                type == ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP || type == ActionPerformedOnCard.DELETE_CARD) {
+                type == ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP || type == ActionPerformedOnCard.DELETE_CARD
+                || type == ActionPerformedOnCard.CUT_DECK) {
             System.err.println("Cannot do the specific action : " + type.toString()
                     + " without specifying the card. The update will be canceled.");
             this.card = null;
@@ -87,6 +93,60 @@ public class CardUpdate {
         this.cardGroup = cardGroup;
         this.card = null;
         this.type = type;
+    }
+
+    public void addSubUpdate(CardUpdate cardUpdate)
+    {
+        subUpdates.add(cardUpdate);
+    }
+
+    public synchronized void setAnimationFinished()
+    {
+        animationFinished = true;
+        notifyAll();
+    }
+
+    public synchronized void waitAnimations(AppPresenter appPresenter)
+    {
+        CardUpdate thisCU = this;
+        class WaitThread extends Thread
+        {
+            @Override
+            public synchronized void run()
+            {
+                while (!checkUpdatesFinished(thisCU))
+                {
+                    try {
+                        //wait();       because doesn't want to work...
+                        sleep(10);
+                    } catch (InterruptedException e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+                appPresenter.notifyEndAnimation(thisCU);
+            }
+
+            boolean checkUpdatesFinished(CardUpdate cardUpdate)
+            {
+                if (cardUpdate.subUpdates.size() == 0)
+                {
+                    return cardUpdate.animationFinished;
+                } else {
+                    boolean isFinished = true;
+                    for (CardUpdate children : cardUpdate.subUpdates)
+                    {
+                        isFinished = isFinished && checkUpdatesFinished(children);
+                        if (isFinished == false)
+                        {
+                            break;
+                        }
+                    }
+                    return isFinished;
+                }
+            }
+        }
+        WaitThread thread = new WaitThread();
+        thread.start();
     }
 
     //GETTERS - no documentation needed

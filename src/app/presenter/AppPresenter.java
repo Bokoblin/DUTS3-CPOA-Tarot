@@ -13,6 +13,8 @@ limitations under the License.
 
 package app.presenter;
 
+import app.model.ActionPerformedOnCard;
+import app.model.CardUpdate;
 import app.model.GameModel;
 import app.view.AppView;
 
@@ -42,6 +44,15 @@ public class AppPresenter {
             }
         else
             gameModel.setUserChoice(choice);
+    }
+
+    public void notifyEndAnimation(CardUpdate cardUpdate)
+    {
+        if (cardUpdate != null)
+        {
+            System.out.println(cardUpdate.getType().toString());
+            gameModel.setLastEndedAnimation(cardUpdate.hashCode());
+        }
     }
 
 

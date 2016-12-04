@@ -1,5 +1,6 @@
 package app.view;
 
+import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
 
 /**
@@ -20,8 +21,8 @@ public class ViewCamera extends PerspectiveCamera {
     public ViewCamera(boolean fixedEyedAtCameraZero)
     {
         super(fixedEyedAtCameraZero);
-        this.setNearClip(0);
-        this.setFarClip(100000);
+        this.setNearClip(1);
+        this.setFarClip(10000);
         transformations = new Transformations(this);
     }
 
