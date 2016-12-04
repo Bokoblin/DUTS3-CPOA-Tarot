@@ -39,7 +39,7 @@ import java.util.Observer;
 
 
 /**
- * The {@code AppView} class consists in the MVC architecture view
+ * The {@code GameView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
  * @version v0.10
@@ -48,7 +48,7 @@ import java.util.Observer;
  * @see Observer
  * @see Scene
  */
-public class AppView extends Scene implements Observer {
+public class GameView extends Scene implements Observer {
 
     private static final float TABLE_SIZE = 2500;
     private static final float MARGIN_TABLE = 130;
@@ -70,6 +70,7 @@ public class AppView extends Scene implements Observer {
     //Groups
     private Group root3D;
     private Group rootGUI;
+    private SubScene subSceneGUI;
     private Group background;
     private Group wholeCardsDeck;
     private Group pickedCardDeck;
@@ -93,17 +94,19 @@ public class AppView extends Scene implements Observer {
      * @param   model       the model it reads
      * @param   controller  the presenter it sends event information
      */
-    public AppView(Group root, GameModel model, AppPresenter controller) {
+    public GameView(Group root, GameModel model, AppPresenter controller) {
         super(root, 800, 600, true, SceneAntialiasing.DISABLED);
 
         this.gameModel = model;
         this.appPresenter = controller;
         this.handleCardPicking = false;
+        this.setFill(Color.BLACK);
         model.addObserver(this);
 
         //=== Create the groups
         root3D = new Group();
         rootGUI = new Group();
+        subSceneGUI = new SubScene(root3D, 800, 600, false, SceneAntialiasing.BALANCED);
         background = new Group();
         wholeCardsDeck = new Group();
         pickedCardDeck = new Group();
@@ -125,7 +128,17 @@ public class AppView extends Scene implements Observer {
         camera3D.setTranslateY(4200);
         camera3D.setTranslateZ(-3800);
         camera3D.getTransformations().getRotateX().setAngle(35);
+
+        //camera for GUI
+        ViewCamera camera2D = new ViewCamera(true);
+        camera2D.setTranslateX(TABLE_SIZE/2);
+        camera2D.setTranslateY(1200);
+        camera2D.setTranslateZ(-5500);
+        camera2D.getTransformations().getRotateX().setAngle(0);
+
         this.setCamera(camera3D);
+        subSceneGUI.setCamera(camera2D);
+
 
         //=== Define the light
 
@@ -135,6 +148,8 @@ public class AppView extends Scene implements Observer {
         pointLight.setTranslateZ(-20000);
 
         //=== Create GUI elements
+
+        rootGUI.setStyle("-fx-focus-color: transparent;");
 
         stateTitle = new Label();
         stateTitle.setTranslateX(1000);
@@ -161,44 +176,63 @@ public class AppView extends Scene implements Observer {
         errorSnack.setFont(new Font(30));
 
         Button bidSmall = new Button("Small");
-        bidSmall.setTextFill(Color.WHITE);
+        bidSmall.setTextFill(Color.BLACK);
+        bidSmall.setMinSize(160, 30);
         bidSmall.setOnAction(event -> {
             appPresenter.transmitUserChoice(1);
             bidBox.setVisible(false);
         });
+        bidSmall.setOnMouseEntered( event -> this.setCursor(Cursor.HAND) );
+        bidSmall.setOnMouseExited( event -> this.setCursor(Cursor.DEFAULT) );
+
         Button bidGuard = new Button("Guard");
-        bidGuard.setTextFill(Color.WHITE);
+        bidGuard.setTextFill(Color.BLACK);
+        bidGuard.setMinSize(160, 30);
         bidGuard.setOnAction(event -> {
             appPresenter.transmitUserChoice(2);
             bidBox.setVisible(false);
         });
+        bidGuard.setOnMouseEntered( event -> this.setCursor(Cursor.HAND) );
+        bidGuard.setOnMouseExited( event -> this.setCursor(Cursor.DEFAULT) );
+
         Button bidGuardWithout = new Button("Guard Without The Kitty");
-        bidGuardWithout.setTextFill(Color.WHITE);
+        bidGuardWithout.setTextFill(Color.BLACK);
+        bidGuardWithout.setMinSize(160, 30);
         bidGuardWithout.setOnAction(event  -> {
             appPresenter.transmitUserChoice(3);
             bidBox.setVisible(false);
         });
+        bidGuardWithout.setOnMouseEntered( event -> this.setCursor(Cursor.HAND) );
+        bidGuardWithout.setOnMouseExited( event -> this.setCursor(Cursor.DEFAULT) );
+
         Button bidGuardAgainst = new Button("Guard Against The Kitty");
-        bidGuardAgainst.setTextFill(Color.WHITE);
+        bidGuardAgainst.setTextFill(Color.BLACK);
+        bidGuardAgainst.setMinSize(160, 30);
         bidGuardAgainst.setOnAction(event -> {
             appPresenter.transmitUserChoice(4);
             bidBox.setVisible(false);
         });
+        bidGuardAgainst.setOnMouseEntered( event -> this.setCursor(Cursor.HAND) );
+        bidGuardAgainst.setOnMouseExited( event -> this.setCursor(Cursor.DEFAULT) );
+
         Button bidPass = new Button("Pass");
-        bidPass.setTextFill(Color.WHITE);
+        bidPass.setTextFill(Color.BLACK);
+        bidPass.setMinSize(160, 30);
         bidPass.setOnAction(event -> {
             appPresenter.transmitUserChoice(5);
             bidBox.setVisible(false);
         });
+        bidPass.setOnMouseEntered( event -> this.setCursor(Cursor.HAND) );
+        bidPass.setOnMouseExited( event -> this.setCursor(Cursor.DEFAULT) );
 
 
-        bidBox = new VBox();
+        bidBox = new VBox(10);
         bidBox.setPadding(new Insets(10, 50, 50, 50));
-        bidBox.setSpacing(10);
-        bidBox.setScaleX(5);
-        bidBox.setScaleY(5);
-        bidBox.setTranslateX(3000);
-        bidBox.setTranslateY(800);
+        bidBox.setTranslateZ(-500);
+        bidBox.setScaleX(4.5);
+        bidBox.setScaleY(4.5);
+        bidBox.setTranslateX(2800);
+        bidBox.setTranslateY(1200);
         bidBox.getChildren().addAll(bidSmall, bidGuard, bidGuardWithout, bidGuardAgainst, bidPass);
         bidBox.setVisible(false);
 
@@ -211,6 +245,18 @@ public class AppView extends Scene implements Observer {
         for ( Group hand : hands)
             root3D.getChildren().add(hand);
 
+        this.setOnKeyPressed(keyEvent -> {
+            switch (keyEvent.getCode())
+            {
+                case M:
+                    root3D.setVisible(false);
+                    rootGUI.setVisible(false);
+                    gameModel.setGameState(GameState.ENDED);
+                    Platform.runLater( () -> gameModel.quitGame());
+                default:
+                    break;
+            }
+        });
     }
 
 
@@ -271,7 +317,7 @@ public class AppView extends Scene implements Observer {
                                 removeCardFromGroup(cardUpdate);
                                 break;
                             case DELETE_CARD:
-                                removeCard(cardUpdate);
+                                removeCard(cardUpdate.getCard());
                                 break;
                             case SHUFFLE_CARDS:
                                 shuffleDeck(cardUpdate.getCardGroup());
@@ -286,6 +332,10 @@ public class AppView extends Scene implements Observer {
                                 spreadAllCards(cardUpdate.getCardGroup());
                                 break;
                             case GATHER_CARDS:
+                                if ( gameModel.getGameState() == GameState.ENDED) {
+                                    stateTitle.setText("GAME ENDING");
+                                    toolTip.setText("");
+                                }
                                 gatherAllCards(cardUpdate.getCardGroup());
                                 break;
                             default:
@@ -359,7 +409,7 @@ public class AppView extends Scene implements Observer {
                         break;
                     case ECART_CONSTITUTED:
                         stateTitle.setText("ECART CONSTITUTED");
-                        toolTip.setText("Game is finished\nYou can go back to menu");
+                        toolTip.setText("Game is finished\nYou can quit game");
                         //TODO : NAVIGATION SYSTEM
                         break;
                     default:
@@ -384,10 +434,10 @@ public class AppView extends Scene implements Observer {
                 toolTip.setText("Guard\nYou can constitute your ecart");
                 break;
             case GuardWithoutTheKitty:
-                toolTip.setText("Guard Without The Kitty\nGame is finished\nYou can go back to menu");
+                toolTip.setText("Guard Without The Kitty\nGame is finished\nYou can quit game");
                 break;
             case GuardAgainstTheKitty:
-                toolTip.setText("Guard Against The Kitty\nGame is finished\nYou can go back to menu");
+                toolTip.setText("Guard Against The Kitty\nGame is finished\nYou can quit game");
                 break;
             case Pass:
                 toolTip.setText("You have chosen to Pass\nPlease click on \"RE-DEAL\" button");
@@ -567,15 +617,10 @@ public class AppView extends Scene implements Observer {
      * This method is called by @update if the update type is @DELETE_CARD
      * It delete the ViewCard associated to a model Card from the View
      * @since   v0.6
-     *
-     * @param   cardUpdate     the cardUpdate object.
+     *@param   card     the viewCard related modelCard
      */
-    private void removeCard(CardUpdate cardUpdate) throws NullViewCardException {
-        ViewCard viewCard = getViewCardFromCard(cardUpdate.getCard());
-        if (viewCard == null)
-        {
-            throw new NullViewCardException(cardUpdate, true);
-        }
+    private void removeCard(Card card) throws NullViewCardException {
+        ViewCard viewCard = getViewCardFromCard(card);
         viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
         viewCardToGroup.remove(viewCard);
     }
@@ -588,7 +633,18 @@ public class AppView extends Scene implements Observer {
      * @param   cardGroup     the cardUpdate object.
      */
     private void shuffleDeck(CardGroup cardGroup) throws NullViewCardException {
-        //TODO : SHUFFLING CARDS ANIMATION
+        //TODO : ADD SHUFFLING CARDS ANIMATION
+    }
+
+
+    /**
+     * This method is called by @update if the update type is @CUT_DECK
+     * It cut the deck of a given group in two
+     * @since v0.7.1
+     * @param   cardGroup     the cardUpdate object.
+     */
+    private void cutDeck(CardGroup cardGroup) throws NullViewCardException {
+        //TODO : ADD CUTTING DECK ANIMATION
     }
 
 
@@ -599,7 +655,7 @@ public class AppView extends Scene implements Observer {
      * @param   cardGroup     the cardUpdate object.
      */
     private void sortDeck(CardGroup cardGroup) throws NullViewCardException {
-        //TODO : FIX SORT - CONFLICT WITH MOUSE SELECTION
+        //TODO : FIX SORTING DECK ANIMATION - CONFLICT WITH MOUSE SELECTION
         cardGroup.forEach( (card) -> {
             ViewCard viewCard = getViewCardFromCard(card);
 
@@ -645,17 +701,6 @@ public class AppView extends Scene implements Observer {
             }
         });
 
-    }
-
-
-    /**
-     * This method is called by @update if the update type is @CUT_DECK
-     * It cut the deck of a given group in two
-     * @since v0.7.1
-     * @param   cardGroup     the cardUpdate object.
-     */
-    private void cutDeck(CardGroup cardGroup) throws NullViewCardException {
-        //TODO : CUTTING DECK ANIMATION
     }
 
 
@@ -881,12 +926,15 @@ public class AppView extends Scene implements Observer {
 
 //GETTERS & SETTERS - no documentation needed
 
+    public GameModel getGameModel() {
+        return gameModel;
+    }
+    public AppPresenter getAppPresenter() {
+        return appPresenter;
+    }
     public Group getRoot3d()
     {
         return root3D;
-    }
-    public GameModel getGameModel() {
-        return gameModel;
     }
     public Group getSouth() {
         return getGroupFromCardGroup(gameModel.getOurPlayer());
@@ -900,9 +948,6 @@ public class AppView extends Scene implements Observer {
     }
     public HashMap<ViewCard, Group> getViewCardToGroup() {
         return viewCardToGroup;
-    }
-    public AppPresenter getAppPresenter() {
-        return appPresenter;
     }
     public boolean isHandlingCardPicking() {
         return handleCardPicking;

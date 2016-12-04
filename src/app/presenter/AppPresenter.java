@@ -14,7 +14,7 @@ limitations under the License.
 package app.presenter;
 
 import app.model.GameModel;
-import app.view.AppView;
+import app.view.GameView;
 
 /**
  * The {@code AppPresenter} class consists in the MVC architecture presenter
@@ -24,7 +24,7 @@ import app.view.AppView;
  */
 public class AppPresenter {
     private GameModel gameModel;
-    private AppView appView;
+    private GameView appView;
 
 
     /**
@@ -50,7 +50,7 @@ public class AppPresenter {
     public void setGameModel(GameModel gameModel) {
         this.gameModel = gameModel;
     }
-    public void setAppView(AppView appView) {
+    public void setGameView(GameView appView) {
         this.appView = appView;
     }
 }

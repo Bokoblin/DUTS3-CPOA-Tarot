@@ -15,7 +15,7 @@ package app;
 
 import app.model.GameModel;
 import app.presenter.AppPresenter;
-import app.view.AppView;
+import app.view.GameView;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -26,9 +26,9 @@ import javafx.stage.Stage;
  * The {@code Main} class inits and launch game
  *
  * The app follows an MVP Architecture :
- * GameModel notify its view observer, AppView
- * AppView send user request to presenter, AppPresenter
- * AppPresenter change the model, GameModel
+ * GameModel notifies change to GameView (its observer)
+ * GameView sends user request AppPresenter and send state request to model
+ * AppPresenter changes GameModel fields
  *
  * Our app implements a variant of MVP from CPOA TD2 (page 3)
  *
@@ -41,22 +41,22 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage window) throws Exception{
         Group root = new Group();
-        GameModel gameModel = new GameModel();
+        GameModel gameModel = new GameModel(true);
         AppPresenter appPresenter = new AppPresenter();
-        AppView scene = new AppView(root, gameModel, appPresenter);
+        GameView scene = new GameView(root, gameModel, appPresenter);
         appPresenter.setGameModel(gameModel);
-        appPresenter.setAppView(scene);
+        appPresenter.setGameView(scene);
         gameModel.createCards();
 
-        primaryStage.setTitle("JACQUOT JOLIVET S3A");
-        primaryStage.setMaximized(true);
-        primaryStage.setScene(scene);
+        window.setTitle("JACQUOT JOLIVET S3A");
+        window.setMaximized(true);
+        window.setScene(scene);
         scene.setFill(Color.BLACK);
-        primaryStage.show();
+        window.show();
 
-        primaryStage.setOnCloseRequest(event -> {
+        window.setOnCloseRequest(event -> {
             Platform.exit();
             System.exit(0);
         });
