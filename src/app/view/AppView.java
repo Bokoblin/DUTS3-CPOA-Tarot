@@ -422,7 +422,7 @@ public class AppView extends Scene implements Observer {
                 new KeyFrame(new Duration(1000), new KeyValue(viewCard.translateZProperty(), specificPosition.getZ())),
                 new KeyFrame(new Duration(1000), new KeyValue(viewCard.rotateProperty(), getCardDefaultRotation(viewCard)))
         );
-        timeline.setOnFinished(event -> appPresenter.notifyEndAnimation(cardUpdate));
+        timeline.setOnFinished(event -> cardUpdate.setAnimationFinished());
         timeline.play();
     }
 
@@ -513,7 +513,6 @@ public class AppView extends Scene implements Observer {
                 try {
                     CardUpdate newCardUpdate = new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, card, cardGroup);
                     cardUpdate.addSubUpdate(newCardUpdate);
-                    cardUpdate.setAnimationFinished();
                     changeCardGroup(newCardUpdate, newPosition);
                 } catch (NullViewCardException e) {
                     System.err.println(e.toString());
@@ -522,6 +521,7 @@ public class AppView extends Scene implements Observer {
                 throw new NullViewCardException(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, card, cardGroup), true);
             }
         }
+        cardUpdate.setAnimationFinished();
     }
 
 
@@ -588,7 +588,6 @@ public class AppView extends Scene implements Observer {
                     + j*(MARGIN_CARDS+ViewCard.getCardHeight()), -ViewCard.getCardDepth());
             CardUpdate newCardUpdate = new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, card, null);
             cardUpdate.addSubUpdate(newCardUpdate);
-            cardUpdate.setAnimationFinished();
             changeCardGroup(newCardUpdate, position);
             i++;
             if (i>nbCardInRow-1)
@@ -597,6 +596,7 @@ public class AppView extends Scene implements Observer {
                 j++;
             }
         }
+        cardUpdate.setAnimationFinished();
     }
 
 
