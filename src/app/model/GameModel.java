@@ -46,6 +46,7 @@ public class GameModel extends Observable {
     private NotificationType awaitsUserEvent;
     private Thread gameThread;
     private GameState gameState;
+    private boolean gameModeSimplified;
     private int userChoice;
 
     /**
@@ -53,8 +54,11 @@ public class GameModel extends Observable {
      * @since v0.5
      *
      * @throws CardGroupNumberException if user tries to create too much hands
+     * @param gameModeSimplified the mode chosen to run the game
      */
-    public GameModel() throws CardGroupNumberException {
+    public GameModel(boolean gameModeSimplified) throws CardGroupNumberException {
+
+        this.gameModeSimplified = gameModeSimplified;
         wholeCardsDeck = new CardGroup(78);
         toPickDeck = new CardGroup(78);
         pickedCardsDeck = new CardGroup(4);
@@ -71,12 +75,19 @@ public class GameModel extends Observable {
             System.err.println(e.getMessage());
         }
 
-        gameThread = new Thread(() -> {
-            chooseInitialDealer();
-            handleDealing();
-            handleBids();
-            System.out.println(toString());
+        gameThread = new Thread( () -> {
+            if (gameState != GameState.ENDED && !this.gameModeSimplified)
+                chooseInitialDealer();
+            if (gameState != GameState.ENDED)
+                handleDealing();
+            if (gameState != GameState.ENDED)
+                handleBids();
+            if (gameState != GameState.ENDED) {
+                pauseModelFor(5000);
+                quitGame();
+            }
         });
+        gameThread.setDaemon(true);
 
         userChoice = -1;
         awaitsUserEvent = null;
@@ -284,9 +295,6 @@ public class GameModel extends Observable {
         while ( !talon.isEmpty() ) {
             moveCardBetweenDecks(talon, wholeCardsDeck, talon.get(0), false);
         }
-        while ( !talon.isEmpty() ) {
-            moveCardBetweenDecks(talon, wholeCardsDeck, talon.get(0), false);
-        }
         while ( !pickedCardsDeck.isEmpty() ) {
             moveCardBetweenDecks(pickedCardsDeck, wholeCardsDeck, pickedCardsDeck.get(0), false);
         }
@@ -317,6 +325,7 @@ public class GameModel extends Observable {
             constituteEcart();
             changeGameState(GameState.ECART_CONSTITUTED);
         }
+        playerHandler.getPlayersMap().forEach( (cardinalPoint,player) -> sortDeck(player));
     }
 
 
@@ -363,6 +372,7 @@ public class GameModel extends Observable {
 
         //sortDeck(ourPlayer);
 
+        //TODO : DRAG & DROP VERSION
         for (int i=0; i < 6; i++) {
             boolean choiceValid;
             Card c;
@@ -394,32 +404,25 @@ public class GameModel extends Observable {
             }
             moveCardBetweenDecks(ourPlayer, talon, c, true);
         }
-        sortDeck(ourPlayer);
     }
 
 
     /**
-     * Displays card repartition after distribution
-     * @since v0.5
+     * Properly quit the game by removing all cards
+     * and notifying observer of the removal
+     * @since v0.10
      */
-    @Override
-    public String toString() {
-
-        String result = "\n=== CARD REPARTITION ===\n";
-
-        for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
-                : playerHandler.getPlayersMap().entrySet()) {
-            result += playerHandler.getPlayerName(player.getValue()) + " : ";
-            for ( Card c : player.getValue()) {
-                result += c.getName() + "; ";
-            }
-            result +=  "\n";
+    public void quitGame() {
+        gameState = GameState.ENDED;
+        gatherAllCards();
+        while ( !wholeCardsDeck.isEmpty() ) {
+            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.DELETE_CARD, wholeCardsDeck.get(0)));
+            pauseModelFor(10);
+            wholeCardsDeck.remove(0);
         }
-        result += "Talon : ";
-        for ( Card c : talon) {
-            result += c.getName() + "; ";
-        }
-        return result;
+        Talon.resetClassForTesting();
+        Hand.resetClassForTesting();
+        Card.resetClassForTesting();
     }
 
 
@@ -555,6 +558,7 @@ public class GameModel extends Observable {
         try {
             sleep(millis);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
         }
     }
@@ -681,9 +685,14 @@ public class GameModel extends Observable {
     public Thread getGameThread() {
         return gameThread;
     }
+    public GameState getGameState() {
+        return gameState;
+    }
 
     public void setUserChoice(int userChoice) {
         this.userChoice = userChoice;
     }
-
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
 }

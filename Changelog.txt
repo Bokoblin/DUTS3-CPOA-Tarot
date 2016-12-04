@@ -9,13 +9,18 @@ v0.10-dev :
 
 Features :
 - Added game state
+- Added game mode ( simplified mode removes dealer choosing)
+- Added a method to properly clean at game quitting
 - Added on-screen text (section title, tooltips, errors)
 - Removed console text
 - Added Ecart constitution user event
 - Added Bid choosing user event
 
+Fixed :
+- cursor.HAND not shown when it should have
+
 Issues :
-- sorting in conflict with mouse events -> Disabled pre-Ecart sorting
+- sorting in conflict with mouse events -> Disabled pre-Ecart sorting for now
 - AppView's rootGUI, camera handling to rewrite for correct displaying
     of on-screen text and buttons
 
