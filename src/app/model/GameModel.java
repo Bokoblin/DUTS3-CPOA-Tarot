@@ -33,6 +33,7 @@ import static java.lang.Thread.sleep;
  * @see PlayerHandler
  * @see Talon
  */
+//TODO : Change the most part of @pauseModelFor with @waitEndUpdateAnimation
 public class GameModel extends Observable {
 
     private CardGroup wholeCardsDeck;
@@ -43,6 +44,7 @@ public class GameModel extends Observable {
     private Talon talon;
     private Hand ourPlayer;
     private int userChoice;
+    private int lastEndedAnimation;
 
     /**
      * Constructs app model by creating players, chien and cards
@@ -148,9 +150,8 @@ public class GameModel extends Observable {
             if ( player == ourPlayer) {
 
                 System.out.println("Choose your card by clicking on it");
-                waitObserverUserEvent(ViewActionExpected.PICK_CARD);
-                c = toPickDeck.get(userChoice);
-                userChoice = -1;
+                int choice = waitObserverUserEvent(ViewActionExpected.PICK_CARD);
+                c = toPickDeck.get(choice);
             }
             else { //choose a random card for other players
                 do {
@@ -331,10 +332,9 @@ public class GameModel extends Observable {
                 System.out.println("4. GuardAgainstTheKitty");
                 System.out.println("5. Pass");
 
-                waitObserverUserEvent(ViewActionExpected.CHOOSE_BID);
+                int choice = waitObserverUserEvent(ViewActionExpected.CHOOSE_BID);
                 try {
-                    ourPlayer.setBidChosen(Bids.valueOf(userChoice));
-                    userChoice = -1;
+                    ourPlayer.setBidChosen(Bids.valueOf(choice));
                     System.out.println("You have chosen the bid : " +
                             String.valueOf(ourPlayer.getBidChosen()));
                 } catch (Exception e) {
@@ -372,9 +372,9 @@ public class GameModel extends Observable {
             boolean choiceValid;
             Card c;
             do {
-                waitObserverUserEvent(ViewActionExpected.CHOOSE_ECART_CARD);
+                int choice = waitObserverUserEvent(ViewActionExpected.CHOOSE_ECART_CARD);
 
-                c = ourPlayer.get(userChoice);
+                c = ourPlayer.get(choice);
 
                 if ( c.getSuit() != Suit.Trump && c.getSuit() != Suit.Excuse && c.getRank() != Rank.King) {
                     choiceValid = true;
@@ -486,7 +486,10 @@ public class GameModel extends Observable {
         wholeCardsDeck.addAll(cut2);
         wholeCardsDeck.addAll(cut1);
 
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.CUT_DECK, wholeCardsDeck));
+        pauseModelFor(2000);
+        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.CUT_DECK, wholeCardsDeck.get(splitIt), wholeCardsDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
     }
 
 
@@ -602,7 +605,7 @@ public class GameModel extends Observable {
             setChanged();
             notifyObservers(cardUpdate);
             if (cardUpdate.getType() != ActionPerformedOnCard.ADD_CARD) {
-                pauseModelFor(300);
+                pauseModelFor(200);
             }
         }
     }
@@ -621,31 +624,57 @@ public class GameModel extends Observable {
      * @see ViewActionExpected
      * @param action the expected action from view
      */
-    private void waitObserverUserEvent(ViewActionExpected action) {
+    private synchronized int waitObserverUserEvent(ViewActionExpected action) {
+        int choice = -1;
         if ( countObservers() != 0 ) {
             setChanged();
             notifyObservers(action);
-            while (userChoice == -1) {
-                pauseModelFor(10);
+            while (userChoice == -1)
+            {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    System.err.println(e.toString());
+                }
             }
+            choice = userChoice;
+            userChoice = -1;
         }
         else { //if no observers, set default values
             if ( action == ViewActionExpected.PICK_CARD) {
-                userChoice = new Random().nextInt(78);
+                choice = new Random().nextInt(78);
             }
             else if ( action == ViewActionExpected.CHOOSE_BID) {
-                userChoice = 1 + (new Random().nextInt(5));
+                choice = 1 + (new Random().nextInt(5));
             }
             else if ( action == ViewActionExpected.CHOOSE_ECART_CARD) {
-                userChoice = new Random().nextInt(playerHandler.
+                choice = new Random().nextInt(playerHandler.
                         getPlayer(PlayerHandler.PlayersCardinalPoint.South).size() );
             }
         }
+        return choice;
     }
 
+    /**
+     * Wait until the animation of a specified updateCard object
+     * has been finished.
+     * @since v0.9.1
+     * @param cardUpdate the specified cardUpdate object
+     */
+    private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate)
+    {
+        while (lastEndedAnimation != cardUpdate.hashCode())
+        {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                System.err.println(e.toString());
+            }
+        }
+        lastEndedAnimation = -1;
+    }
 
     //GETTERS & SETTERS - no documentation needed
-
 
     public CardGroup getWholeCardsDeck() {
         return wholeCardsDeck;
@@ -663,7 +692,14 @@ public class GameModel extends Observable {
         return talon;
     }
 
-    public void setUserChoice(int userChoice) {
+    public synchronized void setUserChoice(int userChoice) {
         this.userChoice = userChoice;
+        notifyAll();
+    }
+
+    public synchronized void setLastEndedAnimation(int lastEndedAnimation)
+    {
+        this.lastEndedAnimation = lastEndedAnimation;
+        notifyAll();
     }
 }
