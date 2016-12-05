@@ -142,8 +142,9 @@ public class GameModel extends Observable {
         }
         temporize(1500);
 
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SPREAD_CARDS, toPickDeck));
-        temporize(500); //TODO : should disappear
+        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.SPREAD_CARDS, toPickDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
 
         //Handle dealer choosing
         playerHandler.getPlayersMap().forEach((cardinalPoint,player)-> {
@@ -436,7 +437,9 @@ public class GameModel extends Observable {
     public void shuffleCards() {
         long seed = System.nanoTime();
         Collections.shuffle(wholeCardsDeck, new Random(seed));
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SHUFFLE_CARDS, wholeCardsDeck));
+        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.SHUFFLE_CARDS, wholeCardsDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
     }
 
 

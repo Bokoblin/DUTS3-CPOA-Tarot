@@ -22,6 +22,8 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.paint.Color;
@@ -458,6 +460,35 @@ public class AppView extends Scene implements Observer {
         cardUpdate.setAnimationFinished();
     }
 
+    /**
+     * Reorganize all viewCards of a group with their default positions
+     * @since   v0.9.2
+     *
+     * @param   group     the group object.
+     */
+    private void refreshGroupNodesPosition(Group group)
+    {
+        List<ViewCard> originalDeck = new ArrayList<>();
+        for (Node node : group.getChildren())
+        {
+            if (node instanceof ViewCard)
+            {
+                originalDeck.add((ViewCard)node);
+            }
+        }
+        for (ViewCard viewCard : originalDeck)
+        {
+            group.getChildren().remove(viewCard);
+        }
+        for (ViewCard viewCard : originalDeck)
+        {
+            try {
+                changeCardGroup(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, viewCard.getModelCard(), getCardGroupFromGroup(group)));
+            } catch (NullViewCardException e) {
+                System.err.println(e.toString());
+            }
+        }
+    }
 
     /**
      * This method is called by @update if the update type is @SHUFFLE_CARDS
@@ -466,7 +497,21 @@ public class AppView extends Scene implements Observer {
      * @param   cardUpdate     the cardUpdate object.
      */
     private void shuffleDeck(CardUpdate cardUpdate) throws NullViewCardException {
-        //TODO : SHUFFLING CARDS ANIMATION
+        Timeline timeline = new Timeline();
+        timeline.setOnFinished(event -> cardUpdate.setAnimationFinished());
+        int i = 0;
+        for (Card card : cardUpdate.getCardGroup())
+        {
+            ViewCard viewCard = getViewCardFromCard(card);
+            timeline.getKeyFrames().addAll(
+                    new KeyFrame(new Duration(i * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), ViewCard.getCardWidth()*2)),
+                    new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0)),
+                    new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), getCardDefaultPosition(viewCard).getY())),
+                    new KeyFrame(new Duration((i+2) * 100), event -> refreshGroupNodesPosition(getGroupFromCardGroup(cardUpdate.getCardGroup())))
+                    );
+            i++;
+        }
+        timeline.play();
     }
 
 
