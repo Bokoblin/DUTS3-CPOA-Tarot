@@ -24,9 +24,11 @@ import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Point3D;
+import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -69,8 +71,8 @@ public class GameView extends Scene implements Observer {
 
     //Groups
     private Group root3D;
-    private Group rootGUI;
-    private SubScene subSceneGUI;
+    private StackPane rootGUI;
+    private SubScene subScene3D;
     private Group background;
     private Group wholeCardsDeck;
     private Group pickedCardDeck;
@@ -91,11 +93,13 @@ public class GameView extends Scene implements Observer {
     /**
      * Constructs a view for a specific root node and with a model and a presenter
      * @since   v0.1
+     * @param   root
      * @param   model       the model it reads
      * @param   controller  the presenter it sends event information
      */
     public GameView(Group root, GameModel model, AppPresenter controller) {
-        super(root, 800, 600, true, SceneAntialiasing.DISABLED);
+        super(root, 800, 600, false, SceneAntialiasing.DISABLED);
+
 
         this.gameModel = model;
         this.appPresenter = controller;
@@ -105,8 +109,13 @@ public class GameView extends Scene implements Observer {
 
         //=== Create the groups
         root3D = new Group();
-        rootGUI = new Group();
-        subSceneGUI = new SubScene(root3D, 800, 600, false, SceneAntialiasing.BALANCED);
+        rootGUI = new StackPane();
+        rootGUI.setAlignment(Pos.TOP_CENTER);
+        rootGUI.prefWidthProperty().bind(widthProperty());
+        rootGUI.prefHeightProperty().bind(heightProperty());
+        subScene3D = new SubScene(root3D, 800, 600, true, SceneAntialiasing.DISABLED);
+        subScene3D.widthProperty().bind(widthProperty());
+        subScene3D.heightProperty().bind(heightProperty());
         background = new Group();
         wholeCardsDeck = new Group();
         pickedCardDeck = new Group();
@@ -129,15 +138,7 @@ public class GameView extends Scene implements Observer {
         camera3D.setTranslateZ(-3800);
         camera3D.getTransformations().getRotateX().setAngle(35);
 
-        //camera for GUI
-        ViewCamera camera2D = new ViewCamera(true);
-        camera2D.setTranslateX(TABLE_SIZE/2);
-        camera2D.setTranslateY(1200);
-        camera2D.setTranslateZ(-5500);
-        camera2D.getTransformations().getRotateX().setAngle(0);
-
-        this.setCamera(camera3D);
-        subSceneGUI.setCamera(camera2D);
+        subScene3D.setCamera(camera3D);
 
 
         //=== Define the light
@@ -152,28 +153,24 @@ public class GameView extends Scene implements Observer {
         rootGUI.setStyle("-fx-focus-color: transparent;");
 
         stateTitle = new Label();
-        stateTitle.setTranslateX(1000);
-        stateTitle.setTranslateY(-200);
-        stateTitle.setScaleX(2);
-        stateTitle.setScaleY(2);
+        stateTitle.setTranslateX(0);
+        stateTitle.setTranslateY(10);
         stateTitle.setTextFill(Color.WHITE);
-        stateTitle.setFont(new Font(40));
+        stateTitle.setFont(new Font(20));
 
         toolTip = new Label();
-        toolTip.setTranslateX(3000);
-        toolTip.setTranslateY(0);
+        toolTip.setTranslateX(getWidth()/2);
+        toolTip.setTranslateY(50);
         toolTip.setScaleX(2);
         toolTip.setScaleY(2);
         toolTip.setTextFill(Color.WHITE);
-        toolTip.setFont(new Font(35));
+        toolTip.setFont(new Font(8));
 
         errorSnack = new Label();
-        errorSnack.setTranslateX(1000);
-        errorSnack.setTranslateY(2700);
-        errorSnack.setScaleX(2);
-        errorSnack.setScaleY(2);
+        errorSnack.setTranslateX(0);
+        errorSnack.setTranslateY(650);
         errorSnack.setTextFill(Color.RED);
-        errorSnack.setFont(new Font(30));
+        errorSnack.setFont(new Font(20));
 
         Button bidSmall = new Button("Small");
         bidSmall.setTextFill(Color.BLACK);
@@ -229,34 +226,19 @@ public class GameView extends Scene implements Observer {
         bidBox = new VBox(10);
         bidBox.setPadding(new Insets(10, 50, 50, 50));
         bidBox.setTranslateZ(-500);
-        bidBox.setScaleX(4.5);
-        bidBox.setScaleY(4.5);
-        bidBox.setTranslateX(2800);
-        bidBox.setTranslateY(1200);
+        bidBox.setTranslateX(1000);
+        bidBox.setTranslateY(100);
         bidBox.getChildren().addAll(bidSmall, bidGuard, bidGuardWithout, bidGuardAgainst, bidPass);
         bidBox.setVisible(false);
 
         //=== Add elements to groups
 
         background.getChildren().add(table);
-        root.getChildren().addAll(root3D, rootGUI);
+        root.getChildren().addAll(rootGUI, subScene3D );
         rootGUI.getChildren().addAll(stateTitle, toolTip, errorSnack, bidBox);
         root3D.getChildren().addAll(background, talon, wholeCardsDeck, pickedCardDeck, pointLight);
         for ( Group hand : hands)
             root3D.getChildren().add(hand);
-
-        this.setOnKeyPressed(keyEvent -> {
-            switch (keyEvent.getCode())
-            {
-                case M:
-                    root3D.setVisible(false);
-                    rootGUI.setVisible(false);
-                    gameModel.setGameState(GameState.ENDED);
-                    Platform.runLater( () -> gameModel.quitGame());
-                default:
-                    break;
-            }
-        });
     }
 
 
@@ -352,7 +334,7 @@ public class GameView extends Scene implements Observer {
                 switch ( (NotificationType)arg ) {
                     case PICK_CARD:
                         handleCardPicking = true;
-                        toolTip.setText("Please select a card by clicking on it");
+                        toolTip.setText("Please select a card");
                         break;
                     case CHOOSE_ECART_CARD:
                         handleCardPicking = true;
@@ -360,7 +342,7 @@ public class GameView extends Scene implements Observer {
                         break;
                     case CHOOSE_BID:
                         bidBox.setVisible(true);
-                        toolTip.setText("Select a bid with the buttons below");
+                        toolTip.setText("Please select a bid");
                         break;
                     case UNAUTHORIZED_CARD_CHOICE:
                         errorSnack.setText("You can't choose a Trump, a King or Excuse");
@@ -393,7 +375,7 @@ public class GameView extends Scene implements Observer {
                         break;
                     case PETIT_SEC_DETECTED:
                         stateTitle.setText("PETIT SEC DETECTED");
-                        toolTip.setText("Please click on \"RE-DEAL\" button");
+                        toolTip.setText("Re-dealing...");
                         //TODO : NAVIGATION SYSTEM
                         break;
                     case BID_CHOOSING:
@@ -428,19 +410,19 @@ public class GameView extends Scene implements Observer {
         stateTitle.setText("BID HAS BEEN CHOSEN");
         switch (gameModel.getOurPlayer().getBidChosen()) {
             case Small:
-                toolTip.setText("Small\nYou can constitute your ecart");
+                toolTip.setText("Small\nConstitute your ecart");
                 break;
             case Guard:
-                toolTip.setText("Guard\nYou can constitute your ecart");
+                toolTip.setText("Guard\nConstitute your ecart");
                 break;
             case GuardWithoutTheKitty:
-                toolTip.setText("Guard Without The Kitty\nGame is finished\nYou can quit game");
+                toolTip.setText("Guard Without The Kitty\nGame is finished\nYou can quit");
                 break;
             case GuardAgainstTheKitty:
-                toolTip.setText("Guard Against The Kitty\nGame is finished\nYou can quit game");
+                toolTip.setText("Guard Against The Kitty\nGame is finished\nYou can quit");
                 break;
             case Pass:
-                toolTip.setText("You have chosen to Pass\nPlease click on \"RE-DEAL\" button");
+                toolTip.setText("You have chosen to Pass\nRe-dealing...9");
                 break;
             //TODO : NAVIGATION SYSTEM
         }

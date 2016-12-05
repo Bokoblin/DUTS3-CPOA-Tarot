@@ -43,7 +43,7 @@ public class Main extends Application {
     @Override
     public void start(Stage window) throws Exception{
         Group root = new Group();
-        GameModel gameModel = new GameModel(true);
+        GameModel gameModel = new GameModel(false);
         AppPresenter appPresenter = new AppPresenter();
         GameView scene = new GameView(root, gameModel, appPresenter);
         appPresenter.setGameModel(gameModel);
@@ -52,6 +52,8 @@ public class Main extends Application {
 
         window.setTitle("JACQUOT JOLIVET S3A");
         window.setMaximized(true);
+        window.setMinWidth(1000);
+        window.setMinHeight(600);
         window.setScene(scene);
         scene.setFill(Color.BLACK);
         window.show();
