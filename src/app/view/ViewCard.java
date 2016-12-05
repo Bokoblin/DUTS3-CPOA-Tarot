@@ -172,7 +172,7 @@ public class ViewCard extends RectangleMesh {
                 {
                     gameView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
                     gameView.setHandleCardPicking(false);
-                    gameView.getToolTip().setText("Please wait");
+                    gameView.getToolTip().setText("Please wait...");
                 }
             }
         });
