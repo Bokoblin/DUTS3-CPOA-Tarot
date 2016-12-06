@@ -24,7 +24,7 @@ import static java.lang.Thread.sleep;
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.9
+ * @version v0.10
  * @since v0.2
  *
  * @see Observable
@@ -43,6 +43,10 @@ public class GameModel extends Observable {
     private PlayerHandler playerHandler;
     private Talon talon;
     private Hand ourPlayer;
+    private NotificationType awaitsUserEvent;
+    private Thread gameThread;
+    private GameState gameState;
+    private boolean gameModeSimplified;
     private int userChoice;
     private int lastEndedAnimation;
 
@@ -51,8 +55,11 @@ public class GameModel extends Observable {
      * @since v0.5
      *
      * @throws CardGroupNumberException if user tries to create too much hands
+     * @param gameModeSimplified the mode chosen to run the game
      */
-    public GameModel() throws CardGroupNumberException {
+    public GameModel(boolean gameModeSimplified) throws CardGroupNumberException {
+
+        this.gameModeSimplified = gameModeSimplified;
         wholeCardsDeck = new CardGroup(78);
         toPickDeck = new CardGroup(78);
         pickedCardsDeck = new CardGroup(4);
@@ -69,7 +76,22 @@ public class GameModel extends Observable {
             System.err.println(e.getMessage());
         }
 
+        gameThread = new Thread( () -> {
+            if (gameState != GameState.GAME_ENDED && !this.gameModeSimplified)
+                chooseInitialDealer();
+            if (gameState != GameState.GAME_ENDED)
+                handleDealing();
+            if (gameState != GameState.GAME_ENDED)
+                handleBids();
+            if (gameState != GameState.GAME_ENDED) {
+                temporize(5000);
+                quitGame();
+            }
+        });
+        gameThread.setDaemon(true);
+
         userChoice = -1;
+        awaitsUserEvent = null;
     }
 
 
@@ -87,7 +109,7 @@ public class GameModel extends Observable {
                             throw new CardNumberException("Card number limit has been reached.",
                                     wholeCardsDeck.getNbMaxCards());
                         else
-                            notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, wholeCardsDeck));
+                            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
 
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
@@ -102,7 +124,7 @@ public class GameModel extends Observable {
                             throw new CardNumberException("Card number limit has been reached.",
                                     wholeCardsDeck.getNbMaxCards());
                         else
-                            notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, wholeCardsDeck));
+                            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
                     }
@@ -114,12 +136,13 @@ public class GameModel extends Observable {
                     if(!wholeCardsDeck.add(c))
                         throw new CardNumberException("Card number limit has been reached.",
                                 wholeCardsDeck.getNbMaxCards());
-                    notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD, c, wholeCardsDeck));
+                    notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
                 } catch (CardNumberException | CardUniquenessException e) {
                     System.err.println(e.getMessage());
                 }
             }
         }
+        changeGameState(GameState.CARDS_SPREADING);
     }
 
 
@@ -130,29 +153,23 @@ public class GameModel extends Observable {
      * becomes the dealer
      * @since v0.5
      */
-    public void chooseInitialDealer() {
-        System.out.println("\n=== DEALER CHOOSING ===\n");
+    private void chooseInitialDealer() {
+        changeGameState(GameState.DEALER_CHOOSING);
 
-        //shuffle wholeCardsDeck and spread the cards on the table
+        changeGameState(GameState.CARDS_SHUFFLING);
         shuffleCards();
 
-        while ( !wholeCardsDeck.isEmpty() ) {
-            toPickDeck.add(wholeCardsDeck.get(0));
-            wholeCardsDeck.remove(wholeCardsDeck.get(0));
-        }
         temporize(1500);
 
-        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.SPREAD_CARDS, toPickDeck);
-        notifyObserversOfCardUpdate(cardUpdate);
-        waitEndUpdateAnimation(cardUpdate);
+        changeGameState(GameState.CARDS_SPREADING);
+        spreadCards();
 
         //Handle dealer choosing
+        changeGameState(GameState.DEALER_CHOOSING);
         playerHandler.getPlayersMap().forEach((cardinalPoint,player)-> {
             Card c;
             if ( player == ourPlayer) {
-
-                System.out.println("Choose your card by clicking on it");
-                int choice = waitObserverUserEvent(ViewActionExpected.PICK_CARD);
+                int choice = waitObserverUserEvent(NotificationType.PICK_CARD);
                 c = toPickDeck.get(choice);
             }
             else { //choose a random card for other players
@@ -162,7 +179,7 @@ public class GameModel extends Observable {
                 while (c.getSuit() == Suit.Excuse);
             }
 
-            moveCardBetweenDecks(toPickDeck, pickedCardsDeck, c);
+            moveCardBetweenDecks(toPickDeck, pickedCardsDeck, c, true);
             pickedCardsMap.put(c, player);
         });
 
@@ -178,15 +195,11 @@ public class GameModel extends Observable {
                 minCard = mapEntry.getKey();
 
         playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
-        System.out.println("Dealer is " + playerHandler.getPlayerName(getPlayerHandler().getDealer()));
+        changeGameState(GameState.DEALER_CHOSEN);
 
         //Flip cards again and put them back to wholeCardsDeck
-        while ( !pickedCardsDeck.isEmpty()) {
-            flipCard(pickedCardsDeck.get(0), false);
-            moveCardBetweenDecks(pickedCardsDeck, wholeCardsDeck, pickedCardsDeck.get(0));
-        }
-        while ( !toPickDeck.isEmpty() )
-            moveCardBetweenDecks(toPickDeck, wholeCardsDeck, toPickDeck.get(0));
+        flipDeck(pickedCardsDeck, false);
+        gatherAllCards();
     }
 
 
@@ -197,31 +210,29 @@ public class GameModel extends Observable {
      * and card deck is again shuffled, cut and dealt
      * @since v0.5
      */
-    public void handleDealing() {
+    private void handleDealing() {
         boolean hasPetitSec = false;
         do {
-            System.out.println("Shuffling cards...");
+            changeGameState(GameState.CARDS_SHUFFLING);
             shuffleCards();
-            System.out.println("Cutting cards...");
+            changeGameState(GameState.CARDS_CUTTING);
             cutDeck();
-            System.out.println("Dealing cards...");
+            changeGameState(GameState.CARDS_DEALING);
             dealAllCards();
 
             flipDeck(ourPlayer, true);
 
-            System.out.println("Sorting cards...");
             playerHandler.getPlayersMap().forEach( (cardinalPoint, playerHand) -> sortDeck(playerHand));
 
             temporize(3000);
 
             //"Petit Sec" checking
-            System.out.println("Petit Sec checking...");
             for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
                     : playerHandler.getPlayersMap().entrySet()) {
 
                 hasPetitSec = player.getValue().checkHasPetitSec();
                 if (hasPetitSec) {
-                    System.out.println("The player has Petit Sec, re-dealing...");
+                    changeGameState(GameState.PETIT_SEC_DETECTED);
                     flipDeck(ourPlayer, false);
                     playerHandler.changeDealer();
                     gatherAllCards();
@@ -230,7 +241,6 @@ public class GameModel extends Observable {
             }
         }
         while (hasPetitSec);
-        System.out.println("No Petit Sec found.");
     }
 
     /**
@@ -244,18 +254,18 @@ public class GameModel extends Observable {
             if( talon.size() < 6
                     && wholeCardsDeck.size() < 78) { //Don't give first card to chien
                 if ( wholeCardsDeck.size() == 2 ) { //Don't give last card to chien
-                    moveCardBetweenDecks(wholeCardsDeck, talon, wholeCardsDeck.get(0));
+                    moveCardBetweenDecks(wholeCardsDeck, talon, wholeCardsDeck.get(0), true);
                     chienReceiveCard = true;
                 }
                 else {
                     chienReceiveCard = ( (new Random().nextInt(4) == 0)); //25% it chooses to put it in Talon
                     if (chienReceiveCard) {
-                        moveCardBetweenDecks(wholeCardsDeck, talon, wholeCardsDeck.get(0));
+                        moveCardBetweenDecks(wholeCardsDeck, talon, wholeCardsDeck.get(0), true);
                     }
                 }
             }
             if (!chienReceiveCard) {
-                moveCardBetweenDecks(wholeCardsDeck, playerHandler.getCurrentPlayer(), wholeCardsDeck.get(0));
+                moveCardBetweenDecks(wholeCardsDeck, playerHandler.getCurrentPlayer(), wholeCardsDeck.get(0), true);
                 cptNbCardGivenToSameHand++;
             }
             if (cptNbCardGivenToSameHand == 3) {
@@ -274,15 +284,21 @@ public class GameModel extends Observable {
     public void gatherAllCards() {
         playerHandler.getPlayersMap().forEach((cardinalPoint,player)-> {
             while ( !player.isEmpty() ) {
-                moveCardBetweenDecks(player, wholeCardsDeck, player.get(0));
+                moveCardBetweenDecks(player, wholeCardsDeck, player.get(0), false);
             }
         });
-
         while ( !talon.isEmpty() ) {
-            moveCardBetweenDecks(talon, wholeCardsDeck, talon.get(0));
+            moveCardBetweenDecks(talon, wholeCardsDeck, talon.get(0), false);
         }
-
-        temporize(500);
+        while ( !pickedCardsDeck.isEmpty() ) {
+            moveCardBetweenDecks(pickedCardsDeck, wholeCardsDeck, pickedCardsDeck.get(0), false);
+        }
+        while ( !toPickDeck.isEmpty() ) {
+            moveCardBetweenDecks(toPickDeck, wholeCardsDeck, toPickDeck.get(0), false);
+        }
+        CardUpdate cardUpdate = new CardUpdate(CardUpdateType.GATHER_CARDS, wholeCardsDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
     }
 
 
@@ -290,21 +306,19 @@ public class GameModel extends Observable {
      * Handle the Bids
      * @since v0.6
      */
-    public void handleBids() {
+    private void handleBids() {
         chooseBids();
         while (ourPlayer.getBidChosen() == Bids.Pass) {
-            System.out.println("You've chosen to pass. Re-dealing...");
             flipDeck(ourPlayer, false);
             gatherAllCards();
             playerHandler.changeDealer();
             handleDealing();
             chooseBids();
         }
-        System.out.println("You are the taker");
         if ( ourPlayer.getBidChosen()== Bids.Small || ourPlayer.getBidChosen()== Bids.Guard ) {
-            System.out.println("You're allowed to constitute your ecart");
             temporize(800);
             constituteEcart();
+            changeGameState(GameState.ECART_CONSTITUTED);
         }
     }
 
@@ -315,35 +329,25 @@ public class GameModel extends Observable {
      */
     private void chooseBids() {
 
-        System.out.println("\n=== BIDS ===\n");
+        changeGameState(GameState.BID_CHOOSING);
 
         playerHandler.getPlayersMap().forEach((cardinalPoint,player) -> {
             if ( player == ourPlayer) {
-                System.out.println("Here are your cards :");
-                System.out.println(ourPlayer.cardListToString());
+                flipDeck(ourPlayer, true);
+                int choice = waitObserverUserEvent(NotificationType.CHOOSE_BID);
 
-                System.out.println("Choose your bid among those one :");
-                System.out.println("1. Small");
-                System.out.println("2. Guard");
-                System.out.println("3. GuardWithoutTheKitty");
-                System.out.println("4. GuardAgainstTheKitty");
-                System.out.println("5. Pass");
-
-                int choice = waitObserverUserEvent(ViewActionExpected.CHOOSE_BID);
                 try {
                     ourPlayer.setBidChosen(Bids.valueOf(choice));
-                    System.out.println("You have chosen the bid : " +
-                            String.valueOf(ourPlayer.getBidChosen()));
                 } catch (Exception e) {
-                    //TODO: HANDLE IT WITH ERROR CODE TO OBSERVERS FOR THEM TO DISPLAY IT
-                    System.err.println(e.getMessage());
-                    ourPlayer.setBidChosen(Bids.Pass);
+                    e.getMessage();
                 }
             }
             else {
                 player.setBidChosen(Bids.Pass); //Other players passes
             }
         });
+
+        changeGameState(GameState.BID_CHOSEN);
     }
 
 
@@ -352,23 +356,22 @@ public class GameModel extends Observable {
      * @since v0.6
      */
     private void constituteEcart() {
-        System.out.println("Showing the talon to all...");
+        changeGameState(GameState.ECART_CONSTITUTING);
         flipDeck(talon, true);
-        System.out.println(talon.cardListToString());
 
-        System.out.println("Placing talon's cards into taker's deck...");
         while ( !talon.isEmpty() ) {
-            moveCardBetweenDecks(talon, ourPlayer, talon.get(0));
+            moveCardBetweenDecks(talon, ourPlayer, talon.get(0), true);
         }
 
-        System.out.println("Now, constitute your ecart by putting 6 of your deck's cards in the talon :");
-        System.out.println(ourPlayer.cardListToString());
+        sortDeck(ourPlayer);
 
+        //TODO : DRAG & DROP VERSION
+        //TODO : FIX ANIMATION AND CLICK IMAGE
         for (int i=0; i < 6; i++) {
             boolean choiceValid;
             Card c;
             do {
-                int choice = waitObserverUserEvent(ViewActionExpected.CHOOSE_ECART_CARD);
+                int choice = waitObserverUserEvent(NotificationType.CHOOSE_ECART_CARD);
 
                 c = ourPlayer.get(choice);
 
@@ -381,7 +384,8 @@ public class GameModel extends Observable {
                 }
                 else {
                     choiceValid = false;
-                    System.out.println("You can't choose a Trump, a King or Excuse");
+                    setChanged();
+                    notifyObservers(NotificationType.UNAUTHORIZED_CARD_CHOICE);
                 }
             }
             while (!choiceValid);
@@ -390,42 +394,48 @@ public class GameModel extends Observable {
             if ( c.getSuit() != Suit.Trump) {
                 flipCard(c, false);
             }
-            moveCardBetweenDecks(ourPlayer, talon, c);
-            System.out.println("Taker : " + ourPlayer.cardListToString());
-            System.out.println("Talon : " + talon.cardListToString());
+            moveCardBetweenDecks(ourPlayer, talon, c, true);
         }
-        System.out.println("Ecart done...");
-        System.out.println("Sorting player South...");
-        sortDeck(ourPlayer);
     }
 
 
     /**
-     * Displays card repartition after distribution
-     * @since v0.5
+     * Properly quit the game by removing all cards
+     * and notifying observer of the removal
+     * @since v0.10
      */
-    @Override
-    public String toString() {
+    public void quitGame() {
+        gameState = GameState.GAME_ENDED;
 
-        String result = "\n=== CARD REPARTITION ===\n";
-
-        for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
-                : playerHandler.getPlayersMap().entrySet()) {
-            result += playerHandler.getPlayerName(player.getValue()) + " : ";
-            for ( Card c : player.getValue()) {
-                result += c.getName() + "; ";
-            }
-            result +=  "\n";
+        flipDeck(ourPlayer, false);
+        gatherAllCards();
+        while ( !wholeCardsDeck.isEmpty() ) {
+            CardUpdate deleteUpdate = new CardUpdate(CardUpdateType.DELETE_CARD, wholeCardsDeck.get(0));
+            notifyObserversOfCardUpdate(deleteUpdate);
+            waitEndUpdateAnimation(deleteUpdate);
+            wholeCardsDeck.remove(0);
         }
-        result += "Talon : ";
-        for ( Card c : talon) {
-            result += c.getName() + "; ";
-        }
-        return result;
+        Talon.resetClassForTesting();
+        Hand.resetClassForTesting();
+        Card.resetClassForTesting();
     }
 
 
     //SUPPLY METHODS
+
+
+    /**
+     * Change current game state and notify observers
+     * @since v0.10
+     * @param gameState the new game state
+     */
+    private void changeGameState(GameState gameState) {
+        this.gameState = gameState;
+        if ( countObservers() != 0 ) {
+            setChanged();
+            notifyObservers(gameState);
+        }
+    }
 
 
     /**
@@ -437,7 +447,7 @@ public class GameModel extends Observable {
     public void shuffleCards() {
         long seed = System.nanoTime();
         Collections.shuffle(wholeCardsDeck, new Random(seed));
-        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.SHUFFLE_CARDS, wholeCardsDeck);
+        CardUpdate cardUpdate = new CardUpdate(CardUpdateType.SHUFFLE_CARDS, wholeCardsDeck);
         notifyObserversOfCardUpdate(cardUpdate);
         waitEndUpdateAnimation(cardUpdate);
     }
@@ -451,7 +461,7 @@ public class GameModel extends Observable {
      */
     private void sortDeck(CardGroup cardGroup) {
         cardGroup.sort(new Card.CardComparator());
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SORT_DECK, cardGroup));
+        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.SORT_DECK, cardGroup));
     }
 
 
@@ -484,9 +494,24 @@ public class GameModel extends Observable {
         wholeCardsDeck.addAll(cut1);
 
         temporize(2000);
-        CardUpdate cutUpdate = new CardUpdate(ActionPerformedOnCard.CUT_DECK, wholeCardsDeck.get(splitIt), wholeCardsDeck);
+        CardUpdate cutUpdate = new CardUpdate(CardUpdateType.CUT_DECK, wholeCardsDeck.get(splitIt), wholeCardsDeck);
         notifyObserversOfCardUpdate(cutUpdate);
         waitEndUpdateAnimation(cutUpdate);
+    }
+
+
+    /**
+     * Spread the deck of cards on the the carpet
+     * @since v0.5
+     */
+    private void spreadCards() {
+        while ( !wholeCardsDeck.isEmpty()) {
+            moveCardBetweenDecks(wholeCardsDeck, toPickDeck, wholeCardsDeck.get(0), false);
+        }
+
+        CardUpdate cardUpdate = new CardUpdate(CardUpdateType.SPREAD_CARDS, toPickDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
     }
 
 
@@ -496,11 +521,15 @@ public class GameModel extends Observable {
      * @param source the source deck
      * @param target the target deck
      * @param c the card to move
+     * @param doesNotifyObserver allows to enable/disable move animation
      */
-    public void moveCardBetweenDecks(CardGroup source, CardGroup target, Card c) {
+    public void moveCardBetweenDecks(CardGroup source, CardGroup target, Card c, boolean doesNotifyObserver) {
         source.remove(c);
         target.add(c);
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, c, target));
+        if (doesNotifyObserver)
+        {
+            notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, c, target));
+        }
     }
 
 
@@ -547,6 +576,7 @@ public class GameModel extends Observable {
         try {
             sleep(millis);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
         }
     }
@@ -568,9 +598,10 @@ public class GameModel extends Observable {
      */
     private void flipCard(Card c, boolean state) {
         c.setShown(state);
-        CardUpdate flipCardUpdate = new CardUpdate(ActionPerformedOnCard.FLIP_CARD, c);
+        CardUpdate flipCardUpdate = new CardUpdate(CardUpdateType.FLIP_CARD, c);
         notifyObserversOfCardUpdate(flipCardUpdate);
-        waitEndUpdateAnimation(flipCardUpdate);
+        if ( countObservers() != 0 )
+            waitEndUpdateAnimation(flipCardUpdate);
     }
 
 
@@ -590,7 +621,7 @@ public class GameModel extends Observable {
      */
     private void flipDeck(CardGroup cardGroup, boolean state) {
         cardGroup.forEach(c -> c.setShown(state));
-        CardUpdate flipDeckUpdate = new CardUpdate(ActionPerformedOnCard.FLIP_CARD, cardGroup);
+        CardUpdate flipDeckUpdate = new CardUpdate(CardUpdateType.FLIP_CARD, cardGroup);
         notifyObserversOfCardUpdate(flipDeckUpdate);
         waitEndUpdateAnimation(flipDeckUpdate);
     }
@@ -606,7 +637,7 @@ public class GameModel extends Observable {
         if ( countObservers() != 0) {
             setChanged();
             notifyObservers(cardUpdate);
-            if (cardUpdate.getType() != ActionPerformedOnCard.ADD_CARD) {
+            if (cardUpdate.getType() != CardUpdateType.ADD_CARD) {
                 temporize(200);
             }
         }
@@ -623,10 +654,11 @@ public class GameModel extends Observable {
      * following action type
      *
      * @since v0.8.2
-     * @see ViewActionExpected
+     * @see NotificationType
      * @param action the expected action from view
      */
-    private synchronized int waitObserverUserEvent(ViewActionExpected action) {
+    private synchronized int waitObserverUserEvent(NotificationType action) {
+        awaitsUserEvent = action;
         int choice = -1;
         if ( countObservers() != 0 ) {
             setChanged();
@@ -636,20 +668,20 @@ public class GameModel extends Observable {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    System.err.println(e.toString());
+                    System.err.println(e.getMessage());
                 }
             }
             choice = userChoice;
             userChoice = -1;
         }
         else { //if no observers, set default values
-            if ( action == ViewActionExpected.PICK_CARD) {
+            if ( action == NotificationType.PICK_CARD) {
                 choice = new Random().nextInt(78);
             }
-            else if ( action == ViewActionExpected.CHOOSE_BID) {
+            else if ( action == NotificationType.CHOOSE_BID) {
                 choice = 1 + (new Random().nextInt(5));
             }
-            else if ( action == ViewActionExpected.CHOOSE_ECART_CARD) {
+            else if ( action == NotificationType.CHOOSE_ECART_CARD) {
                 choice = new Random().nextInt(playerHandler.
                         getPlayer(PlayerHandler.PlayersCardinalPoint.South).size() );
             }
@@ -665,15 +697,16 @@ public class GameModel extends Observable {
      */
     private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate)
     {
-        while (lastEndedAnimation != cardUpdate.hashCode())
-        {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                System.err.println(e.toString());
+        if ( countObservers() != 0 ) {
+            while (lastEndedAnimation != cardUpdate.hashCode()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    System.err.println(e.getMessage());
+                }
             }
+            lastEndedAnimation = -1;
         }
-        lastEndedAnimation = -1;
     }
 
     //GETTERS & SETTERS - no documentation needed
@@ -692,6 +725,23 @@ public class GameModel extends Observable {
     }
     public Talon getTalon() {
         return talon;
+    }
+    public Hand getOurPlayer() {
+        return ourPlayer;
+    }
+    public NotificationType getAwaitsUserEvent() {
+        return awaitsUserEvent;
+    }
+
+    public void setAwaitsUserEvent(NotificationType awaitsUserEvent) {
+        this.awaitsUserEvent = awaitsUserEvent;
+    }
+
+    public Thread getGameThread() {
+        return gameThread;
+    }
+    public GameState getGameState() {
+        return gameState;
     }
 
     public synchronized void setUserChoice(int userChoice) {
