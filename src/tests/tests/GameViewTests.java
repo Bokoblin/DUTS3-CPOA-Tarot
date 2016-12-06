@@ -13,29 +13,32 @@ limitations under the License.
 
 package tests;
 
+import app.model.*;
+import app.presenter.AppPresenter;
+import app.view.GameView;
+import app.view.ViewCard;
 import exceptions.CardGroupNumberException;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.stage.Stage;
-import org.junit.*;
-import app.presenter.*;
-import app.model.*;
-import app.view.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * GameView Unit tests
  *
  * @author Alexandre
- * @version v0.9
+ * @version v0.10
  * @since v0.6
  */
 public class GameViewTests extends Application
 {
     private static AppPresenter appPresenter;
     private static GameModel gameModel;
-    private static AppView scene;
+    private static GameView scene;
     private static Group root;
 
     /**
@@ -45,9 +48,6 @@ public class GameViewTests extends Application
     @BeforeClass
     public static void initApplication()
     {
-        Card.resetClassForTesting();
-        Hand.resetClassForTesting();
-        Talon.resetClassForTesting();
         Thread thread = new Thread("JavaFX Application Thread") {
             @Override
             public void run() {
@@ -66,18 +66,18 @@ public class GameViewTests extends Application
     }
 
     @Before
-    public void cleanClasses() {
+    public void initGame() {
         Card.resetClassForTesting();
         Hand.resetClassForTesting();
         Talon.resetClassForTesting();
         root = new Group();
         try {
-            gameModel = new GameModel();
+            gameModel = new GameModel(false);
             gameModel.createCards();
         } catch (CardGroupNumberException e) {
             e.getMessage();
         }
-        scene = new AppView(root, gameModel, appPresenter);
+        scene = new GameView(root, gameModel, appPresenter);
     }
 
     /**
@@ -91,7 +91,7 @@ public class GameViewTests extends Application
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
             gameModel.notifyObserversOfCardUpdate(
-                    new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0)));
+                    new CardUpdate(CardUpdateType.ADD_CARD, gameModel.getWholeCardsDeck().get(0)));
             try {
                 Thread.sleep(20);
             } catch (Exception e) {
@@ -116,7 +116,7 @@ public class GameViewTests extends Application
         int nbNodeHandBefore = scene.getGroupFromCardGroup(hand).getChildren().size();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0), hand));
+                new CardUpdate(CardUpdateType.ADD_CARD, gameModel.getWholeCardsDeck().get(0), hand));
         try {
             Thread.sleep(20);
         } catch (Exception e) {
@@ -124,7 +124,7 @@ public class GameViewTests extends Application
         }
         assertTrue(scene.getGroupFromCardGroup(hand).getChildren().size() == nbNodeHandBefore+1);
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
+                new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, ((ViewCard)scene.getGroupFromCardGroup(hand).getChildren().get(0)).getModelCard(), talon));
         try {
             Thread.sleep(20);
         } catch (Exception e) {
@@ -144,7 +144,7 @@ public class GameViewTests extends Application
         Talon talon = gameModel.getTalon();
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         gameModel.notifyObserversOfCardUpdate(
-                new CardUpdate(ActionPerformedOnCard.ADD_CARD, gameModel.getWholeCardsDeck().get(0), talon));
+                new CardUpdate(CardUpdateType.ADD_CARD, gameModel.getWholeCardsDeck().get(0), talon));
         try {
             Thread.sleep(20);
         } catch (Exception e) {
@@ -153,7 +153,7 @@ public class GameViewTests extends Application
         assertTrue(scene.getTalon().getChildren().size() == nbNodeTalonBefore + 1);
         int nbNodeBeforeAddingCard = scene.getRoot3d().getChildren().size();
         try {
-            gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.REMOVE_CARD_FROM_GROUP,
+            gameModel.notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.REMOVE_CARD_FROM_GROUP,
                     ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
             try {
                 Thread.sleep(20);
@@ -174,7 +174,7 @@ public class GameViewTests extends Application
     public void removeCard()
     {
         Talon talon = gameModel.getTalon();
-        gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.ADD_CARD,
+        gameModel.notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD,
                 gameModel.getWholeCardsDeck().get(0), talon));
         try {
             Thread.sleep(20);
@@ -183,7 +183,7 @@ public class GameViewTests extends Application
         }
         int nbNodeTalonBefore = scene.getTalon().getChildren().size();
         try {
-            gameModel.notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.DELETE_CARD,
+            gameModel.notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.DELETE_CARD,
                     ((ViewCard)scene.getTalon().getChildren().get(0)).getModelCard()));
             try {
                 Thread.sleep(20);
@@ -203,12 +203,12 @@ public class GameViewTests extends Application
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        root = new Group();
-        gameModel = new GameModel();
         appPresenter = new AppPresenter();
-        scene = new AppView(root, gameModel, appPresenter);
+        root = new Group();
+        gameModel = new GameModel(false);
+        scene = new GameView(root, gameModel, appPresenter);
         appPresenter.setGameModel(gameModel);
-        appPresenter.setAppView(scene);
+        appPresenter.setGameView(scene);
 
         primaryStage.setScene(scene);
     }

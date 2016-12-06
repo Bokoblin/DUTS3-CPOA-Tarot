@@ -1,9 +1,30 @@
-Project Name : Tarot Card Distribution
+Project Name : Project Tarot
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.9.1
+Current version : v0.10.0
 
 =========================================================================
+
+v0.10.0 (06/12/16) :
+
+Features :
+- Added game state
+- Added game modes ( simplified mode removes dealer choosing)
+- Added a method to properly clean at game quitting
+- Added on-screen text (section title, tooltips, errors) shown with a 2D camera
+- Removed console text
+- Added Ecart constitution user event
+- Added Bid choosing user event
+
+Issues :
+- cursor.HAND not shown when it should have
+- ecart constituting animation issues
+- buttons and tooltip position on non-maximized mode
+- card textures that are superposed sometimes
+- cards not dealt from deck's top
+
+
+--------------------------------------------------------------------
 
 v0.9.1 (6/12/16) :
 - Added shuffle animation
@@ -11,7 +32,8 @@ v0.9.1 (6/12/16) :
 - Added end of animation notification replacing model posing
 - Fixed z-buffer
 
-=========================================================================
+
+--------------------------------------------------------------------
 
 v0.9.0 (27/11/16) :
 - Added spreading cards animation

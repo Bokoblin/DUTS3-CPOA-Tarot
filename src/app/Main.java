@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,10 +13,9 @@ limitations under the License.
 
 package app;
 
-import app.model.CardUpdate;
 import app.model.GameModel;
 import app.presenter.AppPresenter;
-import app.view.AppView;
+import app.view.GameView;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -27,49 +26,44 @@ import javafx.stage.Stage;
  * The {@code Main} class inits and launch game
  *
  * The app follows an MVP Architecture :
- * GameModel notify its view observer, AppView
- * AppView send user request to presenter, AppPresenter
- * AppPresenter change the model, GameModel
+ * GameModel notifies change to GameView (its observer)
+ * GameView sends user request to AppPresenter and send state request to model
+ * AppPresenter changes GameModel fields
  *
  * Our app implements a variant of MVP from CPOA TD2 (page 3)
  *
  * @author Alexandre
  * @author Arthur
- * @version v0.8.1
+ * @version v0.10
  * @since v0.2
  *
  * @see Application
  */
 public class Main extends Application {
     @Override
-    public void start(Stage primaryStage) throws Exception{
-        Platform.setImplicitExit(false);
+    public void start(Stage window) throws Exception{
         Group root = new Group();
-        GameModel gameModel = new GameModel();
+        GameModel gameModel = new GameModel(false);
         AppPresenter appPresenter = new AppPresenter();
-        AppView scene = new AppView(root, gameModel, appPresenter);
+        GameView scene = new GameView(root, gameModel, appPresenter);
         appPresenter.setGameModel(gameModel);
-        appPresenter.setAppView(scene);
+        appPresenter.setGameView(scene);
         gameModel.createCards();
 
-        primaryStage.setTitle("JACQUOT JOLIVET S3A");
-        primaryStage.setMaximized(true);
-        primaryStage.setScene(scene);
+        window.setTitle("JACQUOT JOLIVET S3A");
+        window.setMaximized(true);
+        window.setMinWidth(1000);
+        window.setMinHeight(600);
+        window.setScene(scene);
         scene.setFill(Color.BLACK);
-        primaryStage.show();
+        window.show();
 
-        Thread gameThread = new Thread(() -> {
-            gameModel.chooseInitialDealer();
-            gameModel.handleDealing();
-            gameModel.handleBids();
-            System.out.println(gameModel.toString());
-        });
-        gameThread.start();
-
-        primaryStage.setOnCloseRequest(event -> {
+        window.setOnCloseRequest(event -> {
             Platform.exit();
             System.exit(0);
         });
+
+        gameModel.getGameThread().start();
     }
 
     public static void main(String[] args) {
