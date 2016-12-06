@@ -26,6 +26,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
@@ -45,18 +46,18 @@ import java.util.*;
  */
 public class AppView extends Scene implements Observer {
 
-    private static final float TABLE_SIZE = 2500;
+    private static final float CARPET_SIZE = 2500;
     private static final float MARGIN_TABLE = 130;
     private static final float MARGIN_CARDS = 30;
-    private static final float TABLE_DEPTH = 182;
+    private static final float CARPET_DEPTH = 30;
     private static final float HAND_MARGIN_UP = 100;
-    private static final float HAND_MARGIN_LEFT = (float)(0.2 * TABLE_SIZE);
-    private static final float MARGIN_BETWEEN_HAND_CARDS = (TABLE_SIZE-(2*HAND_MARGIN_LEFT))/18;
-    private static final Point3D TALON_POSITION = new Point3D((TABLE_SIZE/2) - (ViewCard.getCardWidth()/2),
-            (TABLE_SIZE/2)-(ViewCard.getCardHeight()/2), 0);
-    private static final Point3D INITIAL_DECK_POSITION = new Point3D(-300, TABLE_SIZE/2, -300);
+    private static final float HAND_MARGIN_LEFT = (float)(0.2 *  CARPET_SIZE);
+    private static final float MARGIN_BETWEEN_HAND_CARDS = ( CARPET_SIZE-(2*HAND_MARGIN_LEFT))/18;
+    private static final Point3D TALON_POSITION = new Point3D(( CARPET_SIZE/2) - (ViewCard.getCardWidth()/2),
+            ( CARPET_SIZE/2)-(ViewCard.getCardHeight()/2), 0);
+    private static final Point3D INITIAL_DECK_POSITION = new Point3D(-300,  CARPET_SIZE/2, -300);
     private static final Point3D PICKED_CARD_DECK_POSITION = new Point3D(MARGIN_TABLE,
-            TABLE_SIZE-MARGIN_TABLE-ViewCard.getCardHeight(), 0);
+             CARPET_SIZE-MARGIN_TABLE-ViewCard.getCardHeight(), 0);
 
     private boolean handleCardPicking;
     private GameModel gameModel;
@@ -106,13 +107,19 @@ public class AppView extends Scene implements Observer {
         updateCardGroupToGroup();
 
         //Create the scene objects
-        RectangleMesh table = new RectangleMesh(TABLE_SIZE, TABLE_SIZE, TABLE_DEPTH,
+        RectangleMesh carpet = new RectangleMesh( CARPET_SIZE,  CARPET_SIZE, CARPET_DEPTH,
                 "file:./res/table.jpg", 1100, 1100);
-        background.getChildren().add(table);
+        ImageView table = new ImageView("file:./res/wood.jpg");
+        table.setTranslateZ(CARPET_DEPTH);
+        table.setTranslateX(-table.getImage().getWidth()/2 + CARPET_SIZE/2);
+        table.setTranslateY(-table.getImage().getHeight()/2 + CARPET_SIZE/2);
+        table.setScaleX(2);
+        table.setScaleY(2);
+        background.getChildren().addAll(carpet, table);
 
         //Define the camera
         this.setCamera(new ViewCamera(true));
-        this.getViewCamera().setTranslateX(TABLE_SIZE/2);
+        this.getViewCamera().setTranslateX( CARPET_SIZE/2);
         this.getViewCamera().setTranslateY(4000);
         this.getViewCamera().setTranslateZ(-3500);
         getViewCamera().getTransformations().getRotateX().setAngle(35);
@@ -508,11 +515,11 @@ public class AppView extends Scene implements Observer {
                     new KeyFrame(new Duration(i * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0)),
                     new KeyFrame(new Duration(((i+1) * 100)-50), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), ViewCard.getCardWidth()*2)),
                     new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0)),
-                    new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.translateZProperty(), INITIAL_DECK_POSITION.getZ() - (nbViewCards + i) * ViewCard.getCardDepth())),
+                    new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.translateZProperty(), INITIAL_DECK_POSITION.getZ() - (nbViewCards*2 - i) * ViewCard.getCardDepth())),
                     new KeyFrame(new Duration((i+1) * 100+1), event -> {
                         Group group = getGroupFromCardGroup(cardUpdate.getCardGroup());
                         group.getChildren().remove(viewCard);
-                        group.getChildren().add(group.getChildren().size(), viewCard);
+                        group.getChildren().add(0, viewCard);
                     })
             );
             if (i == cardUpdate.getCardGroup().size())
@@ -544,7 +551,7 @@ public class AppView extends Scene implements Observer {
                 switch (gameModel.getPlayerHandler().getPlayerCardinalPoint( (Hand)getCardGroupFromGroup(group) ) )
                 {
                     case North:
-                        newPosition = new Point3D( TABLE_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth()
+                        newPosition = new Point3D(  CARPET_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth()
                                 - CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS,
                                 HAND_MARGIN_UP, -ViewCard.getCardDepth());
                         break;
@@ -555,11 +562,11 @@ public class AppView extends Scene implements Observer {
                         break;
                     case South:
                         newPosition = new Point3D( HAND_MARGIN_LEFT + CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS,
-                                TABLE_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(),-ViewCard.getCardDepth());
+                                 CARPET_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(),-ViewCard.getCardDepth());
                         break;
                     case East:
-                        newPosition = new Point3D(TABLE_SIZE - ViewCard.getCardWidth() -((ViewCard.getCardHeight()
-                                - ViewCard.getCardWidth())/2) - HAND_MARGIN_UP, TABLE_SIZE - HAND_MARGIN_LEFT
+                        newPosition = new Point3D( CARPET_SIZE - ViewCard.getCardWidth() -((ViewCard.getCardHeight()
+                                - ViewCard.getCardWidth())/2) - HAND_MARGIN_UP,  CARPET_SIZE - HAND_MARGIN_LEFT
                                 - ViewCard.getCardWidth() - ((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2)
                                 - CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS, -ViewCard.getCardDepth());
                         break;
@@ -599,7 +606,7 @@ public class AppView extends Scene implements Observer {
             {
                 if (initialGroup.getChildren().get(i) instanceof ViewCard)
                 {
-                    if (i < cutCardIndex)
+                    if (i <= cutCardIndex)
                     {
                         group1.add((ViewCard)initialGroup.getChildren().get(i));
                     } else {
@@ -634,7 +641,7 @@ public class AppView extends Scene implements Observer {
      * @param   cardUpdate     the cardUpdate object.
      */
     private void spreadAllCards(CardUpdate cardUpdate) throws NullViewCardException {
-        int nbCardInRow = (int)((TABLE_SIZE - MARGIN_TABLE*2)/(ViewCard.getCardWidth()+MARGIN_CARDS));
+        int nbCardInRow = (int)(( CARPET_SIZE - MARGIN_TABLE*2)/(ViewCard.getCardWidth()+MARGIN_CARDS));
         int i = 0;
         int j = 0;
         for(Card card : cardUpdate.getCardGroup())
@@ -749,7 +756,7 @@ public class AppView extends Scene implements Observer {
             {
                 case North:
                     point3D = new Point3D(
-                            TABLE_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth()
+                             CARPET_SIZE - HAND_MARGIN_LEFT - ViewCard.getCardWidth()
                                     - (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS,
                             HAND_MARGIN_UP, (-1)*ViewCard.getCardDepth());
                     break;
@@ -761,11 +768,11 @@ public class AppView extends Scene implements Observer {
                     break;
                 case South:
                     point3D = new Point3D(HAND_MARGIN_LEFT + (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS,
-                            TABLE_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(),(-1)*ViewCard.getCardDepth());
+                             CARPET_SIZE-HAND_MARGIN_UP-ViewCard.getCardHeight(),(-1)*ViewCard.getCardDepth());
                     break;
                 case East:
-                    point3D = new Point3D(TABLE_SIZE - ViewCard.getCardWidth() -((ViewCard.getCardHeight()
-                            - ViewCard.getCardWidth())/2) - HAND_MARGIN_UP, TABLE_SIZE - HAND_MARGIN_LEFT
+                    point3D = new Point3D( CARPET_SIZE - ViewCard.getCardWidth() -((ViewCard.getCardHeight()
+                            - ViewCard.getCardWidth())/2) - HAND_MARGIN_UP,  CARPET_SIZE - HAND_MARGIN_LEFT
                             - ViewCard.getCardWidth() - ((ViewCard.getCardHeight() - ViewCard.getCardWidth())/2)
                             - (getNbViewCard(group)-1)*MARGIN_BETWEEN_HAND_CARDS, (-1)*ViewCard.getCardDepth());
                     break;

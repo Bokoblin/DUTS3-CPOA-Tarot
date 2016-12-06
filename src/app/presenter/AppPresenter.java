@@ -50,7 +50,6 @@ public class AppPresenter {
     {
         if (cardUpdate != null)
         {
-            System.out.println(cardUpdate.getType().toString());
             gameModel.setLastEndedAnimation(cardUpdate.hashCode());
         }
     }
