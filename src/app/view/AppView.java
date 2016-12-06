@@ -499,16 +499,26 @@ public class AppView extends Scene implements Observer {
     private void shuffleDeck(CardUpdate cardUpdate) throws NullViewCardException {
         Timeline timeline = new Timeline();
         timeline.setOnFinished(event -> cardUpdate.setAnimationFinished());
-        int i = 0;
+        int i = 1;
+        int nbViewCards = getNbViewCard(getGroupFromCardGroup(cardUpdate.getCardGroup()));
         for (Card card : cardUpdate.getCardGroup())
         {
             ViewCard viewCard = getViewCardFromCard(card);
             timeline.getKeyFrames().addAll(
-                    new KeyFrame(new Duration(i * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), ViewCard.getCardWidth()*2)),
+                    new KeyFrame(new Duration(i * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0)),
+                    new KeyFrame(new Duration(((i+1) * 100)-50), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), ViewCard.getCardWidth()*2)),
                     new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.getTransformations().getTranslate().xProperty(), 0)),
-                    new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.getTransformations().getTranslate().yProperty(), getCardDefaultPosition(viewCard).getY())),
-                    new KeyFrame(new Duration((i+2) * 100), event -> refreshGroupNodesPosition(getGroupFromCardGroup(cardUpdate.getCardGroup())))
-                    );
+                    new KeyFrame(new Duration((i+1) * 100), new KeyValue(viewCard.translateZProperty(), INITIAL_DECK_POSITION.getZ() - (nbViewCards + i) * ViewCard.getCardDepth())),
+                    new KeyFrame(new Duration((i+1) * 100+1), event -> {
+                        Group group = getGroupFromCardGroup(cardUpdate.getCardGroup());
+                        group.getChildren().remove(viewCard);
+                        group.getChildren().add(group.getChildren().size(), viewCard);
+                    })
+            );
+            if (i == cardUpdate.getCardGroup().size())
+            {
+                timeline.getKeyFrames().add(new KeyFrame(new Duration((i + 3) * 100), event -> refreshGroupNodesPosition(getGroupFromCardGroup(cardUpdate.getCardGroup()))));
+            }
             i++;
         }
         timeline.play();
