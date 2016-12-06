@@ -13,6 +13,7 @@ limitations under the License.
 
 package app;
 
+import app.model.CardUpdate;
 import app.model.GameModel;
 import app.presenter.AppPresenter;
 import app.view.AppView;
