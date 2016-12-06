@@ -33,6 +33,7 @@ import static java.lang.Thread.sleep;
  * @see PlayerHandler
  * @see Talon
  */
+
 public class GameModel extends Observable {
 
     private CardGroup wholeCardsDeck;
@@ -43,6 +44,7 @@ public class GameModel extends Observable {
     private Talon talon;
     private Hand ourPlayer;
     private int userChoice;
+    private int lastEndedAnimation;
 
     /**
      * Constructs app model by creating players, chien and cards
@@ -138,9 +140,11 @@ public class GameModel extends Observable {
             toPickDeck.add(wholeCardsDeck.get(0));
             wholeCardsDeck.remove(wholeCardsDeck.get(0));
         }
-        pauseModelFor(1500);
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SPREAD_CARDS, toPickDeck));
-        pauseModelFor(500);
+        temporize(1500);
+
+        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.SPREAD_CARDS, toPickDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
 
         //Handle dealer choosing
         playerHandler.getPlayersMap().forEach((cardinalPoint,player)-> {
@@ -148,9 +152,8 @@ public class GameModel extends Observable {
             if ( player == ourPlayer) {
 
                 System.out.println("Choose your card by clicking on it");
-                waitObserverUserEvent(ViewActionExpected.PICK_CARD);
-                c = toPickDeck.get(userChoice);
-                userChoice = -1;
+                int choice = waitObserverUserEvent(ViewActionExpected.PICK_CARD);
+                c = toPickDeck.get(choice);
             }
             else { //choose a random card for other players
                 do {
@@ -164,8 +167,7 @@ public class GameModel extends Observable {
         });
 
         //Flip cards for players to see which is the lowest
-        pickedCardsDeck.forEach( (card) -> flipCard(card, true));
-        pauseModelFor(3000);
+        flipDeck(pickedCardsDeck, true);
 
         //Set dealer from picking
         Card minCard = null;
@@ -181,7 +183,6 @@ public class GameModel extends Observable {
         //Flip cards again and put them back to wholeCardsDeck
         while ( !pickedCardsDeck.isEmpty()) {
             flipCard(pickedCardsDeck.get(0), false);
-            pauseModelFor(1500);
             moveCardBetweenDecks(pickedCardsDeck, wholeCardsDeck, pickedCardsDeck.get(0));
         }
         while ( !toPickDeck.isEmpty() )
@@ -207,12 +208,11 @@ public class GameModel extends Observable {
             dealAllCards();
 
             flipDeck(ourPlayer, true);
-            pauseModelFor(3000);
 
             System.out.println("Sorting cards...");
             playerHandler.getPlayersMap().forEach( (cardinalPoint, playerHand) -> sortDeck(playerHand));
 
-            pauseModelFor(3000);
+            temporize(3000);
 
             //"Petit Sec" checking
             System.out.println("Petit Sec checking...");
@@ -223,7 +223,6 @@ public class GameModel extends Observable {
                 if (hasPetitSec) {
                     System.out.println("The player has Petit Sec, re-dealing...");
                     flipDeck(ourPlayer, false);
-                    pauseModelFor(1500);
                     playerHandler.changeDealer();
                     gatherAllCards();
                     break;
@@ -282,6 +281,8 @@ public class GameModel extends Observable {
         while ( !talon.isEmpty() ) {
             moveCardBetweenDecks(talon, wholeCardsDeck, talon.get(0));
         }
+
+        temporize(500);
     }
 
 
@@ -294,9 +295,7 @@ public class GameModel extends Observable {
         while (ourPlayer.getBidChosen() == Bids.Pass) {
             System.out.println("You've chosen to pass. Re-dealing...");
             flipDeck(ourPlayer, false);
-            pauseModelFor(1500);
             gatherAllCards();
-            pauseModelFor(500);
             playerHandler.changeDealer();
             handleDealing();
             chooseBids();
@@ -304,7 +303,7 @@ public class GameModel extends Observable {
         System.out.println("You are the taker");
         if ( ourPlayer.getBidChosen()== Bids.Small || ourPlayer.getBidChosen()== Bids.Guard ) {
             System.out.println("You're allowed to constitute your ecart");
-            pauseModelFor(1500);
+            temporize(800);
             constituteEcart();
         }
     }
@@ -321,7 +320,6 @@ public class GameModel extends Observable {
         playerHandler.getPlayersMap().forEach((cardinalPoint,player) -> {
             if ( player == ourPlayer) {
                 System.out.println("Here are your cards :");
-                flipDeck(ourPlayer, true);
                 System.out.println(ourPlayer.cardListToString());
 
                 System.out.println("Choose your bid among those one :");
@@ -331,10 +329,9 @@ public class GameModel extends Observable {
                 System.out.println("4. GuardAgainstTheKitty");
                 System.out.println("5. Pass");
 
-                waitObserverUserEvent(ViewActionExpected.CHOOSE_BID);
+                int choice = waitObserverUserEvent(ViewActionExpected.CHOOSE_BID);
                 try {
-                    ourPlayer.setBidChosen(Bids.valueOf(userChoice));
-                    userChoice = -1;
+                    ourPlayer.setBidChosen(Bids.valueOf(choice));
                     System.out.println("You have chosen the bid : " +
                             String.valueOf(ourPlayer.getBidChosen()));
                 } catch (Exception e) {
@@ -357,7 +354,6 @@ public class GameModel extends Observable {
     private void constituteEcart() {
         System.out.println("Showing the talon to all...");
         flipDeck(talon, true);
-        pauseModelFor(2000);
         System.out.println(talon.cardListToString());
 
         System.out.println("Placing talon's cards into taker's deck...");
@@ -372,9 +368,9 @@ public class GameModel extends Observable {
             boolean choiceValid;
             Card c;
             do {
-                waitObserverUserEvent(ViewActionExpected.CHOOSE_ECART_CARD);
+                int choice = waitObserverUserEvent(ViewActionExpected.CHOOSE_ECART_CARD);
 
-                c = ourPlayer.get(userChoice);
+                c = ourPlayer.get(choice);
 
                 if ( c.getSuit() != Suit.Trump && c.getSuit() != Suit.Excuse && c.getRank() != Rank.King) {
                     choiceValid = true;
@@ -393,7 +389,6 @@ public class GameModel extends Observable {
             //Only Trumps are shown when put in Ecart
             if ( c.getSuit() != Suit.Trump) {
                 flipCard(c, false);
-                pauseModelFor(1500);
             }
             moveCardBetweenDecks(ourPlayer, talon, c);
             System.out.println("Taker : " + ourPlayer.cardListToString());
@@ -442,7 +437,9 @@ public class GameModel extends Observable {
     public void shuffleCards() {
         long seed = System.nanoTime();
         Collections.shuffle(wholeCardsDeck, new Random(seed));
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.SHUFFLE_CARDS, wholeCardsDeck));
+        CardUpdate cardUpdate = new CardUpdate(ActionPerformedOnCard.SHUFFLE_CARDS, wholeCardsDeck);
+        notifyObserversOfCardUpdate(cardUpdate);
+        waitEndUpdateAnimation(cardUpdate);
     }
 
 
@@ -486,7 +483,10 @@ public class GameModel extends Observable {
         wholeCardsDeck.addAll(cut2);
         wholeCardsDeck.addAll(cut1);
 
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.CUT_DECK, wholeCardsDeck));
+        temporize(2000);
+        CardUpdate cutUpdate = new CardUpdate(ActionPerformedOnCard.CUT_DECK, wholeCardsDeck.get(splitIt), wholeCardsDeck);
+        notifyObserversOfCardUpdate(cutUpdate);
+        waitEndUpdateAnimation(cutUpdate);
     }
 
 
@@ -538,11 +538,12 @@ public class GameModel extends Observable {
 
     /**
      * Interrupts model logic for a certain amount of milliseconds
+     * This allows game to run cooler
      * @since v0.8.1
      * @see Random
      * @param millis the amount of milliseconds to sleep
      */
-    private void pauseModelFor(long millis) {
+    private void temporize(long millis) {
         try {
             sleep(millis);
         } catch (InterruptedException e) {
@@ -567,7 +568,9 @@ public class GameModel extends Observable {
      */
     private void flipCard(Card c, boolean state) {
         c.setShown(state);
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.FLIP_CARD, c));
+        CardUpdate flipCardUpdate = new CardUpdate(ActionPerformedOnCard.FLIP_CARD, c);
+        notifyObserversOfCardUpdate(flipCardUpdate);
+        waitEndUpdateAnimation(flipCardUpdate);
     }
 
 
@@ -587,7 +590,9 @@ public class GameModel extends Observable {
      */
     private void flipDeck(CardGroup cardGroup, boolean state) {
         cardGroup.forEach(c -> c.setShown(state));
-        notifyObserversOfCardUpdate(new CardUpdate(ActionPerformedOnCard.FLIP_CARD, cardGroup));
+        CardUpdate flipDeckUpdate = new CardUpdate(ActionPerformedOnCard.FLIP_CARD, cardGroup);
+        notifyObserversOfCardUpdate(flipDeckUpdate);
+        waitEndUpdateAnimation(flipDeckUpdate);
     }
 
 
@@ -602,7 +607,7 @@ public class GameModel extends Observable {
             setChanged();
             notifyObservers(cardUpdate);
             if (cardUpdate.getType() != ActionPerformedOnCard.ADD_CARD) {
-                pauseModelFor(300);
+                temporize(200);
             }
         }
     }
@@ -621,31 +626,57 @@ public class GameModel extends Observable {
      * @see ViewActionExpected
      * @param action the expected action from view
      */
-    private void waitObserverUserEvent(ViewActionExpected action) {
+    private synchronized int waitObserverUserEvent(ViewActionExpected action) {
+        int choice = -1;
         if ( countObservers() != 0 ) {
             setChanged();
             notifyObservers(action);
-            while (userChoice == -1) {
-                pauseModelFor(10);
+            while (userChoice == -1)
+            {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    System.err.println(e.toString());
+                }
             }
+            choice = userChoice;
+            userChoice = -1;
         }
         else { //if no observers, set default values
             if ( action == ViewActionExpected.PICK_CARD) {
-                userChoice = new Random().nextInt(78);
+                choice = new Random().nextInt(78);
             }
             else if ( action == ViewActionExpected.CHOOSE_BID) {
-                userChoice = 1 + (new Random().nextInt(5));
+                choice = 1 + (new Random().nextInt(5));
             }
             else if ( action == ViewActionExpected.CHOOSE_ECART_CARD) {
-                userChoice = new Random().nextInt(playerHandler.
+                choice = new Random().nextInt(playerHandler.
                         getPlayer(PlayerHandler.PlayersCardinalPoint.South).size() );
             }
         }
+        return choice;
     }
 
+    /**
+     * Wait until the animation of a specified updateCard object
+     * has been finished.
+     * @since v0.9.1
+     * @param cardUpdate the specified cardUpdate object
+     */
+    private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate)
+    {
+        while (lastEndedAnimation != cardUpdate.hashCode())
+        {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                System.err.println(e.toString());
+            }
+        }
+        lastEndedAnimation = -1;
+    }
 
     //GETTERS & SETTERS - no documentation needed
-
 
     public CardGroup getWholeCardsDeck() {
         return wholeCardsDeck;
@@ -663,7 +694,14 @@ public class GameModel extends Observable {
         return talon;
     }
 
-    public void setUserChoice(int userChoice) {
+    public synchronized void setUserChoice(int userChoice) {
         this.userChoice = userChoice;
+        notify();
+    }
+
+    public synchronized void setLastEndedAnimation(int lastEndedAnimation)
+    {
+        this.lastEndedAnimation = lastEndedAnimation;
+        notify();
     }
 }
