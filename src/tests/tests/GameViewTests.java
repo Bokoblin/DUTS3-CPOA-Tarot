@@ -15,7 +15,7 @@ package tests;
 
 import app.model.*;
 import app.presenter.AppPresenter;
-import app.view.AppView;
+import app.view.GameView;
 import app.view.ViewCard;
 import exceptions.CardGroupNumberException;
 import javafx.application.Application;
@@ -38,7 +38,7 @@ public class GameViewTests extends Application
 {
     private static AppPresenter appPresenter;
     private static GameModel gameModel;
-    private static AppView scene;
+    private static GameView scene;
     private static Group root;
 
     /**
@@ -69,18 +69,18 @@ public class GameViewTests extends Application
     }
 
     @Before
-    public void cleanClasses() {
+    public void initGame() {
         Card.resetClassForTesting();
         Hand.resetClassForTesting();
         Talon.resetClassForTesting();
         root = new Group();
         try {
-            gameModel = new GameModel();
+            gameModel = new GameModel(false);
             gameModel.createCards();
         } catch (CardGroupNumberException e) {
             e.getMessage();
         }
-        scene = new AppView(root, gameModel, appPresenter);
+        scene = new GameView(root, gameModel, appPresenter);
     }
 
     /**
@@ -207,11 +207,8 @@ public class GameViewTests extends Application
     @Override
     public void start(Stage primaryStage) throws Exception {
         root = new Group();
-        gameModel = new GameModel();
-        appPresenter = new AppPresenter();
-        scene = new AppView(root, gameModel, appPresenter);
-        appPresenter.setGameModel(gameModel);
-        appPresenter.setAppView(scene);
+        gameModel = new GameModel(false);
+        scene = new GameView(root, gameModel, null);
 
         primaryStage.setScene(scene);
     }

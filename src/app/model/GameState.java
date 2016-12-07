@@ -29,5 +29,5 @@ public enum GameState {
     BID_CHOOSING,       //Player must choose his bid among the 4 + "Pass"
     BID_CHOSEN,         //Bid has been chosen, player can constitute ecart, re-deal or quit
     ECART_CONSTITUTING, //Player has to choose 6 cards for the Ecart
-    ECART_CONSTITUTED;  //Ecart has been chosen, player can quit
+    ECART_CONSTITUTED, ENDED;  //Ecart has been chosen, player can quit
 }

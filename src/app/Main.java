@@ -15,20 +15,20 @@ package app;
 
 import app.model.GameModel;
 import app.presenter.AppPresenter;
-import app.view.AppView;
+import app.view.GameView;
+import app.view.MenuView;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
  * The {@code Main} class inits and launch game
  *
  * The app follows an MVP Architecture :
- * GameModel notify its view observer, AppView
- * AppView send user request to presenter, AppPresenter
- * AppPresenter change the model, GameModel
+ * GameModel notifies change to GameView (its observer)
+ * GameView sends user request AppPresenter and send state request to model
+ * AppPresenter switches between menu and game, change GameModel fields
  *
  * Our app implements a variant of MVP from CPOA TD2 (page 3)
  *
@@ -41,27 +41,23 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
     @Override
-    public void start(Stage primaryStage) throws Exception{
-        Group root = new Group();
-        GameModel gameModel = new GameModel();
-        AppPresenter appPresenter = new AppPresenter();
-        AppView scene = new AppView(root, gameModel, appPresenter);
-        appPresenter.setGameModel(gameModel);
-        appPresenter.setAppView(scene);
-        gameModel.createCards();
+    public void start(Stage window) {
 
-        primaryStage.setTitle("JACQUOT JOLIVET S3A");
-        primaryStage.setMaximized(true);
-        primaryStage.setScene(scene);
-        scene.setFill(Color.BLACK);
-        primaryStage.show();
+        Group menu = new Group();
 
-        primaryStage.setOnCloseRequest(event -> {
+        AppPresenter appPresenter = new AppPresenter(window);
+        MenuView menuView = new MenuView(menu, appPresenter);
+        appPresenter.setMenuView(menuView);
+
+        window.setTitle("JACQUOT JOLIVET S3A - MENU");
+        window.setMaximized(true);
+        window.setScene(menuView);
+        window.show();
+
+        window.setOnCloseRequest(event -> {
             Platform.exit();
             System.exit(0);
         });
-
-        gameModel.getGameThread().start();
     }
 
     public static void main(String[] args) {
