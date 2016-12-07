@@ -14,7 +14,11 @@ limitations under the License.
 package app.presenter;
 
 import app.model.GameModel;
-import app.view.AppView;
+import app.view.GameView;
+import app.view.MenuView;
+import exceptions.CardGroupNumberException;
+import javafx.scene.Group;
+import javafx.stage.Stage;
 
 /**
  * The {@code AppPresenter} class consists in the MVC architecture presenter
@@ -24,7 +28,14 @@ import app.view.AppView;
  */
 public class AppPresenter {
     private GameModel gameModel;
-    private AppView appView;
+    private Stage window;
+    private GameView gameView;
+    private MenuView menuView;
+    private boolean gameModeSimplified;
+
+    public AppPresenter(Stage window) {
+        this.window = window;
+    }
 
 
     /**
@@ -44,13 +55,41 @@ public class AppPresenter {
             gameModel.setUserChoice(choice);
     }
 
+    public void launchMenu() {
+        gameView = null;
+        window.setTitle("JACQUOT JOLIVET S3A - MENU");
+        window.setMaximized(false);
+        window.setScene(menuView);
+        window.show();
+    }
+
+    public void launchGame() {
+        try {
+            window.hide();
+            if ( gameModel == null)
+            gameModel = new GameModel(gameModeSimplified);
+            gameView = new GameView(new Group(), gameModel, this);
+            gameModel.createCards();
+            window.setTitle("JACQUOT JOLIVET S3A - GAME");
+            window.setScene(gameView);
+            window.show();
+            gameModel.getGameThread().start();
+        } catch (CardGroupNumberException e) {
+            e.getMessage();
+        }
+    }
+
+    public void quit() {
+        window.close();
+    }
+
 
     //SETTERS - no documentation needed
 
-    public void setGameModel(GameModel gameModel) {
-        this.gameModel = gameModel;
+    public void setMenuView(MenuView menuView) {
+        this.menuView = menuView;
     }
-    public void setAppView(AppView appView) {
-        this.appView = appView;
+    public void setGameModeSimplified(boolean on) {
+        this.gameModeSimplified = on;
     }
 }

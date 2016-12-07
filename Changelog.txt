@@ -14,6 +14,9 @@ Features :
 - Added Ecart constitution user event
 - Added Bid choosing user event
 
+Fixed :
+- cursor.HAND not shown when it should have
+
 Issues :
 - sorting in conflict with mouse events -> Disabled pre-Ecart sorting
 - AppView's rootGUI, camera handling to rewrite for correct displaying
