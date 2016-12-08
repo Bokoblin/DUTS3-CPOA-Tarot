@@ -24,7 +24,7 @@ import static java.lang.Thread.sleep;
  * The {@code GameModel} class consists in the MVC architecture model
  * It handles Tarot dealing and bids
  * @author Arthur
- * @version v0.10
+ * @version v0.10.1
  * @since v0.2
  *
  * @see Observable
@@ -195,7 +195,9 @@ public class GameModel extends Observable {
                 minCard = mapEntry.getKey();
 
         playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
+
         changeGameState(GameState.DEALER_CHOSEN);
+        temporize(1000);
 
         //Flip cards again and put them back to wholeCardsDeck
         flipDeck(pickedCardsDeck, false);
@@ -366,7 +368,6 @@ public class GameModel extends Observable {
         sortDeck(ourPlayer);
 
         //TODO : DRAG & DROP VERSION
-        //TODO : FIX ANIMATION AND CLICK IMAGE
         for (int i=0; i < 6; i++) {
             boolean choiceValid;
             Card c;
@@ -395,6 +396,9 @@ public class GameModel extends Observable {
                 flipCard(c, false);
             }
             moveCardBetweenDecks(ourPlayer, talon, c, true);
+            CardUpdate cardUpdate = new CardUpdate(CardUpdateType.SORT_DECK, ourPlayer);
+            notifyObserversOfCardUpdate(cardUpdate);
+            waitEndUpdateAnimation(cardUpdate);
         }
     }
 
@@ -493,7 +497,7 @@ public class GameModel extends Observable {
         wholeCardsDeck.addAll(cut2);
         wholeCardsDeck.addAll(cut1);
 
-        temporize(2000);
+        temporize(1000);
         CardUpdate cutUpdate = new CardUpdate(CardUpdateType.CUT_DECK, wholeCardsDeck.get(splitIt), wholeCardsDeck);
         notifyObserversOfCardUpdate(cutUpdate);
         waitEndUpdateAnimation(cutUpdate);

@@ -27,5 +27,4 @@ public enum NotificationType {
     CHOOSE_BID,                 //To choose a bid among those shown
     CHOOSE_ECART_CARD,          //To choose a card among blinking ones (Ecart constitution)
     UNAUTHORIZED_CARD_CHOICE    //To display an error message
-
 }

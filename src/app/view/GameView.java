@@ -29,8 +29,7 @@ import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -42,7 +41,7 @@ import java.util.*;
  * The {@code GameView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.10
+ * @version v0.10.1
  * @since v0.2
  *
  * @see Observer
@@ -62,10 +61,15 @@ public class GameView extends Scene implements Observer {
     private static final Point3D INITIAL_DECK_POSITION = new Point3D(-400,  CARPET_SIZE/2, -300);
     private static final Point3D PICKED_CARD_DECK_POSITION = new Point3D(MARGIN_TABLE,
             CARPET_SIZE-MARGIN_TABLE-ViewCard.getHeight(), 0);
+    private static final Point3D CAMERA_POSITION_1 = new Point3D(CARPET_SIZE/2, 4200, -3800);
+    private static final double CAMERA_ROTATION_1 = 35;
+    private static final Point3D CAMERA_POSITION_2 = new Point3D(CARPET_SIZE/2, 2600, -2800);
+    private static final double CAMERA_ROTATION_2 = 15;
 
 
     private GameModel gameModel;
     private AppPresenter appPresenter;
+    private ViewCamera camera3D;
 
     //Groups
     private Group root3D;
@@ -79,7 +83,6 @@ public class GameView extends Scene implements Observer {
     //GUI elements
     private Label stateTitle;
     private Label toolTip;
-    private Label errorSnack;
     private VBox bidBox;
 
 
@@ -91,7 +94,7 @@ public class GameView extends Scene implements Observer {
      * @param   controller  the presenter it sends event information
      */
     public GameView(Group root, GameModel model, AppPresenter controller) {
-        super(root, 800, 600, false, SceneAntialiasing.DISABLED);
+        super(root, 800, 600, false, SceneAntialiasing.BALANCED);
 
 
         this.gameModel = model;
@@ -101,10 +104,31 @@ public class GameView extends Scene implements Observer {
 
         //=== Create the groups
         root3D = new Group();
-        StackPane rootGUI = new StackPane();
-        rootGUI.setAlignment(Pos.TOP_CENTER);
+        BorderPane rootGUI = new BorderPane();
+        HBox boxTop = new HBox();
+        VBox boxBottom = new VBox();
+        HBox boxLeft = new HBox();
+        HBox boxRight = new HBox();
+        HBox boxCenter = new HBox();
+
+        boxRight.setAlignment(Pos.CENTER_RIGHT);
+        boxLeft.setAlignment(Pos.CENTER_LEFT);
+        boxCenter.setAlignment(Pos.CENTER);
+        boxTop.setAlignment(Pos.CENTER);
+        boxBottom.setAlignment(Pos.CENTER);
+        rootGUI.setTop(boxTop);
+        rootGUI.setRight(boxRight);
+        rootGUI.setBottom(boxBottom);
+        rootGUI.setLeft(boxLeft);
+        rootGUI.setCenter(boxCenter);
         rootGUI.prefWidthProperty().bind(widthProperty());
         rootGUI.prefHeightProperty().bind(heightProperty());
+        rootGUI.setPickOnBounds(false);
+        for (Node node: rootGUI.getChildren()) {
+            node.setPickOnBounds(false);
+            ((Pane)node).setPadding(new Insets(10, 10, 10, 10));
+        }
+
         SubScene subScene3D = new SubScene(root3D, 800, 600, true, SceneAntialiasing.DISABLED);
         subScene3D.widthProperty().bind(widthProperty());
         subScene3D.heightProperty().bind(heightProperty());
@@ -130,14 +154,10 @@ public class GameView extends Scene implements Observer {
 
         //=== Define the camera
 
-        ViewCamera camera3D = new ViewCamera(true);
-        camera3D.setTranslateX(CARPET_SIZE/2);
-        camera3D.setTranslateY(4200);
-        camera3D.setTranslateZ(-3800);
-        camera3D.getTransformations().getRotateX().setAngle(35);
+        camera3D = new ViewCamera(true);
+        camera3D.moveCamera(CAMERA_POSITION_1, CAMERA_ROTATION_1, 0);
 
         subScene3D.setCamera(camera3D);
-
 
         //=== Define the light
 
@@ -148,27 +168,13 @@ public class GameView extends Scene implements Observer {
 
         //=== Create GUI elements
 
-        rootGUI.setStyle("-fx-focus-color: transparent;");
-
         stateTitle = new Label();
-        stateTitle.setTranslateX(0);
-        stateTitle.setTranslateY(10);
         stateTitle.setTextFill(Color.WHITE);
         stateTitle.setFont(new Font(25));
 
         toolTip = new Label();
-        toolTip.setTranslateX(0);
-        toolTip.setTranslateY(650);
-        toolTip.setScaleX(2);
-        toolTip.setScaleY(2);
         toolTip.setTextFill(Color.WHITE);
-        toolTip.setFont(new Font(10));
-
-        errorSnack = new Label();
-        errorSnack.setTranslateX(0);
-        errorSnack.setTranslateY(650);
-        errorSnack.setTextFill(Color.RED);
-        errorSnack.setFont(new Font(20));
+        toolTip.setFont(new Font(20));
 
         Button bidSmall = new Button("Small");
         bidSmall.setTextFill(Color.BLACK);
@@ -222,9 +228,8 @@ public class GameView extends Scene implements Observer {
 
 
         bidBox = new VBox(10);
-        bidBox.setPadding(new Insets(10, 50, 50, 50));
-        bidBox.setTranslateX(1000);
-        bidBox.setTranslateY(100);
+        bidBox.setTranslateY(50);
+        bidBox.setPadding(new Insets(50, 50, 50, 50));
         bidBox.getChildren().addAll(bidSmall, bidGuard, bidGuardWithout, bidGuardAgainst, bidPass);
         bidBox.setVisible(false);
 
@@ -232,8 +237,9 @@ public class GameView extends Scene implements Observer {
 
         background.getChildren().addAll(table, carpet);
         root.getChildren().addAll(subScene3D, rootGUI);
-        rootGUI.setPickOnBounds(false);
-        rootGUI.getChildren().addAll(stateTitle, toolTip, errorSnack, bidBox);
+        boxTop.getChildren().add(stateTitle);
+        boxBottom.getChildren().addAll(toolTip);
+        boxCenter.getChildren().add(bidBox);
         root3D.getChildren().addAll(background, talon, wholeCardsDeck, pickedCardDeck, pointLight);
         for ( Group hand : hands)
             root3D.getChildren().add(hand);
@@ -329,19 +335,16 @@ public class GameView extends Scene implements Observer {
                     case PICK_CARD:
                         toolTip.setText("Please select a card, Dealer will be whose with the weakest card");
                         break;
-                    case CHOOSE_ECART_CARD:
-                        toolTip.setText("You are the taker, please select a card");
-                        break;
                     case CHOOSE_BID:
                         bidBox.setVisible(true);
-                        toolTip.setText("Please select a bid with the buttons aside");
+                        toolTip.setText("Please select a bid with the buttons above");
                         break;
                     case UNAUTHORIZED_CARD_CHOICE:
-                        toolTip.setText("");
-                        errorSnack.setText("You can't choose a Trump, a King or Excuse");
+                        toolTip.setText("You can't choose a Trump, a King or Excuse");
+                        toolTip.setTextFill(Color.DARKRED);
                         new Timeline(new KeyFrame( Duration.millis(2500), t -> {
-                            toolTip.setText("Please select a bid with the buttons aside");
-                            errorSnack.setText("Please select a card");
+                            toolTip.setText("Please select a card");
+                            toolTip.setTextFill(Color.WHITE);
                         })).play();
                         break;
                     default:
@@ -395,11 +398,13 @@ public class GameView extends Scene implements Observer {
                         break;
                     case ECART_CONSTITUTING:
                         stateTitle.setText("ECART CONSTITUTING");
-                        toolTip.setText("You are the taker");
+                        toolTip.setText("You are the taker, please select a card");
+                        camera3D.moveCamera(CAMERA_POSITION_2, CAMERA_ROTATION_2, 2000);
                         break;
                     case ECART_CONSTITUTED:
                         stateTitle.setText("ECART CONSTITUTED");
                         toolTip.setText("Game is now finished. You can quit");
+                        camera3D.moveCamera(CAMERA_POSITION_1, CAMERA_ROTATION_1, 2000);
                         //TODO : QUIT BUTTON
                         break;
                     default:
@@ -642,10 +647,11 @@ public class GameView extends Scene implements Observer {
      * Reorganize all viewCards of a group with their default positions
      * @since   v0.9.2
      *
-     * @param   group     the group object.
+     * @param   cardUpdate     the cardUpdate object.
      */
-    private void refreshGroupNodesPosition(Group group)
+    private void refreshGroupNodesPosition(CardUpdate cardUpdate)
     {
+        Group group = getGroupFromCardGroup(cardUpdate.getCardGroup());
         List<ViewCard> originalDeck = new ArrayList<>();
         for (Node node : group.getChildren())
         {
@@ -661,11 +667,19 @@ public class GameView extends Scene implements Observer {
         for (ViewCard viewCard : originalDeck)
         {
             try {
-                changeCardGroup(new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, viewCard.getModelCard(), getCardGroupFromGroup(group)), 1000);
+                CardUpdate subUpdate = new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, viewCard.getModelCard(), cardUpdate.getCardGroup());
+                if (group == hands[2] && originalDeck.size() > 18)
+                {
+                    changeCardGroup(subUpdate, getCardDefaultPosition(viewCard).subtract((originalDeck.size()-18)*(MARGIN_BETWEEN_HAND_CARDS/2), 0, 0), 1000);
+                } else {
+                    changeCardGroup(subUpdate, 1000);
+                }
+                cardUpdate.addSubUpdate(subUpdate);
             } catch (NullViewCardException e) {
                 System.err.println(e.toString());
             }
         }
+        cardUpdate.setAnimationFinished();
     }
 
     /**
@@ -697,7 +711,7 @@ public class GameView extends Scene implements Observer {
                         })
                 );
                 if (i == cardUpdate.getCardGroup().size()) {
-                    timeline.getKeyFrames().add(new KeyFrame(new Duration((i + 3) * 100), event -> refreshGroupNodesPosition(getGroupFromCardGroup(cardUpdate.getCardGroup()))));
+                    timeline.getKeyFrames().add(new KeyFrame(new Duration((i + 3) * 100), event -> refreshGroupNodesPosition(cardUpdate)));
                 }
                 i++;
             }
@@ -759,54 +773,25 @@ public class GameView extends Scene implements Observer {
      * @since   v0.8.1
      * @param   cardUpdate the cardUpdate object.
      */
-    //TODO : simplify the method by using @refreshGroupNodesPosition
     public void sortDeck(CardUpdate cardUpdate) throws NullViewCardException {
         CardGroup cardGroup = cardUpdate.getCardGroup();
-        for (Card card : cardGroup) {
-            ViewCard viewCard = getViewCardFromCard(card);
-
-            if (viewCard != null) {
-
-                Point3D newPosition = new Point3D(0, 0, 0);
-                Group group = viewCardToGroup.get(viewCard);
-                final int CARD_INDEX = cardGroup.indexOf(viewCard.getModelCard());
-
-                switch (gameModel.getPlayerHandler().getPlayerCardinalPoint( (Hand)getCardGroupFromGroup(group) ) )
-                {
-                    case North:
-                        newPosition = new Point3D(  CARPET_SIZE - HAND_MARGIN_LEFT - ViewCard.getWidth()
-                                - CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS,
-                                HAND_MARGIN_UP, -ViewCard.getDepth());
-                        break;
-                    case West:
-                        newPosition = new Point3D((ViewCard.getHeight() - ViewCard.getWidth())/2
-                                + HAND_MARGIN_UP, (-1)*((ViewCard.getHeight() - ViewCard.getWidth())/2)
-                                + HAND_MARGIN_LEFT + CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS, -ViewCard.getDepth());
-                        break;
-                    case South:
-                        newPosition = new Point3D( HAND_MARGIN_LEFT + CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS,
-                                CARPET_SIZE-HAND_MARGIN_UP-ViewCard.getHeight(),-ViewCard.getDepth());
-                        break;
-                    case East:
-                        newPosition = new Point3D( CARPET_SIZE - ViewCard.getWidth() -((ViewCard.getHeight()
-                                - ViewCard.getWidth())/2) - HAND_MARGIN_UP,  CARPET_SIZE - HAND_MARGIN_LEFT
-                                - ViewCard.getWidth() - ((ViewCard.getHeight() - ViewCard.getWidth())/2)
-                                - CARD_INDEX*MARGIN_BETWEEN_HAND_CARDS, -ViewCard.getDepth());
-                        break;
-                }
-
-                try {
-                    CardUpdate newCardUpdate = new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, card, cardGroup);
-                    cardUpdate.addSubUpdate(newCardUpdate);
-                    changeCardGroup(newCardUpdate, newPosition, 1000);
-                } catch (NullViewCardException e) {
-                    System.err.println(e.toString());
-                }
-            } else {
-                throw new NullViewCardException(new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, card, cardGroup), true);
+        Group group = getGroupFromCardGroup(cardGroup);
+        List<ViewCard> originalDeck = new ArrayList<>();
+        for (Node node : group.getChildren())
+        {
+            if (node instanceof ViewCard)
+            {
+                originalDeck.add((ViewCard)node);
             }
         }
-        cardUpdate.setAnimationFinished();
+        for (ViewCard viewCard : originalDeck)
+        {
+            group.getChildren().remove(viewCard);
+        }
+        for (Card card : cardGroup) {
+            group.getChildren().add(getViewCardFromCard(card));
+        }
+        refreshGroupNodesPosition(cardUpdate);
     }
 
 

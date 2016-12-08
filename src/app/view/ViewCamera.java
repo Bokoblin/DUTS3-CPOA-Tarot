@@ -1,7 +1,13 @@
 package app.view;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.geometry.Point3D;
 import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
+import javafx.scene.transform.Rotate;
+import javafx.util.Duration;
 
 /**
  * The {@code ViewCamera} class contain the camera of the scene.
@@ -21,11 +27,30 @@ public class ViewCamera extends PerspectiveCamera {
     public ViewCamera(boolean fixedEyedAtCameraZero)
     {
         super(fixedEyedAtCameraZero);
-        this.setNearClip(1);
-        this.setFarClip(10000);
+        setNearClip(1);
+        setFarClip(10000);
+        setRotationAxis(Rotate.X_AXIS);
         transformations = new Transformations(this);
     }
 
+    public void moveCamera(Point3D position, double rotation, int transitionTime)
+    {
+        if (getTranslateX() != position.getX() || getTranslateY() != position.getY() || getTranslateZ() != position.getZ() || rotation != getRotate())
+        {
+            if (transitionTime < 1)
+            {
+                transitionTime = 1;
+            }
+            Timeline timeline = new Timeline();
+            timeline.getKeyFrames().addAll(
+                    new KeyFrame(new Duration(transitionTime), new KeyValue(translateXProperty(), position.getX())),
+                    new KeyFrame(new Duration(transitionTime), new KeyValue(translateYProperty(), position.getY())),
+                    new KeyFrame(new Duration(transitionTime), new KeyValue(translateZProperty(), position.getZ())),
+                    new KeyFrame(new Duration(transitionTime), new KeyValue(rotateProperty(), rotation))
+            );
+            timeline.play();
+        }
+    }
 
     //GETTERS - no documentation needed
 

@@ -158,23 +158,15 @@ public class ViewCard extends RectangleMesh {
         });
 
         this.setOnMouseClicked(event -> {
-            CardGroup cardGroup;
+            CardGroup cardGroup = null;
             if (gameView.getGameModel().getAwaitsUserEvent() == NotificationType.PICK_CARD)
                 cardGroup = gameView.getCardGroupFromGroup(gameView.getWholeCardsDeck());
-            else
+            else if (gameView.getGameModel().getAwaitsUserEvent() == NotificationType.CHOOSE_ECART_CARD)
                 cardGroup = gameView.getCardGroupFromGroup(gameView.getSouth());
 
             if (cardGroup != null && cardGroup.contains(modelCard))
             {
                 gameView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
-                if (gameView.getGameModel().getAwaitsUserEvent() == NotificationType.CHOOSE_ECART_CARD)
-                {
-                    try {
-                        gameView.sortDeck(new CardUpdate(CardUpdateType.SORT_DECK, gameView.getGameModel().getOurPlayer()));
-                    } catch (NullViewCardException e) {
-                        System.err.println(e.getMessage());
-                    }
-                }
                 gameView.getGameModel().setAwaitsUserEvent(null);
                 gameView.getToolTip().setText("Please wait...");
             }

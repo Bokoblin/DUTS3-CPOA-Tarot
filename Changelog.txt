@@ -1,11 +1,26 @@
 Project Name : Project Tarot
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.10.0
+Current version : v0.10.1
 
 =========================================================================
 
-v0.10.0 (06/12/16) :
+
+v0.10.1 (08/12/16) :
+- Fixed ecart constituting animation issues from v0.10.0
+- Added border pane for GUI
+- Fixed buttons and tooltip position on non-maximized mode
+- Fixed an issue that let the player choose a ecart card before choosing the option
+- Camera moving when constituting the ecart
+
+Issues still unfixed :
+- card textures that are superposed sometimes
+- cards not dealt from deck's top
+
+
+--------------------------------------------------------------------
+
+v0.10.0 (06/12/16 - 07/12/16) :
 
 Features :
 - Added game state
@@ -17,7 +32,6 @@ Features :
 - Added Bid choosing user event
 
 Issues :
-- cursor.HAND not shown when it should have
 - ecart constituting animation issues
 - buttons and tooltip position on non-maximized mode
 - card textures that are superposed sometimes
