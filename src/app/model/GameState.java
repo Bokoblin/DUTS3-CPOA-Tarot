@@ -30,7 +30,7 @@ public enum GameState {
     BID_CHOSEN,                 //Bid has been chosen, player can constitute ecart, re-deal or quit
     ECART_CONSTITUTING,         //Player has to choose 6 cards for the Ecart
     ECART_CONSTITUTED,          //Ecart has been chosen, player can quit
-    CARDS_SHUFFLING,    //Card are shuffled before dealer choosing and dealing
-    CARDS_CUTTING,    //Card are cut before dealing
-    GAME_ENDED
+    CARDS_SHUFFLING,            //Card are shuffled before dealer choosing and dealing
+    CARDS_CUTTING,              //Card are cut before dealing
+    GAME_ENDED                  //Final state
 }

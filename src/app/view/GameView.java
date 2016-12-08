@@ -41,7 +41,7 @@ import java.util.*;
  * The {@code GameView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.10.1
+ * @version v0.11
  * @since v0.2
  *
  * @see Observer
@@ -58,7 +58,7 @@ public class GameView extends Scene implements Observer {
     private static final float MARGIN_BETWEEN_HAND_CARDS = ( CARPET_SIZE-(2*HAND_MARGIN_LEFT))/18;
     private static final Point3D TALON_POSITION = new Point3D(( CARPET_SIZE/2) - (ViewCard.getWidth()/2),
             ( CARPET_SIZE/2)-(ViewCard.getHeight()/2), 0);
-    private static final Point3D INITIAL_DECK_POSITION = new Point3D(-400,  CARPET_SIZE/2, -300);
+    private static final Point3D INITIAL_DECK_POSITION = new Point3D(-350,  CARPET_SIZE/2, -300);
     private static final Point3D PICKED_CARD_DECK_POSITION = new Point3D(MARGIN_TABLE,
             CARPET_SIZE-MARGIN_TABLE-ViewCard.getHeight(), 0);
     private static final Point3D CAMERA_POSITION_1 = new Point3D(CARPET_SIZE/2, 4200, -3800);
@@ -405,7 +405,6 @@ public class GameView extends Scene implements Observer {
                         stateTitle.setText("ECART CONSTITUTED");
                         toolTip.setText("Game is now finished. You can quit");
                         camera3D.moveCamera(CAMERA_POSITION_1, CAMERA_ROTATION_1, 2000);
-                        //TODO : QUIT BUTTON
                         break;
                     default:
                         break;
@@ -1021,7 +1020,7 @@ public class GameView extends Scene implements Observer {
     }
 
 
-//GETTERS & SETTERS - no documentation needed
+    //GETTERS - no documentation needed
 
     public GameModel getGameModel() {
         return gameModel;
@@ -1046,7 +1045,6 @@ public class GameView extends Scene implements Observer {
     public HashMap<ViewCard, Group> getViewCardToGroup() {
         return viewCardToGroup;
     }
-
     public Label getToolTip() {
         return toolTip;
     }

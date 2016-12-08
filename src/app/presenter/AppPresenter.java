@@ -15,17 +15,41 @@ package app.presenter;
 
 import app.model.CardUpdate;
 import app.model.GameModel;
+import app.model.GameState;
 import app.view.GameView;
+import exceptions.CardGroupNumberException;
+import javafx.application.Platform;
+import javafx.scene.Group;
+import javafx.stage.Stage;
 
 /**
- * The {@code AppPresenter} class consists in the MVC architecture presenter
+ * The {@code AppPresenter} class consists in
+ * the MVP architecture presenter
  * @author Arthur
- * @version v0.10
+ * @version v0.11
  * @since v0.2
  */
 public class AppPresenter {
     private GameModel gameModel;
-    private GameView appView;
+    private Stage window;
+    private GameView gameView;
+    private boolean dealerChoosingEnabled;
+
+    /**
+     * Constructs a view for a specific root node and with a model and a presenter
+     * @since   v0.10
+     * @param   window  the app window
+     */
+    public AppPresenter(Stage window) {
+        this.window = window;
+
+        window.setOnCloseRequest(event -> {
+            if ( gameModel != null && gameModel.getGameState() == GameState.GAME_ENDED)
+                new Thread( () -> gameModel.quitGame()).start();
+            Platform.exit();
+            System.exit(0);
+        });
+    }
 
 
     /**
@@ -45,6 +69,11 @@ public class AppPresenter {
             gameModel.setUserChoice(choice);
     }
 
+    /**
+     * Aims to notify the model of an animation's end
+     * @since   v0.10
+     * @param   cardUpdate  the cardUpdate associated to the animation
+     */
     public void notifyEndAnimation(CardUpdate cardUpdate)
     {
         if (cardUpdate != null)
@@ -53,13 +82,45 @@ public class AppPresenter {
         }
     }
 
+    /**
+     * Launch a Tarot game from menu
+     * @since   v0.11
+     */
+    public void launchGame() {
+        try {
+            gameModel = new GameModel(dealerChoosingEnabled);
+            gameView = new GameView(new Group(), gameModel, this);
+            gameModel.createCards();
+            window.setTitle("JACQUOT JOLIVET S3A - GAME");
+            window.setScene(gameView);
+            window.setMaximized(true);
+            window.show();
+            gameModel.getGameThread().start();
+        } catch (CardGroupNumberException e) {
+            e.getMessage();
+        }
+    }
+
+    /**
+     * Quit app from menu
+     * @since   v0.11
+     */
+    public void quit() {
+        window.close();
+    }
+
 
     //SETTERS - no documentation needed
+
+    public void setDealerChoosingEnabled(boolean on) {
+        this.dealerChoosingEnabled = on;
+    }
 
     public void setGameModel(GameModel gameModel) {
         this.gameModel = gameModel;
     }
-    public void setGameView(GameView appView) {
-        this.appView = appView;
+
+    public void setGameView(GameView gameView) {
+        this.gameView = gameView;
     }
 }
