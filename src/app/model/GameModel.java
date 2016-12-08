@@ -18,13 +18,15 @@ import exceptions.CardNumberException;
 import exceptions.CardUniquenessException;
 
 import java.util.*;
+
 import static java.lang.Thread.sleep;
 
 /**
- * The {@code GameModel} class consists in the MVC architecture model
- * It handles Tarot dealing and bids
+ * The {@code GameModel} class consists in the MVP architecture model
+ * It handles Tarot dealer choosing,
+ * dealing, bids and ecart constitution
  * @author Arthur
- * @version v0.10.1
+ * @version v0.11
  * @since v0.2
  *
  * @see Observable
@@ -46,7 +48,6 @@ public class GameModel extends Observable {
     private NotificationType awaitsUserEvent;
     private Thread gameThread;
     private GameState gameState;
-    private boolean gameModeSimplified;
     private int userChoice;
     private int lastEndedAnimation;
 
@@ -55,11 +56,10 @@ public class GameModel extends Observable {
      * @since v0.5
      *
      * @throws CardGroupNumberException if user tries to create too much hands
-     * @param gameModeSimplified the mode chosen to run the game
+     * @param dealerChoosingEnabled the mode chosen to run the game
      */
-    public GameModel(boolean gameModeSimplified) throws CardGroupNumberException {
+    public GameModel(boolean dealerChoosingEnabled) throws CardGroupNumberException {
 
-        this.gameModeSimplified = gameModeSimplified;
         wholeCardsDeck = new CardGroup(78);
         toPickDeck = new CardGroup(78);
         pickedCardsDeck = new CardGroup(4);
@@ -77,16 +77,13 @@ public class GameModel extends Observable {
         }
 
         gameThread = new Thread( () -> {
-            if (gameState != GameState.GAME_ENDED && !this.gameModeSimplified)
+            if (gameState != GameState.GAME_ENDED && dealerChoosingEnabled)
                 chooseInitialDealer();
             if (gameState != GameState.GAME_ENDED)
                 handleDealing();
             if (gameState != GameState.GAME_ENDED)
                 handleBids();
-            if (gameState != GameState.GAME_ENDED) {
-                temporize(5000);
-                quitGame();
-            }
+            gameState = GameState.GAME_ENDED;
         });
         gameThread.setDaemon(true);
 
@@ -244,6 +241,7 @@ public class GameModel extends Observable {
         }
         while (hasPetitSec);
     }
+
 
     /**
      * Deals card
@@ -693,14 +691,14 @@ public class GameModel extends Observable {
         return choice;
     }
 
+
     /**
      * Wait until the animation of a specified updateCard object
      * has been finished.
      * @since v0.9.1
      * @param cardUpdate the specified cardUpdate object
      */
-    private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate)
-    {
+    private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate) {
         if ( countObservers() != 0 ) {
             while (lastEndedAnimation != cardUpdate.hashCode()) {
                 try {
@@ -712,6 +710,7 @@ public class GameModel extends Observable {
             lastEndedAnimation = -1;
         }
     }
+
 
     //GETTERS & SETTERS - no documentation needed
 
@@ -736,11 +735,6 @@ public class GameModel extends Observable {
     public NotificationType getAwaitsUserEvent() {
         return awaitsUserEvent;
     }
-
-    public void setAwaitsUserEvent(NotificationType awaitsUserEvent) {
-        this.awaitsUserEvent = awaitsUserEvent;
-    }
-
     public Thread getGameThread() {
         return gameThread;
     }
@@ -752,9 +746,10 @@ public class GameModel extends Observable {
         this.userChoice = userChoice;
         notify();
     }
-
-    public synchronized void setLastEndedAnimation(int lastEndedAnimation)
-    {
+    public void setAwaitsUserEvent(NotificationType awaitsUserEvent) {
+        this.awaitsUserEvent = awaitsUserEvent;
+    }
+    public synchronized void setLastEndedAnimation(int lastEndedAnimation) {
         this.lastEndedAnimation = lastEndedAnimation;
         notify();
     }

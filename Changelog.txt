@@ -1,10 +1,19 @@
 Project Name : Project Tarot
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v0.10.1
+Current version : v0.11.0
 
 =========================================================================
 
+v0.11.0 (08/12/16) :
+- Added menu allowing to play, quit and enable Dealer choosing
+
+Issues still unfixed :
+- card textures that are superposed sometimes
+- cards not dealt from deck's top
+
+
+--------------------------------------------------------------------
 
 v0.10.1 (08/12/16) :
 - Fixed ecart constituting animation issues from v0.10.0

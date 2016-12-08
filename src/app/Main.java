@@ -13,13 +13,10 @@ limitations under the License.
 
 package app;
 
-import app.model.GameModel;
 import app.presenter.AppPresenter;
-import app.view.GameView;
+import app.view.MenuView;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -34,7 +31,7 @@ import javafx.stage.Stage;
  *
  * @author Alexandre
  * @author Arthur
- * @version v0.10
+ * @version v0.11
  * @since v0.2
  *
  * @see Application
@@ -42,28 +39,16 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage window) throws Exception{
+
         Group root = new Group();
-        GameModel gameModel = new GameModel(false);
-        AppPresenter appPresenter = new AppPresenter();
-        GameView scene = new GameView(root, gameModel, appPresenter);
-        appPresenter.setGameModel(gameModel);
-        appPresenter.setGameView(scene);
-        gameModel.createCards();
+        AppPresenter appPresenter = new AppPresenter(window);
+        MenuView menuView = new MenuView(root, appPresenter);
 
-        window.setTitle("JACQUOT JOLIVET S3A");
-        window.setMaximized(true);
-        window.setMinWidth(1000);
+        window.setTitle("JACQUOT JOLIVET S3A - MENU");
+        window.setMinWidth(800);
         window.setMinHeight(600);
-        window.setScene(scene);
-        scene.setFill(Color.BLACK);
+        window.setScene(menuView);
         window.show();
-
-        window.setOnCloseRequest(event -> {
-            Platform.exit();
-            System.exit(0);
-        });
-
-        gameModel.getGameThread().start();
     }
 
     public static void main(String[] args) {
