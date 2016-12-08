@@ -91,6 +91,7 @@ public class AppPresenter {
             gameModel = new GameModel(dealerChoosingEnabled);
             gameView = new GameView(new Group(), gameModel, this);
             gameModel.createCards();
+            window.hide();
             window.setTitle("JACQUOT JOLIVET S3A - GAME");
             window.setScene(gameView);
             window.setMaximized(true);

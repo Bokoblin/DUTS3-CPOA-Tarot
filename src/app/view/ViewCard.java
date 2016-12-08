@@ -35,7 +35,7 @@ public class ViewCard extends RectangleMesh {
     private boolean shown;
     private static final float CARD_HEIGHT = 250;
     private static final float CARD_WIDTH = CARD_HEIGHT * (float)(55.0/88.0);
-    private static final float CARD_DEPTH = 1;
+    private static final float CARD_DEPTH = 1.5f;
     private static final int CARD_FACE_TEXTURE_WIDTH = 256;
     private static final int CARD_FACE_TEXTURE_HEIGHT = 454;
 
@@ -143,7 +143,7 @@ public class ViewCard extends RectangleMesh {
         view.getViewCardToGroup().put(this, group);
         setPosition(view.getCardDefaultPosition(this));
         setRotationAxis(Rotate.Z_AXIS);
-        setRotate(view.getCardDefaultRotation(this));
+        setRotate(view.getCardDefaultRotation(this).z);
 
         //=== EVENTS
 
