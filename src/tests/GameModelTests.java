@@ -27,12 +27,12 @@ import static org.junit.Assert.*;
  * GameModel Unit tests
  *
  * @author Arthur
- * @version v0.9
+ * @version v0.11
  * @since v0.5
  */
 public class GameModelTests {
 
-    GameModel gameModel;
+    private GameModel gameModel;
 
     /**
      * Reset static fields before each test
@@ -234,5 +234,23 @@ public class GameModelTests {
             assertEquals(mean, mapEntry.getValue(), delta);
         }
         System.out.println("I=[" + (mean-delta) + ", " + (mean+delta) +"]");
+    }
+
+
+    /**
+     * Test quitGame method
+     * @since v0.11
+     *
+     */
+    @Test
+    public void quitGameTest() {
+
+        assertTrue(gameModel.getWholeCardsDeck().size() == 78);
+        assertTrue(Card.getNbCards() == 78);
+
+        gameModel.quitGame();
+
+        assertTrue(gameModel.getWholeCardsDeck().size() == 0);
+        assertTrue(Card.getNbCards() == 0);
     }
 }

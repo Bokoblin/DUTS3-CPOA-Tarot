@@ -14,6 +14,7 @@ public class Transformations {
     private Rotate rotateX;
     private Rotate rotateY;
     private Rotate rotateZ;
+    private Rotate incline;
     private Translate translate;
 
     public Transformations(Node object)
@@ -24,10 +25,10 @@ public class Transformations {
         rotateX = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.X_AXIS);
         rotateY = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.Y_AXIS);
         rotateZ = new Rotate(0, pivotX, pivotY, pivotZ, Rotate.Z_AXIS);
+        incline = new Rotate(0, pivotX, object.getBoundsInLocal().getDepth(), pivotZ, Rotate.Y_AXIS);
         translate = new Translate(0,0,0);
-        object.getTransforms().addAll(translate, rotateX, rotateY, rotateZ); //The order of adding the transformations is important !
+        object.getTransforms().addAll(translate, incline, rotateX, rotateY, rotateZ); //The order of adding the transformations is important !
     }
-
 
     //GETTERS - no documentation needed
 
@@ -43,6 +44,11 @@ public class Transformations {
     {
         return rotateZ;
     }
+
+    public Rotate getIncline() {
+        return incline;
+    }
+
     public Translate getTranslate()
     {
         return translate;

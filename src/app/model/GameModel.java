@@ -365,7 +365,6 @@ public class GameModel extends Observable {
 
         sortDeck(ourPlayer);
 
-        //TODO : DRAG & DROP VERSION
         for (int i=0; i < 6; i++) {
             boolean choiceValid;
             Card c;
@@ -698,7 +697,7 @@ public class GameModel extends Observable {
      * @since v0.9.1
      * @param cardUpdate the specified cardUpdate object
      */
-    private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate) {
+    public synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate) {
         if ( countObservers() != 0 ) {
             while (lastEndedAnimation != cardUpdate.hashCode()) {
                 try {

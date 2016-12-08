@@ -104,6 +104,8 @@ public class GameViewTests extends Application
     /**
      * Add a card to the view then move it to another group
      * and verify the number of cards of the group have been increase
+     *
+     * It might fail, if it does, relaunch the tests
      * @since v0.6
      */
     @Test
