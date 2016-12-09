@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -26,7 +26,7 @@ import javafx.stage.Stage;
  * The {@code AppPresenter} class consists in
  * the MVP architecture presenter
  * @author Arthur
- * @version v0.11
+ * @version v1.0.0
  * @since v0.2
  */
 public class AppPresenter {
@@ -36,7 +36,7 @@ public class AppPresenter {
     private boolean dealerChoosingEnabled;
 
     /**
-     * Constructs a view for a specific root node and with a model and a presenter
+     * Constructs the presenter with the app's window
      * @since   v0.10
      * @param   window  the app window
      */
@@ -83,7 +83,7 @@ public class AppPresenter {
     }
 
     /**
-     * Launch a Tarot game from menu
+     * Launches a Tarot game from menu
      * @since   v0.11
      */
     public void launchGame() {
@@ -92,7 +92,7 @@ public class AppPresenter {
             gameView = new GameView(new Group(), gameModel, this);
             gameModel.createCards();
             window.hide();
-            window.setTitle("JACQUOT JOLIVET S3A - GAME");
+            window.setTitle("GAME");
             window.setScene(gameView);
             window.setMaximized(true);
             window.show();
@@ -103,7 +103,7 @@ public class AppPresenter {
     }
 
     /**
-     * Quit app from menu
+     * Quits app from menu
      * @since   v0.11
      */
     public void quit() {
@@ -116,11 +116,9 @@ public class AppPresenter {
     public void setDealerChoosingEnabled(boolean on) {
         this.dealerChoosingEnabled = on;
     }
-
     public void setGameModel(GameModel gameModel) {
         this.gameModel = gameModel;
     }
-
     public void setGameView(GameView gameView) {
         this.gameView = gameView;
     }

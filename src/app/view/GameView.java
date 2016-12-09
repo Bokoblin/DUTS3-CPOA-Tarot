@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,7 +17,6 @@ import app.model.*;
 import app.presenter.AppPresenter;
 import com.sun.istack.internal.NotNull;
 import com.sun.javafx.geom.Vec3d;
-import com.sun.javafx.geom.Vec3f;
 import exceptions.NullViewCardException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -31,7 +30,10 @@ import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -43,7 +45,7 @@ import java.util.*;
  * The {@code GameView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v0.11
+ * @version v1.0.0
  * @since v0.2
  *
  * @see Observer
@@ -153,8 +155,8 @@ public class GameView extends Scene implements Observer {
         table.setTranslateZ(CARPET_DEPTH);
         table.setTranslateX(-table.getImage().getWidth()/2 + CARPET_SIZE/2);
         table.setTranslateY(-table.getImage().getHeight()/2 + CARPET_SIZE/2);
-        table.setScaleX(2);
-        table.setScaleY(2);
+        table.setScaleX(3);
+        table.setScaleY(3);
 
         //=== Define the camera
 
@@ -629,18 +631,17 @@ public class GameView extends Scene implements Observer {
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void refreshGroupNodesPosition(CardUpdate cardUpdate)
-    {
+    private void refreshGroupNodesPosition(CardUpdate cardUpdate) {
         Group group = getGroupFromCardGroup(cardUpdate.getCardGroup());
         List<ViewCard> originalDeck = new ArrayList<>();
-        for (Node node : group.getChildren()) {
+
+        group.getChildren().forEach( node -> {
             if (node instanceof ViewCard) {
-                originalDeck.add((ViewCard)node);
+                originalDeck.add((ViewCard) node);
             }
-        }
-        for (ViewCard viewCard : originalDeck) {
-            group.getChildren().remove(viewCard);
-        }
+        });
+        originalDeck.forEach(viewCard -> group.getChildren().remove(viewCard));
+
         for (ViewCard viewCard : originalDeck) {
             try {
                 CardUpdate subUpdate = new CardUpdate(CardUpdateType.MOVE_CARD_BETWEEN_GROUPS, viewCard.getModelCard(), cardUpdate.getCardGroup());
@@ -743,21 +744,18 @@ public class GameView extends Scene implements Observer {
      * @since   v0.8.1
      * @param   cardUpdate the cardUpdate object.
      */
-    public void sortDeck(CardUpdate cardUpdate) throws NullViewCardException {
+    private void sortDeck(CardUpdate cardUpdate) throws NullViewCardException {
         CardGroup cardGroup = cardUpdate.getCardGroup();
         Group group = getGroupFromCardGroup(cardGroup);
         List<ViewCard> originalDeck = new ArrayList<>();
-        for (Node node : group.getChildren()) {
+
+        group.getChildren().forEach( node -> {
             if (node instanceof ViewCard) {
                 originalDeck.add((ViewCard) node);
             }
-        }
-        for (ViewCard viewCard : originalDeck) {
-            group.getChildren().remove(viewCard);
-        }
-        for (Card card : cardGroup) {
-            group.getChildren().add(getViewCardFromCard(card));
-        }
+        });
+        originalDeck.forEach( viewCard -> group.getChildren().remove(viewCard));
+        cardGroup.forEach( card -> group.getChildren().add(getViewCardFromCard(card)));
         refreshGroupNodesPosition(cardUpdate);
     }
 
@@ -942,7 +940,7 @@ public class GameView extends Scene implements Observer {
      * of a card depending on the group
      * @since   v0.7
      * @param   viewCard    the viewCard object
-     * @return  the default z hard rotation and the default transforrm y rotation
+     * @return  the default z hard rotation and the default transform y rotation
      */
     public Vec3d getCardDefaultRotation(@NotNull ViewCard viewCard) {
         Vec3d rotation = new Vec3d(0, 0, 0);

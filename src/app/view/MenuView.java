@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -37,7 +37,7 @@ import java.util.Observer;
  * of the MVP architecture view
  * It contains the menu elements
  * @author Arthur
- * @version v0.11
+ * @version v1.0.0
  * @since v0.10
  *
  * @see Observer
@@ -45,8 +45,8 @@ import java.util.Observer;
  */
 public class MenuView extends Scene {
 
-    private static final Point3D CAMERA_POSITION_1 = new Point3D(1250, 4200, -3800);
-    private static final double CAMERA_ROTATION_1 = 35;
+    private static final Point3D CAMERA_POSITION = new Point3D(1250, 4200, -3800);
+    private static final double CAMERA_ROTATION = 35;
 
     private AppPresenter appPresenter;
 
@@ -88,15 +88,13 @@ public class MenuView extends Scene {
         subScene3D.heightProperty().bind(heightProperty());
 
         ImageView table = new ImageView("file:./res/table.jpg");
-        table.setTranslateX(-table.getImage().getWidth()/2);
-        table.setTranslateY(-table.getImage().getHeight()/2);
-        table.setScaleX(2);
-        table.setScaleY(2);
+        table.setScaleX(3);
+        table.setScaleY(3);
 
         //=== Define the camera
 
         ViewCamera camera3D = new ViewCamera(true);
-        camera3D.moveCamera(CAMERA_POSITION_1, CAMERA_ROTATION_1, 0);
+        camera3D.moveCamera(CAMERA_POSITION, CAMERA_ROTATION, 0);
         subScene3D.setCamera(camera3D);
 
         //=== Create GUI elements
@@ -129,7 +127,7 @@ public class MenuView extends Scene {
         dealerChoosingCheckBox.setOnMouseExited( event -> this.setCursor(Cursor.DEFAULT) );
         appPresenter.setDealerChoosingEnabled(dealerChoosingCheckBox.selectedProperty().getValue());
 
-        Label credit = new Label("2016 Jacquot Alexandre, Jolivet Arthur S3A");
+        Label credit = new Label("2016 Jacquot Alexandre, Jolivet Arthur");
         credit.setTextFill(Color.WHITE);
         credit.setFont(new Font(20));
         credit.setPadding(new Insets(60, 10, 10, 10));

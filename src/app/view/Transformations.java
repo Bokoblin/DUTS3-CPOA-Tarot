@@ -1,3 +1,16 @@
+/*
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package app.view;
 
 import javafx.scene.Node;
@@ -7,7 +20,7 @@ import javafx.scene.transform.Translate;
 /**
  * The {@code Transformations} class contain a list of basics transformations objects to add to the nodes.
  * @author Alexandre
- * @version v0.4
+ * @version v1.0.0
  * @since v0.4
  */
 public class Transformations {
@@ -17,6 +30,13 @@ public class Transformations {
     private Rotate incline;
     private Translate translate;
 
+    /**
+     * Constructs a Transformation with a node
+     * @since v0.4
+     *
+     * @param object the node we add transformation getters
+     * @see Node
+     */
     public Transformations(Node object)
     {
         double pivotX = object.getBoundsInLocal().getWidth()/2;
@@ -40,15 +60,9 @@ public class Transformations {
     {
         return rotateY;
     }
-    public Rotate getRotateZ()
-    {
-        return rotateZ;
-    }
-
     public Rotate getIncline() {
         return incline;
     }
-
     public Translate getTranslate()
     {
         return translate;
