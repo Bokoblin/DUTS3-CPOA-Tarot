@@ -13,14 +13,14 @@ limitations under the License.
 
 package app.model;
 
-import exceptions.*;
+import exceptions.CardGroupNumberException;
 
 /**
  * The {@code Talon} class extends {@code CardGroup},
  * it consists in a group of cards representing the chien
  * and afterward the taker's ecart
  * @author Arthur
- * @version v0.6
+ * @version v1.0.0
  * @since v0.1
  *
  * @see CardGroup
@@ -44,16 +44,18 @@ public class Talon extends CardGroup{
     }
 
     /**
-     * Reset static field for unit tests
+     * Reset static field
      * @since v0.5
      */
-    public static void resetClassForTesting() {
+    public static void resetClass() {
         exist = false;
     }
 
     /**
      * Return if talon exists
      * @since v0.5
+     *
+     * @return a boolean indicating if Talon has already been instantiated
      */
     public static boolean exists() {
         return exist;

@@ -17,7 +17,7 @@ package exceptions;
  * Exception class on card uniqueness
  *
  * @author Arthur
- * @version v0.5
+ * @version v1.0.0
  * @since v0.5
  */
 public class CardNameException extends Exception {

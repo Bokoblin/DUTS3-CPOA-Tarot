@@ -1,0 +1,7 @@
+app
+app.model
+app.presenter
+app.view
+consoleApplication
+exceptions
+unitTests

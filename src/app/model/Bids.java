@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License";
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,7 +17,7 @@ package app.model;
  * The {@code Bids} enumeration defines
  * all bids that are possible
  * @author Arthur
- * @version v0.8.2
+ * @version v1.0.0
  * @since v0.6
  */
 public enum Bids {
@@ -31,7 +31,9 @@ public enum Bids {
      * Gets Bids value from ordinal
      * @since v0.8.2
      *
+     * @param ordinal the ordinal value
      * @return the corresponding bids value
+     * @throws Exception if value not between 1 and 5
      */
     public static Bids valueOf(int ordinal) throws Exception {
         Bids result;

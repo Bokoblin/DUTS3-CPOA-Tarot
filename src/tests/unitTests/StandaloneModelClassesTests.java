@@ -10,17 +10,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+package unitTests;
 
 import app.model.*;
-import org.junit.*;
-import static org.junit.Assert.*;
-import exceptions.*;
+import exceptions.CardGroupNumberException;
+import exceptions.CardNumberException;
+import exceptions.CardUniquenessException;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Standalone Unit tests for model classes
  *
  * @author Arthur
- * @version v0.9
+ * @version v1.0.0
  * @since v0.1
  */
 public class StandaloneModelClassesTests {
@@ -31,9 +37,9 @@ public class StandaloneModelClassesTests {
      */
     @Before
     public void cleanClasses() {
-        Card.resetClassForTesting();
-        Hand.resetClassForTesting();
-        Talon.resetClassForTesting();
+        Card.resetClass();
+        Hand.resetClass();
+        Talon.resetClass();
     }
 
     /**

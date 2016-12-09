@@ -1,5 +1,5 @@
-/*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+package unitTests;/*
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -24,10 +24,10 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * GameModel Unit tests
+ * ConsoleGameModel Unit tests
  *
  * @author Arthur
- * @version v0.11
+ * @version v1.0.0
  * @since v0.5
  */
 public class GameModelTests {
@@ -40,9 +40,9 @@ public class GameModelTests {
      */
     @Before
     public void initGameModel() {
-        Card.resetClassForTesting();
-        Hand.resetClassForTesting();
-        Talon.resetClassForTesting();
+        Card.resetClass();
+        Hand.resetClass();
+        Talon.resetClass();
         try {
             gameModel = new GameModel(false);
             gameModel.createCards();

@@ -6,7 +6,7 @@ import app.model.CardUpdate;
  * Exception class on card update
  *
  * @author Alexandre
- * @version v0.8
+ * @version v1.0.0
  * @since v0.5
  */
 public class NullViewCardException extends Exception

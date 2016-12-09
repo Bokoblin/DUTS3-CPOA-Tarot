@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * The {@code Suit} enumeration defines all suits that can be assigned to a card
  * @author Arthur
- * @version v0.8.2
+ * @version v1.0.0
  * @since v0.1
  */
 public enum Suit {

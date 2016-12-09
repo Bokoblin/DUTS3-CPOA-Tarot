@@ -13,7 +13,8 @@ limitations under the License.
 
 package app.model;
 
-import exceptions.*;
+import exceptions.CardNumberException;
+import exceptions.CardUniquenessException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,7 +33,7 @@ import java.util.Objects;
  *  - 1  Excuse card
  *
  * @author Arthur
- * @version v0.7.2
+ * @version v1.0.0
  * @since v0.1
  *
  * @see Suit
@@ -134,10 +135,10 @@ public class Card{
     }
 
     /**
-     * Reset static field for unit tests
+     * Reset static field
      * @since v0.5
      */
-    public static void resetClassForTesting() {
+    public static void resetClass() {
         nb = 0;
         cardList.clear();
     }
@@ -146,7 +147,7 @@ public class Card{
      The {@code CardComparator} class compares two cards
      following their Rank and Suit
      * @author Arthur
-     * @version v0.7.2
+     * @version v1.0.0
      * @since v0.7.2
      */
     public static class CardComparator implements Comparator<Card> {
@@ -157,17 +158,24 @@ public class Card{
             //=== Cards have same suit
             if ( c1.suit == c2.suit) {
                 if ( c1.suit != Suit.Trump)
-                    return ( c1.rank.ordinal() < c2.rank.ordinal() )? -1: 1;
+                    if (c1.rank != null && c2.rank != null)
+                        return ( c1.rank.ordinal() < c2.rank.ordinal() )? -1: 1;
+                    else
+                        return 0;
                 else
                     return ( c1.trumpRank < c2.trumpRank )? -1: 1;
             }
             //=== Card have different suit
-            else
-                return ( c1.suit.ordinal() < c2.suit.ordinal() )? -1: 1;
+            else {
+                if (c1.suit != null && c2.suit != null)
+                    return (c1.suit.ordinal() < c2.suit.ordinal()) ? -1 : 1;
+                else
+                    return 0;
+            }
         }
     }
 
-    //GETTERS - no documentation needed
+    //GETTERS & SETTERS - no documentation needed
 
     public static int getNbCards() {
         return nb;
@@ -190,9 +198,6 @@ public class Card{
     public boolean isShown() {
         return shown;
     }
-
-
-    //SETTERS - no documentation needed
 
     public void setShown(boolean shown) {
         this.shown = shown;

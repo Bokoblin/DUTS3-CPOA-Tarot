@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,7 +21,7 @@ import java.util.Map;
  * The {@code PlayerHandler} class handles players creation
  * and their temporary status (dealer, shuffler, cutter, currentPlayer)
  * @author Arthur
- * @version v0.9
+ * @version v1.0.0
  * @since v0.6
  *
  * @see Hand
@@ -161,6 +161,8 @@ public class PlayerHandler {
      * Get player name
      * @since v0.6
      * @param player the player whose name is requested
+     *
+     * @return the name of a player in a char string
      */
     public String getPlayerName(Hand player) {
         if ( player == north)
