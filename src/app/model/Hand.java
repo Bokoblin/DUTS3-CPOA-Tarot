@@ -13,7 +13,7 @@ limitations under the License.
 
 package app.model;
 
-import exceptions.*;
+import exceptions.CardGroupNumberException;
 
 import java.util.Objects;
 
@@ -22,7 +22,7 @@ import java.util.Objects;
  * it consists in a group of cards representing a player
  *
  * @author Arthur
- * @version v0.9
+ * @version v1.0.0
  * @since v0.1
  *
  * @see CardGroup
@@ -55,6 +55,7 @@ public class Hand extends CardGroup{
      * Check if a hand has Petit Sec
      * (First of Trump as only Trump and no excuse)
      * @since v0.5
+     * @return a boolean indicating "Petit Sec" presence
      */
     public boolean checkHasPetitSec() {
         int nbTrumps = 0;
@@ -73,10 +74,10 @@ public class Hand extends CardGroup{
 
 
     /**
-     * Reset static field for unit tests
+     * Reset static field
      * @since v0.5
      */
-    public static void resetClassForTesting() {
+    public static void resetClass() {
         nbHands = 0;
     }
 

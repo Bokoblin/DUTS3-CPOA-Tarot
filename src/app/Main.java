@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,18 +20,16 @@ import javafx.scene.Group;
 import javafx.stage.Stage;
 
 /**
- * The {@code Main} class inits and launch game
+ * The {@code Main} class inits and launch game.
  *
  * The app follows an MVP Architecture :
- * GameModel notifies change to GameView (its observer)
- * GameView sends user request to AppPresenter and send state request to model
- * AppPresenter changes GameModel fields
- *
- * Our app implements a variant of MVP from CPOA TD2 (page 3)
+ * ConsoleGameModel notifies changes to GameView (its observer),
+ * GameView sends user request to AppPresenter and send state request to model,
+ * AppPresenter alternates from menu to game and changes ConsoleGameModel fields
  *
  * @author Alexandre
  * @author Arthur
- * @version v0.11
+ * @version v1.0.0
  * @since v0.2
  *
  * @see Application
@@ -44,7 +42,7 @@ public class Main extends Application {
         AppPresenter appPresenter = new AppPresenter(window);
         MenuView menuView = new MenuView(root, appPresenter);
 
-        window.setTitle("JACQUOT JOLIVET S3A - MENU");
+        window.setTitle("MENU");
         window.setMinWidth(800);
         window.setMinHeight(600);
         window.setScene(menuView);

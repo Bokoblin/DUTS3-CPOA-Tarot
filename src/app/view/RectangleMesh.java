@@ -2,14 +2,14 @@ package app.view;
 
 import javafx.geometry.Point3D;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 
 /**
  * The RectangleMesh class is a pre-defined rectangle mesh extended from MeshView
  * It create the mesh points from the specified coordinates, apply the specified texture and have a list of Transformations
  * @author Alexandre
- * @version v0.8
+ * @version v1.0.0
  * @since v0.2
  *
  * @see java.util.Observer
@@ -97,10 +97,6 @@ public class RectangleMesh extends MeshView {
 
     //GETTERS & SETTERS - no documentation needed
 
-    public Point3D getPosition()
-    {
-        return new Point3D(getTranslateX(), getTranslateY(), getTranslateZ());
-    }
     public Transformations getTransformations()
     {
         return transformations;

@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,7 +17,7 @@ package app.model;
  * The {@code GameState} enumeration
  * defines all steps that can occur
  * @author Arthur
- * @version v0.10
+ * @version v1.0.0
  * @since v0.10
  */
 public enum GameState {

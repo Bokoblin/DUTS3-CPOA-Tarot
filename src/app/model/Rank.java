@@ -19,7 +19,7 @@ import java.util.Random;
  * The {@code Rank} enumeration defines all ranks
  * that can be assigned to a card
  * @author Arthur
- * @version v0.5
+ * @version v1.0.0
  * @since v0.1
  */
 public enum Rank {

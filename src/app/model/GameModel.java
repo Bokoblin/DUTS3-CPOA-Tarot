@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -22,11 +22,11 @@ import java.util.*;
 import static java.lang.Thread.sleep;
 
 /**
- * The {@code GameModel} class consists in the MVP architecture model
+ * The {@code ConsoleGameModel} class consists in the MVP architecture model
  * It handles Tarot dealer choosing,
  * dealing, bids and ecart constitution
  * @author Arthur
- * @version v0.11
+ * @version v1.0.0
  * @since v0.2
  *
  * @see Observable
@@ -153,12 +153,8 @@ public class GameModel extends Observable {
     private void chooseInitialDealer() {
         changeGameState(GameState.DEALER_CHOOSING);
 
-        changeGameState(GameState.CARDS_SHUFFLING);
         shuffleCards();
-
         temporize(1500);
-
-        changeGameState(GameState.CARDS_SPREADING);
         spreadCards();
 
         //Handle dealer choosing
@@ -212,11 +208,8 @@ public class GameModel extends Observable {
     private void handleDealing() {
         boolean hasPetitSec = false;
         do {
-            changeGameState(GameState.CARDS_SHUFFLING);
             shuffleCards();
-            changeGameState(GameState.CARDS_CUTTING);
             cutDeck();
-            changeGameState(GameState.CARDS_DEALING);
             dealAllCards();
 
             flipDeck(ourPlayer, true);
@@ -248,6 +241,8 @@ public class GameModel extends Observable {
      * @since v0.5
      */
     public void dealAllCards() {
+        changeGameState(GameState.CARDS_DEALING);
+
         int cptNbCardGivenToSameHand = 0;
         while( !wholeCardsDeck.isEmpty()) {
             boolean chienReceiveCard = false;
@@ -416,9 +411,9 @@ public class GameModel extends Observable {
             waitEndUpdateAnimation(deleteUpdate);
             wholeCardsDeck.remove(0);
         }
-        Talon.resetClassForTesting();
-        Hand.resetClassForTesting();
-        Card.resetClassForTesting();
+        Talon.resetClass();
+        Hand.resetClass();
+        Card.resetClass();
     }
 
 
@@ -446,6 +441,7 @@ public class GameModel extends Observable {
      * @see Random
      */
     public void shuffleCards() {
+        changeGameState(GameState.CARDS_SHUFFLING);
         long seed = System.nanoTime();
         Collections.shuffle(wholeCardsDeck, new Random(seed));
         CardUpdate cardUpdate = new CardUpdate(CardUpdateType.SHUFFLE_CARDS, wholeCardsDeck);
@@ -506,6 +502,7 @@ public class GameModel extends Observable {
      * @since v0.5
      */
     private void spreadCards() {
+        changeGameState(GameState.CARDS_SPREADING);
         while ( !wholeCardsDeck.isEmpty()) {
             moveCardBetweenDecks(wholeCardsDeck, toPickDeck, wholeCardsDeck.get(0), false);
         }
@@ -633,6 +630,7 @@ public class GameModel extends Observable {
      * it shall operate to update itself
      * @since v0.6
      * @see Observable
+     * @param cardUpdate the cardUpdate to send to notify
      */
     public void notifyObserversOfCardUpdate(CardUpdate cardUpdate) {
         if ( countObservers() != 0) {

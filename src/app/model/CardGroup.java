@@ -15,6 +15,7 @@ package app.model;
 
 
 import exceptions.CardGroupNumberException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -24,7 +25,7 @@ import java.util.Objects;
  * It extends {@code ArrayList} class of jav.util package
  * @author Arthur
  * @author Alexandre
- * @version v0.7.1
+ * @version v1.0.0
  * @since v0.1
  *
  * @see ArrayList
@@ -104,6 +105,7 @@ public class CardGroup extends ArrayList<Card> {
      *
      * @return a boolean indicating if card has been found
      * @since v0.6
+     * @param nameToFind the name searched
      */
     public boolean findInCardsList(String nameToFind) {
         for (Card c : this)
@@ -117,6 +119,7 @@ public class CardGroup extends ArrayList<Card> {
      *
      * @return the card if found
      * @since v0.6
+     * @param nameToFind the name searched
      */
     public Card getInCardsList(String nameToFind) {
         for (Card c : this)
@@ -142,6 +145,8 @@ public class CardGroup extends ArrayList<Card> {
         result = 31 * result + id;
         return result;
     }
+
+    //GETTERS - no documentation needed
 
     public int getNbMaxCards() {
         return NB_MAX_CARDS;

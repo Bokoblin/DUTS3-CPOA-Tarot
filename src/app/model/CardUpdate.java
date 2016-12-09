@@ -1,5 +1,5 @@
 /*
-Copyright 2016 Jacquot Alexandre, Jolivet Arthur S3A
+Copyright 2016 Jacquot Alexandre, Jolivet Arthur
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * This class is a container which is passed when calling notifyObservers() method.
  * It indicate to view what action to perform on a specific card with sometimes a specific cardGroup.
  * @author Alexandre
- * @version v0.10
+ * @version v1.0.0
  * @since v0.6
  */
 public class CardUpdate {
@@ -95,6 +95,7 @@ public class CardUpdate {
         this.type = type;
     }
 
+
     /**
      * Add a sub-Update to cardUpdate
      * @since v0.9
@@ -105,6 +106,7 @@ public class CardUpdate {
     {
         subUpdates.add(cardUpdate);
     }
+
 
     /**
      * Set an animation as finished for model to resume its logic
@@ -118,6 +120,7 @@ public class CardUpdate {
             CardUpdate.class.notifyAll();
         }
     }
+
 
     /**
      * Wait animation to finish before resuming
