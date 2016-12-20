@@ -592,10 +592,10 @@ public class GameModel extends Observable {
      * @since v0.8.2
      * @see CardUpdate
      * @param c the card to flip
-     * @param state the state that is passed to the card (if different)
+     * @param isShown the state that is passed to the card (if different)
      */
-    private void flipCard(Card c, boolean state) {
-        c.setShown(state);
+    private void flipCard(Card c, boolean isShown) {
+        c.setShown(isShown);
         CardUpdate flipCardUpdate = new CardUpdate(CardUpdateType.FLIP_CARD, c);
         notifyObserversOfCardUpdate(flipCardUpdate);
         if ( countObservers() != 0 )
@@ -695,7 +695,7 @@ public class GameModel extends Observable {
      * @since v0.9.1
      * @param cardUpdate the specified cardUpdate object
      */
-    public synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate) {
+    private synchronized void waitEndUpdateAnimation(CardUpdate cardUpdate) {
         if ( countObservers() != 0 ) {
             while (lastEndedAnimation != cardUpdate.hashCode()) {
                 try {
@@ -743,8 +743,8 @@ public class GameModel extends Observable {
         this.userChoice = userChoice;
         notify();
     }
-    public void setAwaitsUserEvent(NotificationType awaitsUserEvent) {
-        this.awaitsUserEvent = awaitsUserEvent;
+    public void setAwaitsUserEventToNull() {
+        this.awaitsUserEvent = null;
     }
     public synchronized void setLastEndedAnimation(int lastEndedAnimation) {
         this.lastEndedAnimation = lastEndedAnimation;

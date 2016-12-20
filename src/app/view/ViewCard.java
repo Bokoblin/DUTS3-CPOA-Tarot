@@ -168,7 +168,7 @@ public class ViewCard extends RectangleMesh {
             if (cardGroup != null && cardGroup.contains(modelCard))
             {
                 gameView.getAppPresenter().transmitUserChoice(cardGroup.indexOf(modelCard));
-                gameView.getGameModel().setAwaitsUserEvent(null);
+                gameView.getGameModel().setAwaitsUserEventToNull();
                 gameView.getToolTip().setText("Please wait...");
             }
         });
