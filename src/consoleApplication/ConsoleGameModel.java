@@ -176,9 +176,8 @@ class ConsoleGameModel extends Observable {
         //Set dealer from picking
         Card minCard = null;
         for (Map.Entry<Card, Hand> mapEntry : pickedCardsMap.entrySet())
-            if (Objects.isNull(minCard))
-                minCard = mapEntry.getKey();
-            else if ( new Card.CardComparator().compare(mapEntry.getKey(), minCard) == -1 )
+            if (Objects.isNull(minCard) ||
+                    (new Card.CardComparator().compare(mapEntry.getKey(), minCard) == -1))
                 minCard = mapEntry.getKey();
 
         playerHandler.setFirstDealer(pickedCardsMap.get(minCard));
@@ -571,10 +570,10 @@ class ConsoleGameModel extends Observable {
      * @since v0.8.2
      * @see CardUpdate
      * @param c the card to flip
-     * @param state the state that is passed to the card (if different)
+     * @param isShown the state that is passed to the card (if different)
      */
-    private void flipCard(Card c, boolean state) {
-        c.setShown(state);
+    private void flipCard(Card c, boolean isShown) {
+        c.setShown(isShown);
     }
 
 
