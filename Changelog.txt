@@ -1,9 +1,21 @@
 Project Name : Project Tarot
 Developers   : Alexandre JACQUOT et Arthur JOLIVET
 
-Current version : v1.0.0
+Current version : v1.0.2
 
 =========================================================================
+
+v1.0.2 (03/04/2017) :
+- Corrections alongside CodeFactor's detected errors
+
+
+--------------------------------------------------------------------
+
+v1.0.1 (20/12/16) :
+- Minor corrections
+
+
+--------------------------------------------------------------------
 
 v1.0.0 (10/12/16) :
 - Application graduated to stable

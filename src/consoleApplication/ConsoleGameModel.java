@@ -25,7 +25,7 @@ import java.util.*;
  * It handles dealer choosing, dealing, bids choosing
  * and ecart constituting (if applicable)
  * @author Arthur
- * @version v1.0.0
+ * @version v1.0.2
  * @since v0.2
  *
  * @see Observable
@@ -42,8 +42,8 @@ class ConsoleGameModel extends Observable {
     private CardGroup pickedCardsDeck;
     private Map<Card, Hand> pickedCardsMap;
     private PlayerHandler playerHandler;
-    private Talon talon;
-    private Hand ourPlayer;
+    private Talon chien;
+    private Hand myPlayer;
     private GameState gameState;
 
     /**
@@ -53,18 +53,18 @@ class ConsoleGameModel extends Observable {
      * @throws CardGroupNumberException if user tries to create too much hands
      */
     ConsoleGameModel() throws CardGroupNumberException {
-        wholeCardsDeck = new CardGroup(78);
         toPickDeck = new CardGroup(78);
-        pickedCardsDeck = new CardGroup(4);
+        wholeCardsDeck = new CardGroup(78);
         pickedCardsMap = new HashMap<>();
+        pickedCardsDeck = new CardGroup(4);
 
         //Players creation
         playerHandler = new PlayerHandler();
-        ourPlayer = playerHandler.getPlayer(PlayerHandler.PlayersCardinalPoint.South);
+        myPlayer = playerHandler.getPlayer(PlayerHandler.PlayersCardinalPoint.South);
 
         //Chien creation
         try {
-            talon = new Talon();
+            chien = new Talon();
         } catch (CardGroupNumberException e) {
             System.err.println(e.getMessage());
         }
@@ -83,7 +83,8 @@ class ConsoleGameModel extends Observable {
                     try {
                         Card c = new Card(s,r);
                         if(!wholeCardsDeck.add(c))
-                            throw new CardNumberException("Card number limit has been reached.", wholeCardsDeck.getNbMaxCards());
+                            throw new CardNumberException("Card number limit has been reached.",
+                                    wholeCardsDeck.getNbMaxCards());
 
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
@@ -95,7 +96,8 @@ class ConsoleGameModel extends Observable {
                     try {
                         Card c = new Card(Suit.Trump,i);
                         if(!wholeCardsDeck.add(c))
-                            throw new CardNumberException("Card number limit has been reached.", wholeCardsDeck.getNbMaxCards());
+                            throw new CardNumberException("Card number limit has been reached.",
+                                    wholeCardsDeck.getNbMaxCards());
 
                     } catch (CardUniquenessException | CardNumberException e) {
                         System.err.println(e.getMessage());
@@ -123,17 +125,16 @@ class ConsoleGameModel extends Observable {
      * @since v0.5
      */
     void chooseInitialDealer() {
-        changeGameState(GameState.DEALER_CHOOSING);
-        System.out.println("=== DEALER CHOOSING ===\n");
 
         shuffleCards();
         spreadCards();
 
         //Handle dealer choosing
         changeGameState(GameState.DEALER_CHOOSING);
+        System.out.println("=== DEALER CHOOSING ===\n");
         playerHandler.getPlayersMap().forEach((cardinalPoint,player)-> {
             Card c;
-            if ( player == ourPlayer) {
+            if ( player == myPlayer) {
                 System.out.println("Choose your card by entering its number between 0 and 77");
                 Scanner sc = new Scanner(System.in);
                 boolean choiceValid = false;
@@ -204,7 +205,7 @@ class ConsoleGameModel extends Observable {
             cutDeck();
             dealAllCards();
 
-            flipDeck(ourPlayer, true);
+            flipDeck(myPlayer, true);
 
             playerHandler.getPlayersMap().forEach( (cardinalPoint, playerHand) -> sortDeck(playerHand));
 
@@ -217,7 +218,7 @@ class ConsoleGameModel extends Observable {
                 hasPetitSec = player.getValue().checkHasPetitSec();
                 if (hasPetitSec) {
                     changeGameState(GameState.PETIT_SEC_DETECTED);
-                    flipDeck(ourPlayer, false);
+                    flipDeck(myPlayer, false);
                     playerHandler.changeDealer();
                     gatherAllCards();
                     System.out.println("The player has Petit Sec, re-dealing...");
@@ -239,16 +240,16 @@ class ConsoleGameModel extends Observable {
         int cptNbCardGivenToSameHand = 0;
         while( !wholeCardsDeck.isEmpty()) {
             boolean chienReceiveCard = false;
-            if( talon.size() < 6
+            if( chien.size() < 6
                     && wholeCardsDeck.size() < 78) { //Don't give first card to chien
                 if ( wholeCardsDeck.size() == 2 ) { //Don't give last card to chien
-                    moveCardBetweenDecks(wholeCardsDeck, talon, wholeCardsDeck.get(0));
+                    moveCardBetweenDecks(wholeCardsDeck, chien, wholeCardsDeck.get(0));
                     chienReceiveCard = true;
                 }
                 else {
                     chienReceiveCard = ( (new Random().nextInt(4) == 0)); //25% it chooses to put it in Talon
                     if (chienReceiveCard) {
-                        moveCardBetweenDecks(wholeCardsDeck, talon, wholeCardsDeck.get(0));
+                        moveCardBetweenDecks(wholeCardsDeck, chien, wholeCardsDeck.get(0));
                     }
                 }
             }
@@ -265,7 +266,7 @@ class ConsoleGameModel extends Observable {
 
 
     /**
-     * Retrieve all cards from players and talon
+     * Retrieve all cards from players and chien
      * to the initial deck
      * @since v0.6
      */
@@ -275,8 +276,8 @@ class ConsoleGameModel extends Observable {
                 moveCardBetweenDecks(player, wholeCardsDeck, player.get(0));
             }
         });
-        while ( !talon.isEmpty() ) {
-            moveCardBetweenDecks(talon, wholeCardsDeck, talon.get(0));
+        while ( !chien.isEmpty() ) {
+            moveCardBetweenDecks(chien, wholeCardsDeck, chien.get(0));
         }
         while ( !pickedCardsDeck.isEmpty() ) {
             moveCardBetweenDecks(pickedCardsDeck, wholeCardsDeck, pickedCardsDeck.get(0));
@@ -293,16 +294,16 @@ class ConsoleGameModel extends Observable {
      */
     void handleBids() {
         chooseBids();
-        while (ourPlayer.getBidChosen() == Bids.Pass) {
+        while (myPlayer.getBidChosen() == Bids.Pass) {
             System.out.println("You've chosen to pass. Re-dealing...");
-            flipDeck(ourPlayer, false);
+            flipDeck(myPlayer, false);
             gatherAllCards();
             playerHandler.changeDealer();
             handleDealing();
             chooseBids();
         }
         System.out.println("You are the taker");
-        if ( ourPlayer.getBidChosen()== Bids.Small || ourPlayer.getBidChosen()== Bids.Guard ) {
+        if ( myPlayer.getBidChosen()== Bids.Small || myPlayer.getBidChosen()== Bids.Guard ) {
             System.out.println("You're allowed to constitute your ecart");
             constituteEcart();
             changeGameState(GameState.ECART_CONSTITUTED);
@@ -317,10 +318,10 @@ class ConsoleGameModel extends Observable {
     private void chooseBids() {
         System.out.println("\n=== BIDS ===\n");
         playerHandler.getPlayersMap().forEach((cardinal,player)-> {
-            if ( player == ourPlayer) {
-                flipDeck(ourPlayer, true);
+            if ( player == myPlayer) {
+                flipDeck(myPlayer, true);
                 System.out.println("Here are your cards :");
-                System.out.println(ourPlayer.cardListToString());
+                System.out.println(myPlayer.cardListToString());
                 System.out.println("Choose your Bids among those one :");
                 System.out.println("1. Small\n2. Guard\n3. GuardWithoutTheKitty\n4. GuardAgainstTheKitty\n5. Pass");
                 Scanner sc = new Scanner(System.in);
@@ -341,11 +342,11 @@ class ConsoleGameModel extends Observable {
                 while (!choiceValid);
 
                 try {
-                    ourPlayer.setBidChosen(Bids.valueOf(choice));
+                    myPlayer.setBidChosen(Bids.valueOf(choice));
                 } catch (Exception e) {
                     e.getMessage();
                 }
-                System.out.println("You have chosen the bid : " + String.valueOf(ourPlayer.getBidChosen()));
+                System.out.println("You have chosen the bid : " + String.valueOf(myPlayer.getBidChosen()));
             }
             else {
                 player.setBidChosen(Bids.Pass); //Other players passes
@@ -362,17 +363,17 @@ class ConsoleGameModel extends Observable {
      */
     private void constituteEcart() {
         changeGameState(GameState.ECART_CONSTITUTING);
-        System.out.println("Showing the talon to all...");
-        flipDeck(talon, true);
-        System.out.println(talon.cardListToString());
-        System.out.println("Placing talon's cards into taker's deck...");
+        System.out.println("Showing the chien to all...");
+        flipDeck(chien, true);
+        System.out.println(chien.cardListToString());
+        System.out.println("Placing chien's cards into taker's deck...");
 
-        while ( !talon.isEmpty() ) {
-            moveCardBetweenDecks(talon, ourPlayer, talon.get(0));
+        while ( !chien.isEmpty() ) {
+            moveCardBetweenDecks(chien, myPlayer, chien.get(0));
         }
 
-        System.out.println("Now, constitute your ecart by putting 6 of your deck's cards in the talon :");
-        System.out.println(ourPlayer.cardListToString());
+        System.out.println("Now, constitute your ecart by putting 6 of your deck's cards in the chien :");
+        System.out.println(myPlayer.cardListToString());
 
         for (int i=0; i < 6; i++) {
             Scanner sc = new Scanner(System.in);
@@ -381,9 +382,9 @@ class ConsoleGameModel extends Observable {
             String choice;
             do {
                 choice = sc.nextLine();
-                c = ourPlayer.getInCardsList(choice);
+                c = myPlayer.getInCardsList(choice);
 
-                if ( ourPlayer.findInCardsList(choice) ) {
+                if ( myPlayer.findInCardsList(choice) ) {
                     if ( c.getSuit() != Suit.Trump && c.getSuit() != Suit.Excuse && c.getRank() != Rank.King) {
                         choiceValid = true;
                     }
@@ -405,12 +406,12 @@ class ConsoleGameModel extends Observable {
             if ( c.getSuit() != Suit.Trump) {
                 flipCard(c, false);
             }
-            moveCardBetweenDecks(ourPlayer, talon, c);
-            System.out.println("Taker : " + ourPlayer.cardListToString());
-            System.out.println("Talon : " + talon.cardListToString());
+            moveCardBetweenDecks(myPlayer, chien, c);
+            System.out.println("Taker : " + myPlayer.cardListToString());
+            System.out.println("Talon : " + chien.cardListToString());
         }
         System.out.println("Ecart done...");
-        sortDeck(ourPlayer);
+        sortDeck(myPlayer);
     }
 
 
@@ -423,7 +424,7 @@ class ConsoleGameModel extends Observable {
         gameState = GameState.GAME_ENDED;
         System.out.println("\nQuitting...");
 
-        flipDeck(ourPlayer, false);
+        flipDeck(myPlayer, false);
         gatherAllCards();
         while ( !wholeCardsDeck.isEmpty() ) {
             wholeCardsDeck.remove(0);
@@ -479,12 +480,12 @@ class ConsoleGameModel extends Observable {
     private void cutDeck() {
         System.out.println("Cutting cards...");
         //a cut list must contain more than 3 cards
-        int splitIt;
+        int splitIterator;
         boolean isValidIterator = false;
 
         do {
-            splitIt = wholeCardsDeck.indexOf(randomCard(wholeCardsDeck));
-            if ( splitIt < 74 && splitIt > 3)
+            splitIterator = wholeCardsDeck.indexOf(randomCard(wholeCardsDeck));
+            if ( splitIterator < 74 && splitIterator > 3)
                 isValidIterator = true;
         }
         while (!isValidIterator);
@@ -492,9 +493,9 @@ class ConsoleGameModel extends Observable {
         List<Card> cut1 = new ArrayList<>();
         List<Card> cut2 = new ArrayList<>();
 
-        for (int i=0; i <= splitIt; i++)
+        for (int i=0; i <= splitIterator; i++)
             cut1.add(wholeCardsDeck.get(i));
-        for (int i = splitIt+1; i < wholeCardsDeck.size(); i++)
+        for (int i = splitIterator+1; i < wholeCardsDeck.size(); i++)
             cut2.add(wholeCardsDeck.get(i));
 
         wholeCardsDeck.clear();
@@ -536,11 +537,11 @@ class ConsoleGameModel extends Observable {
      */
     private boolean checkTrumpPossibility() {
         int cpt = 0;
-        for ( Card c : ourPlayer ) {
+        for ( Card c : myPlayer) {
             if ( c.getSuit() == Suit.Trump || c.getSuit() == Suit.Excuse || c.getRank() == Rank.King)
                 cpt++;
         }
-        return cpt == ourPlayer.size();
+        return cpt == myPlayer.size();
     }
 
 
@@ -603,21 +604,21 @@ class ConsoleGameModel extends Observable {
     @Override
     public String toString() {
 
-        String result = "\n=== CARD REPARTITION ===\n\n";
+        StringBuilder result = new StringBuilder("\n=== CARD REPARTITION ===\n\n");
 
         for (Map.Entry<PlayerHandler.PlayersCardinalPoint, Hand> player
                 : playerHandler.getPlayersMap().entrySet()) {
-            result += "Player " + playerHandler.getPlayerName(player.getValue()) + " : ";
+            result.append("Player ").append(playerHandler.getPlayerName(player.getValue())).append(" : ");
             for ( Card c : player.getValue()) {
-                result += c.getName() + "; ";
+                result.append(c.getName()).append("; ");
             }
-            result +=  "\n";
+            result.append("\n");
         }
-        result += "Talon : ";
-        for ( Card c : talon) {
-            result += c.getName() + "; ";
+        result.append("Talon : ");
+        for ( Card c : chien) {
+            result.append(c.getName()).append("; ");
         }
 
-        return result;
+        return result.toString();
     }
 }
