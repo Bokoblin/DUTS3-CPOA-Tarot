@@ -45,7 +45,7 @@ import java.util.*;
  * The {@code GameView} class consists in the MVC architecture view
  * @author Alexandre
  * @author Arthur
- * @version v1.0.0
+ * @version v1.0.2
  * @since v0.2
  *
  * @see Observer
@@ -108,7 +108,7 @@ public class GameView extends Scene implements Observer {
 
         //=== Create the groups
         root3D = new Group();
-        BorderPane rootGUI = new BorderPane();
+        BorderPane gameRootGUI = new BorderPane();
         HBox boxTop = new HBox();
         VBox boxBottom = new VBox();
         HBox boxLeft = new HBox();
@@ -120,15 +120,15 @@ public class GameView extends Scene implements Observer {
         boxCenter.setAlignment(Pos.CENTER);
         boxTop.setAlignment(Pos.CENTER);
         boxBottom.setAlignment(Pos.CENTER);
-        rootGUI.setTop(boxTop);
-        rootGUI.setRight(boxRight);
-        rootGUI.setBottom(boxBottom);
-        rootGUI.setLeft(boxLeft);
-        rootGUI.setCenter(boxCenter);
-        rootGUI.prefWidthProperty().bind(widthProperty());
-        rootGUI.prefHeightProperty().bind(heightProperty());
-        rootGUI.setPickOnBounds(false);
-        for (Node node: rootGUI.getChildren()) {
+        gameRootGUI.setTop(boxTop);
+        gameRootGUI.setRight(boxRight);
+        gameRootGUI.setBottom(boxBottom);
+        gameRootGUI.setLeft(boxLeft);
+        gameRootGUI.setCenter(boxCenter);
+        gameRootGUI.prefWidthProperty().bind(widthProperty());
+        gameRootGUI.prefHeightProperty().bind(heightProperty());
+        gameRootGUI.setPickOnBounds(false);
+        for (Node node: gameRootGUI.getChildren()) {
             node.setPickOnBounds(false);
             ((Pane)node).setPadding(new Insets(10, 10, 10, 10));
         }
@@ -241,7 +241,7 @@ public class GameView extends Scene implements Observer {
         //=== Add elements to groups
 
         background.getChildren().addAll(table, carpet);
-        root.getChildren().addAll(subScene3D, rootGUI);
+        root.getChildren().addAll(subScene3D, gameRootGUI);
         boxTop.getChildren().add(stateTitle);
         boxBottom.getChildren().addAll(toolTip);
         boxCenter.getChildren().add(bidBox);
@@ -283,137 +283,162 @@ public class GameView extends Scene implements Observer {
     public void update(Observable o, Object arg) {
         updateCardGroupToGroup();
         if (arg instanceof CardUpdate) {
-
             CardUpdate cardUpdate = (CardUpdate)arg;
-            if (cardUpdate.getType() != null) {
-                Platform.runLater(() -> {
-                    try {
-                        switch (cardUpdate.getType()) {
-                            case ADD_CARD:
-                                addNewCard(cardUpdate);
-                                break;
-                            case FLIP_CARD:
-                                flipViewCard(cardUpdate, 2500);
-                                break;
-                            case MOVE_CARD_BETWEEN_GROUPS:
-                                changeCardGroup(cardUpdate, 1000);
-                                break;
-                            case REMOVE_CARD_FROM_GROUP:
-                                removeCardFromGroup(cardUpdate);
-                                break;
-                            case DELETE_CARD:
-                                removeCard(cardUpdate);
-                                break;
-                            case SHUFFLE_CARDS:
-                                shuffleDeck(cardUpdate);
-                                break;
-                            case SORT_DECK:
-                                sortDeck(cardUpdate);
-                                break;
-                            case CUT_DECK:
-                                cutDeck(cardUpdate);
-                                break;
-                            case SPREAD_CARDS:
-                                spreadAllCards(cardUpdate);
-                                break;
-                            case GATHER_CARDS:
-                                if ( gameModel.getGameState() == GameState.GAME_ENDED) {
-                                    stateTitle.setText("GAME ENDING");
-                                    toolTip.setText("");
-                                }
-                                gatherAllCards(cardUpdate);
-                                break;
-                            default:
-                                break;
-                        }
-                        cardUpdate.waitAnimations(appPresenter);
-                    } catch (NullViewCardException e) {
-                        System.err.println(e.getMessage());
-                    }
-                });
-            }
+            Platform.runLater(() -> renderCardUpdate(cardUpdate));
         }
         else if ( arg instanceof NotificationType) {
-            Platform.runLater(() -> {
-                switch ( (NotificationType)arg ) {
-                    case PICK_CARD:
-                        toolTip.setText("Please select a card, Dealer will be whose with the weakest card");
-                        break;
-                    case CHOOSE_BID:
-                        bidBox.setVisible(true);
-                        toolTip.setText("Please select a bid with the buttons above");
-                        break;
-                    case UNAUTHORIZED_CARD_CHOICE:
-                        toolTip.setText("You can't choose a Trump, a King or Excuse");
-                        toolTip.setTextFill(Color.RED);
-                        new Timeline(new KeyFrame( Duration.millis(2500), t -> {
-                            toolTip.setText("Please select a card");
-                            toolTip.setTextFill(Color.WHITE);
-                        })).play();
-                        break;
-                    default:
-                        break;
-                }
-            });
+            NotificationType notificationType = (NotificationType) arg;
+            Platform.runLater(() -> renderNotifications(notificationType));
         }
         else if ( arg instanceof GameState) {
-            Platform.runLater(() -> {
-                switch ( (GameState)arg ) {
-                    case CARDS_SPREADING:
-                        stateTitle.setText("CARDS SPREADING");
-                        toolTip.setText("Please wait...");
+            GameState gameState = (GameState) arg;
+            Platform.runLater(() -> updateText(gameState));
+        }
+    }
+
+
+    /**
+     * This method updates the displayed text according to game state
+     * @param gameState the game's current state
+     * @since v1.0.2
+     */
+    private void updateText(final GameState gameState) {
+        switch (gameState) {
+            case CARDS_SPREADING:
+                stateTitle.setText("CARDS SPREADING");
+                toolTip.setText("Please wait...");
+                break;
+            case DEALER_CHOOSING:
+                stateTitle.setText("DEALER CHOOSING");
+                toolTip.setText("Please wait...");
+                break;
+            case DEALER_CHOSEN:
+                stateTitle.setText("DEALER CHOSEN");
+                toolTip.setText("Dealer is " +
+                        gameModel.getPlayerHandler().getPlayerName(gameModel.getPlayerHandler().getDealer())
+                        + ", Shuffler is " +
+                        gameModel.getPlayerHandler().getPlayerName(gameModel.getPlayerHandler().getShuffler())
+                        + " and Cutter is " +
+                        gameModel.getPlayerHandler().getPlayerName(gameModel.getPlayerHandler().getCutter())
+                );
+                break;
+            case CARDS_SHUFFLING:
+                stateTitle.setText("CARDS SHUFFLING");
+                toolTip.setText("Please wait...");
+                break;
+            case CARDS_CUTTING:
+                stateTitle.setText("CARDS CUTTING");
+                toolTip.setText("Please wait...");
+                break;
+            case CARDS_DEALING:
+                stateTitle.setText("CARDS DEALING");
+                toolTip.setText("Please wait...");
+                break;
+            case PETIT_SEC_DETECTED:
+                stateTitle.setText("PETIT SEC DETECTED");
+                toolTip.setText("Re-dealing...");
+                break;
+            case BID_CHOOSING:
+                stateTitle.setText("BID CHOOSING");
+                toolTip.setText("Please wait...");
+                break;
+            case BID_CHOSEN:
+                handleBidChosen();
+                break;
+            case ECART_CONSTITUTING:
+                stateTitle.setText("ECART CONSTITUTING");
+                toolTip.setText("You are the taker, please select a card");
+                camera3D.moveCamera(CAMERA_POSITION_2, CAMERA_ROTATION_2, 2000);
+                break;
+            case ECART_CONSTITUTED:
+                stateTitle.setText("ECART CONSTITUTED");
+                toolTip.setText("Game is now finished. You can quit");
+                camera3D.moveCamera(CAMERA_POSITION_1, CAMERA_ROTATION_1, 2000);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    /**
+     * This method renders the notifications according ti notification type
+     * @param type the type of notification received
+     * @since v1.0.2
+     */
+    private void renderNotifications(final NotificationType type) {
+        switch (type) {
+            case PICK_CARD:
+                toolTip.setText("Please select a card, Dealer will be whose with the weakest card");
+                break;
+            case CHOOSE_BID:
+                bidBox.setVisible(true);
+                toolTip.setText("Please select a bid with the buttons above");
+                break;
+            case UNAUTHORIZED_CARD_CHOICE:
+                toolTip.setText("You can't choose a Trump, a King or Excuse");
+                toolTip.setTextFill(Color.RED);
+                new Timeline(new KeyFrame( Duration.millis(2500), t -> {
+                    toolTip.setText("Please select a card");
+                    toolTip.setTextFill(Color.WHITE);
+                })).play();
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    /**
+     * This method renders the card update related to the parameter.
+     * @param cardUpdate the card update to render
+     * @since v1.0.2
+     */
+    private void renderCardUpdate(final CardUpdate cardUpdate) {
+        if (cardUpdate.getType() != null) {
+            try {
+                switch (cardUpdate.getType()) {
+                    case ADD_CARD:
+                        addNewCard(cardUpdate);
                         break;
-                    case DEALER_CHOOSING:
-                        stateTitle.setText("DEALER CHOOSING");
-                        toolTip.setText("Please wait...");
+                    case FLIP_CARD:
+                        flipViewCard(cardUpdate, 2500);
                         break;
-                    case DEALER_CHOSEN:
-                        stateTitle.setText("DEALER CHOSEN");
-                        toolTip.setText("Dealer is " +
-                                gameModel.getPlayerHandler().getPlayerName(gameModel.getPlayerHandler().getDealer())
-                                + ", Shuffler is " +
-                                gameModel.getPlayerHandler().getPlayerName(gameModel.getPlayerHandler().getShuffler())
-                                + " and Cutter is " +
-                                gameModel.getPlayerHandler().getPlayerName(gameModel.getPlayerHandler().getCutter())
-                        );
+                    case MOVE_CARD_BETWEEN_GROUPS:
+                        changeCardGroup(cardUpdate, 1000);
                         break;
-                    case CARDS_SHUFFLING:
-                        stateTitle.setText("CARDS SHUFFLING");
-                        toolTip.setText("Please wait...");
+                    case REMOVE_CARD_FROM_GROUP:
+                        removeCardFromGroup(cardUpdate);
                         break;
-                    case CARDS_CUTTING:
-                        stateTitle.setText("CARDS CUTTING");
-                        toolTip.setText("Please wait...");
+                    case DELETE_CARD:
+                        removeCard(cardUpdate);
                         break;
-                    case CARDS_DEALING:
-                        stateTitle.setText("CARDS DEALING");
-                        toolTip.setText("Please wait...");
+                    case SHUFFLE_CARDS:
+                        shuffleDeck(cardUpdate);
                         break;
-                    case PETIT_SEC_DETECTED:
-                        stateTitle.setText("PETIT SEC DETECTED");
-                        toolTip.setText("Re-dealing...");
+                    case SORT_DECK:
+                        sortDeck(cardUpdate);
                         break;
-                    case BID_CHOOSING:
-                        stateTitle.setText("BID CHOOSING");
-                        toolTip.setText("Please wait...");
+                    case CUT_DECK:
+                        cutDeck(cardUpdate);
                         break;
-                    case BID_CHOSEN:
-                        handleBidChosen();
+                    case SPREAD_CARDS:
+                        spreadAllCards(cardUpdate);
                         break;
-                    case ECART_CONSTITUTING:
-                        stateTitle.setText("ECART CONSTITUTING");
-                        toolTip.setText("You are the taker, please select a card");
-                        camera3D.moveCamera(CAMERA_POSITION_2, CAMERA_ROTATION_2, 2000);
-                        break;
-                    case ECART_CONSTITUTED:
-                        stateTitle.setText("ECART CONSTITUTED");
-                        toolTip.setText("Game is now finished. You can quit");
-                        camera3D.moveCamera(CAMERA_POSITION_1, CAMERA_ROTATION_1, 2000);
+                    case GATHER_CARDS:
+                        if (gameModel.getGameState() == GameState.GAME_ENDED) {
+                            stateTitle.setText("GAME ENDING");
+                            toolTip.setText("");
+                        }
+                        gatherAllCards(cardUpdate);
                         break;
                     default:
                         break;
                 }
-            });
+                cardUpdate.waitAnimations(appPresenter);
+            } catch (NullViewCardException e) {
+                System.err.println(e.getMessage());
+            }
         }
     }
 
@@ -544,7 +569,8 @@ public class GameView extends Scene implements Observer {
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void changeCardGroup(CardUpdate cardUpdate, int animationTime) throws NullViewCardException {
+    private void changeCardGroup(CardUpdate cardUpdate, int animationTime)
+            throws NullViewCardException {
         changeCardGroup(cardUpdate, null, animationTime);
     }
 
@@ -607,7 +633,8 @@ public class GameView extends Scene implements Observer {
      *
      * @param   cardUpdate     the cardUpdate object.
      */
-    private void removeCardFromGroup(CardUpdate cardUpdate) throws NullViewCardException {
+    private void removeCardFromGroup(CardUpdate cardUpdate)
+            throws NullViewCardException {
         changeCardGroup(cardUpdate, 800);
     }
 
@@ -618,7 +645,8 @@ public class GameView extends Scene implements Observer {
      * @since   v0.6
      *@param   cardUpdate     the viewCard related modelCard
      */
-    private void removeCard(CardUpdate cardUpdate) throws NullViewCardException {
+    private void removeCard(CardUpdate cardUpdate)
+            throws NullViewCardException {
         ViewCard viewCard = getViewCardFromCard(cardUpdate.getCard());
         viewCardToGroup.get(viewCard).getChildren().remove(viewCard);
         viewCardToGroup.remove(viewCard);
@@ -849,12 +877,7 @@ public class GameView extends Scene implements Observer {
      */
     public Group getGroupFromCardGroup(CardGroup cardGroup) {
         updateCardGroupToGroup();
-        if (cardGroupToGroup.containsKey(cardGroup)) {
-            return cardGroupToGroup.get(cardGroup);
-        }
-        else {
-            return root3D;
-        }
+        return cardGroupToGroup.getOrDefault(cardGroup, root3D);
     }
 
 

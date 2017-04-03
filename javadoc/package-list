@@ -4,3 +4,4 @@ app.presenter
 app.view
 consoleApplication
 exceptions
+unitTests

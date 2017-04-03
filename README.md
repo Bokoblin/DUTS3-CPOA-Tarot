@@ -1,5 +1,6 @@
 # README : Project Tarot #
 
+[![CodeFactor](https://www.codefactor.io/repository/github/bokoblin/duts3-cpoa-projettarot/badge)](https://www.codefactor.io/repository/github/bokoblin/duts3-cpoa-projettarot)
 
 ### Description ###
 

@@ -37,7 +37,7 @@ import java.util.Observer;
  * of the MVP architecture view
  * It contains the menu elements
  * @author Arthur
- * @version v1.0.0
+ * @version v1.0.2
  * @since v0.10
  *
  * @see Observer
@@ -63,7 +63,7 @@ public class MenuView extends Scene {
         this.setFill(Color.BLACK);
 
         Group root3D = new Group();
-        BorderPane rootGUI = new BorderPane();
+        BorderPane menuRootGUI = new BorderPane();
 
         HBox boxTop = new HBox();
         VBox boxCenter = new VBox(10);
@@ -72,13 +72,13 @@ public class MenuView extends Scene {
         boxCenter.setAlignment(Pos.CENTER);
         boxTop.setAlignment(Pos.CENTER);
         boxBottom.setAlignment(Pos.CENTER);
-        rootGUI.setTop(boxTop);
-        rootGUI.setBottom(boxBottom);
-        rootGUI.setCenter(boxCenter);
-        rootGUI.prefWidthProperty().bind(widthProperty());
-        rootGUI.prefHeightProperty().bind(heightProperty());
-        rootGUI.setPickOnBounds(false);
-        for (Node node: rootGUI.getChildren()) {
+        menuRootGUI.setTop(boxTop);
+        menuRootGUI.setBottom(boxBottom);
+        menuRootGUI.setCenter(boxCenter);
+        menuRootGUI.prefWidthProperty().bind(widthProperty());
+        menuRootGUI.prefHeightProperty().bind(heightProperty());
+        menuRootGUI.setPickOnBounds(false);
+        for (Node node: menuRootGUI.getChildren()) {
             node.setPickOnBounds(false);
             ((Pane)node).setPadding(new Insets(10, 10, 10, 10));
         }
@@ -138,7 +138,7 @@ public class MenuView extends Scene {
         boxTop.getChildren().add(title);
         boxCenter.getChildren().addAll(playButton, quitButton );
         boxBottom.getChildren().addAll(dealerChoosingCheckBox, credit);
-        root.getChildren().addAll(subScene3D, rootGUI);
+        root.getChildren().addAll(subScene3D, menuRootGUI);
     }
 
 }

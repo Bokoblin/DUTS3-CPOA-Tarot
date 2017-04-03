@@ -25,13 +25,13 @@ import java.util.Objects;
  * It extends {@code ArrayList} class of jav.util package
  * @author Arthur
  * @author Alexandre
- * @version v1.0.0
+ * @version v1.0.2
  * @since v0.1
  *
  * @see ArrayList
  */
 public class CardGroup extends ArrayList<Card> {
-    protected final int NB_MAX_CARDS;
+    private final int NB_MAX_CARDS;
     private int id;
     private static int nbInstances = 0;
 
@@ -90,14 +90,14 @@ public class CardGroup extends ArrayList<Card> {
      * @since v0.6
      */
     public String cardListToString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (Card c : this) {
             if (c.isShown())
-                result += c.getName() + "; ";
+                result.append(c.getName()).append("; ");
             else
-                result += "?? ; ";
+                result.append("?? ; ");
         }
-        return result;
+        return result.toString();
     }
 
     /**

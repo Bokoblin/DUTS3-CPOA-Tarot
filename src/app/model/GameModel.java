@@ -26,7 +26,7 @@ import static java.lang.Thread.sleep;
  * It handles Tarot dealer choosing,
  * dealing, bids and ecart constitution
  * @author Arthur
- * @version v1.0.0
+ * @version v1.0.2
  * @since v0.2
  *
  * @see Observable
@@ -103,8 +103,8 @@ public class GameModel extends Observable {
                     try {
                         Card c = new Card(s,r);
                         if(!wholeCardsDeck.add(c))
-                            throw new CardNumberException("Card number limit has been reached.",
-                                    wholeCardsDeck.getNbMaxCards());
+                            System.err.println("Card number limit has been reached. Max is "
+                                    + wholeCardsDeck.getNbMaxCards());
                         else
                             notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
 
@@ -118,8 +118,8 @@ public class GameModel extends Observable {
                     try {
                         Card c = new Card(Suit.Trump,i);
                         if(!wholeCardsDeck.add(c))
-                            throw new CardNumberException("Card number limit has been reached.",
-                                    wholeCardsDeck.getNbMaxCards());
+                            System.err.println("Card number limit has been reached. Max is "
+                                    + wholeCardsDeck.getNbMaxCards());
                         else
                             notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
                     } catch (CardUniquenessException | CardNumberException e) {
@@ -131,9 +131,10 @@ public class GameModel extends Observable {
                 try {
                     Card c = new Card(Suit.Excuse, -1);
                     if(!wholeCardsDeck.add(c))
-                        throw new CardNumberException("Card number limit has been reached.",
-                                wholeCardsDeck.getNbMaxCards());
-                    notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
+                        System.err.println("Card number limit has been reached. Max is "
+                                + wholeCardsDeck.getNbMaxCards());
+                    else
+                        notifyObserversOfCardUpdate(new CardUpdate(CardUpdateType.ADD_CARD, c, wholeCardsDeck));
                 } catch (CardNumberException | CardUniquenessException e) {
                     System.err.println(e.getMessage());
                 }
